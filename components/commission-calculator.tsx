@@ -222,9 +222,9 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                        const parts = raw.split(".");
                        const candidate = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : raw;
                        const numeric = Number(candidate);
-                       update("motivationPercent", candidate !== "" && Number.isFinite(numeric) && numeric > 100 ? "100" : candidate);
+                       update("motivationPercent", candidate);
                      }} onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); } }} aria-invalid={motivationPercent !== "" && !motivationValid} aria-describedby={motivationPercent !== "" && !motivationValid ? "motivation-hint" : undefined} className="h-12 w-full rounded-xl border border-[#E4E8ED] bg-white px-4 pr-10 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#748195]">%</span></div>
-                    {motivationPercent !== "" && !motivationValid && <p id="motivation-hint" className="mt-2 text-xs leading-relaxed text-[#BD302A]">Введите процент от 0 до 100.</p>}
+                    {motivationPercent !== "" && !motivationValid && <p id="motivation-hint" className="mt-2 text-xs leading-relaxed text-[#BD302A]">Всю комиссию себе? А как же партнёрство? 😉</p>}
                     <div className="mt-4 border-t border-[#26364A]/10 pt-4"><p className="text-xs text-[#647184]">От итоговой комиссии с учётом скидки</p><p data-testid="motivation-amount" className="mt-1 text-3xl font-semibold tracking-tight tabular-nums text-[#26364A]">{motivationAmount === null ? "-" : money(motivationAmount)}</p>{motivationAmount !== null && <p className="mt-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C4D2]"><span className="whitespace-nowrap">{money(discounted.total)}</span> × {motivationPercent}%</p>}</div>
                   </div>}
                   {discount && !discount.paired && <div data-testid="discount-applied" className="mt-4 space-y-2 rounded-xl bg-white/65 p-4 text-sm leading-relaxed">
