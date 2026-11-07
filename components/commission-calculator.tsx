@@ -257,9 +257,9 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                       <Row label="Фиксированная часть" value={money(result.fixed)} />
                       {result.rate > 0 && <><Row label="Процентная часть" value={`${numberFormat.format(result.rate * 100)} % × ${money(result.base)}`} /><Row label="Сумма процентной части" value={money(result.percent)} /></>}
                     </dl>
-                    <details className="mt-5 rounded-xl bg-white/65 px-3 py-2.5 sm:px-4">
-                      <summary className="cursor-pointer text-sm font-semibold text-[#647184]">Подробности расчёта</summary>
-                      <div className="mt-3 space-y-3 border-t border-[#26364A]/10 pt-3 text-sm leading-relaxed">
+                    <details className="mt-3 border-t border-[#26364A]/10 pt-3 text-xs leading-relaxed text-[#6E7886] dark:text-[#AAB6C5]">
+                      <summary className="cursor-pointer font-semibold">Подробности расчёта</summary>
+                      <div className="mt-2 space-y-3">
                         {!discount && result.rate === 0 && result.fixed > 0 ? <p><strong>Размер агентского вознаграждения</strong> при стоимости объекта недвижимости до <strong>{(() => { const rule = (tariffs?.rules ?? DEFAULT_TARIFFS.rules).find(item => item.operation === operation && item.category === category && parseMoney(price) !== null && parseMoney(price)! >= item.from && (item.to === null || parseMoney(price)! <= item.to)); return rule?.to !== null && rule?.to !== undefined ? numberFormat.format(Math.floor(rule.to) + 1) : "установленного тарифом значения"; })()}</strong> рублей составляет <strong>{numberFormat.format(result.fixed)}</strong> рублей.</p> : result.fixed > 0 && <p>Фиксированная часть: <span className="whitespace-nowrap">{money(result.fixed)}</span></p>}
                         {result.rate > 0 && <p>Процентная часть: <span className="whitespace-nowrap">{money(result.base)}</span> × {numberFormat.format(result.rate * 100)}% = <span className="whitespace-nowrap">{money(result.percent)}</span></p>}
                         {(result.fixed > 0 && result.rate > 0) && <p>Комиссия без скидки: <span className="whitespace-nowrap">{money(result.fixed)}</span> + <span className="whitespace-nowrap">{money(result.percent)}</span> = <span className="whitespace-nowrap">{money(result.calculated)}</span></p>}
