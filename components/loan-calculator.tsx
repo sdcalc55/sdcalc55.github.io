@@ -149,7 +149,7 @@ export function LoanCalculator() {
     ];
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
-      toast.success("Результаты расчёта скопированы");
+      toast.success("Скопировано в буфер обмена");
     } catch {
       toast.error("Не удалось скопировать результаты");
     }
@@ -165,6 +165,7 @@ export function LoanCalculator() {
     saveCalculation({ kind: "loan", title: "Кредитный калькулятор", summary: amount(result.monthlyPayment), params: { mode, value, term, unit, rate }, results: { monthlyPayment: amount(result.monthlyPayment), principal: amount(result.principal), interest: amount(result.interest), totalPayment: amount(result.totalPayment), months: String(result.months), annualRate: `${result.annualRate}%` } });
     setSavedKey(snapshotKey);
     setDismissedKey("");
+    toast.success("Расчёт сохранён в истории");
   };
   const inputStyle = "h-14 w-full min-w-0 rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10";
   return <div>
