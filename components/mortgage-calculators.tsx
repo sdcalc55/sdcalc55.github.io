@@ -106,7 +106,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
   const result = calculateMortgage(config.mode, values);
   const Icon = config.mode === "part" ? Wallet : config.mode === "adjustment" ? ChartNoAxesCombined : House;
   const adjustment = config.mode === "adjustment";
-  const downPayment = adjustment && result.status === "ok" ? calculateMortgage("part", [String(result.total), values[2]]) : null;
+  const downPayment = adjustment && result.status === "ok" ? calculateMortgage("part", [String(result.total), values[2]], true) : null;
   const theme = themes[config.mode];
   const historyKind = config.mode === "part" ? "mortgage-part" : config.mode === "whole" ? "mortgage-whole" : "mortgage-adjustment";
   const snapshotKey = JSON.stringify(values);
