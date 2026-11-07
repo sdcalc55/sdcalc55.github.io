@@ -38,6 +38,11 @@ function installKeyboardScrollRestore() {
 
   const restorePosition = () => {
     if (userMovedPage) return;
+    const currentWindowY = window.scrollY;
+    const currentDocumentY = document.scrollingElement?.scrollTop ?? currentWindowY;
+    // If the user has navigated to another calculator while the keyboard
+    // remained open, do not pull them back to the field's old position.
+    if (Math.abs(currentWindowY - savedWindowY) > 100 || Math.abs(currentDocumentY - savedDocumentY) > 100) return;
     window.scrollTo({ top: savedWindowY, left: 0, behavior: "instant" });
     const scroller = document.scrollingElement;
     if (scroller) scroller.scrollTop = savedDocumentY;
