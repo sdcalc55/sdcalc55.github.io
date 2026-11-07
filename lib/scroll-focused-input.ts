@@ -9,19 +9,38 @@ function installKeyboardScrollGuard() {
 
   let keyboardOpen = window.innerHeight - viewport.height > 120;
   let savedScrollY = window.scrollY;
+  let hasPreFocusPosition = false;
+  let restoringScroll = false;
+
+  // Capture the page position before the browser moves the focused field
+  // to make room for the on-screen keyboard.
+  document.addEventListener("pointerdown", event => {
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      savedScrollY = window.scrollY;
+      hasPreFocusPosition = true;
+    }
+  }, true);
+
+  window.addEventListener("scroll", () => {
+    if (!keyboardOpen || restoringScroll || Math.abs(window.scrollY - savedScrollY) < 2) return;
+    restoringScroll = true;
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
+    requestAnimationFrame(() => { restoringScroll = false; });
+  }, { passive: true });
 
   viewport.addEventListener("resize", () => {
     const nextKeyboardOpen = window.innerHeight - viewport.height > 120;
 
     if (nextKeyboardOpen && !keyboardOpen) {
-      // Remember the page position from before the keyboard changes the viewport.
-      savedScrollY = window.scrollY;
+      // Use the position captured before focus; fall back for programmatic focus.
+      if (!hasPreFocusPosition) savedScrollY = window.scrollY;
       keyboardOpen = true;
       return;
     }
 
     if (!nextKeyboardOpen && keyboardOpen) {
       keyboardOpen = false;
+      hasPreFocusPosition = false;
       const restoreScroll = () => window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
       requestAnimationFrame(() => {
         restoreScroll();
