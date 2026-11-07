@@ -128,6 +128,27 @@ function NavigationRow({ title, icon: Icon, red, onClick }: { title: string; ico
 }
 
 export default function Home() {
+  useEffect(() => {
+    const blockedSelector = 'button, label, h1, h2, h3, h4, h5, h6, summary, [role="alert"], .select-none';
+    const isBlocked = (target: EventTarget | null) => target instanceof Element && !!target.closest(blockedSelector);
+    const preventBlockedSelection = (event: Event) => {
+      if (isBlocked(event.target)) event.preventDefault();
+    };
+    const preventBlockedCopy = (event: ClipboardEvent) => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+      if (isBlocked(selection.anchorNode) || isBlocked(selection.focusNode)) event.preventDefault();
+    };
+    document.addEventListener("selectstart", preventBlockedSelection, true);
+    document.addEventListener("contextmenu", preventBlockedSelection, true);
+    document.addEventListener("copy", preventBlockedCopy, true);
+    return () => {
+      document.removeEventListener("selectstart", preventBlockedSelection, true);
+      document.removeEventListener("contextmenu", preventBlockedSelection, true);
+      document.removeEventListener("copy", preventBlockedCopy, true);
+    };
+  }, []);
+
   const { tariffs, status: tariffStatus } = useTariffs();
   const [screen, setScreen] = useState<Screen>("home");
   const [screenReady, setScreenReady] = useState(false);
