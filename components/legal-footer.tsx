@@ -83,7 +83,7 @@ export function LegalSettings() {
 export function LegalFooter() {
   return <div className="mt-5 border-t border-[#DDE3EB] pt-4 text-[#748195] sm:mt-7 sm:pt-5">
     <div className="flex flex-col items-center justify-center gap-1 text-center sm:flex-row sm:justify-between sm:gap-4 sm:text-left">
-      <p className="text-[11px] leading-5">© 2026 Автор: Светлана Демиденко</p>
+      <p className="select-none text-[11px] leading-5">© 2026 Автор: Светлана Демиденко</p>
       <LegalDialog footer />
     </div>
   </div>;
