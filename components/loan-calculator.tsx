@@ -129,21 +129,24 @@ export function LoanCalculator() {
   }, [snapshotKey, result, changed, error, savedKey, dismissedKey, mode, value, term, unit, rate, historyModeVersion]);
 
   const isSaved = savedKey === snapshotKey;
-  const copyParameters = async () => {
-    const lines = [
-      `${reverse ? "Ежемесячный платёж" : "Сумма кредита"}: ${value.trim() || "не указано"}${value.trim() ? " ₽" : ""}`,
-      `Срок кредита: ${term.trim() || "не указан"} ${unit === "years" ? "лет" : "месяцев"}`,
-      `Процентная ставка: ${rate.trim() || "не указана"}${rate.trim() ? "%" : ""}`,
-    ];
-    if (!value.trim() && !term.trim() && !rate.trim()) {
-      toast.error("Сначала заполните параметры кредита");
+  const copyResults = async () => {
+    if (!result || changed || error) {
+      toast.error("Сначала выполните корректный расчёт");
       return;
     }
+    const lines = [
+      `Ежемесячный платёж: ${amount(result.monthlyPayment)}`,
+      `Сумма кредита: ${amount(result.principal)}`,
+      `Переплата по процентам: ${amount(result.interest)}`,
+      `Общая сумма: ${amount(result.totalPayment)}`,
+      `Срок кредита: ${result.months} мес.`,
+      `Годовая ставка: ${result.annualRate}%`,
+    ];
     try {
       await navigator.clipboard.writeText(lines.join("\\n"));
-      toast.success("Параметры кредита скопированы");
+      toast.success("Результаты расчёта скопированы");
     } catch {
-      toast.error("Не удалось скопировать параметры");
+      toast.error("Не удалось скопировать результаты");
     }
   };
   const save = () => {
@@ -165,7 +168,7 @@ export function LoanCalculator() {
     </div>
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.1fr]">
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
-      <div className="mb-6 flex items-center justify-between gap-3"><div className="flex min-w-0 items-center gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div><button type="button" onClick={copyParameters} aria-label="Скопировать параметры кредита" title="Скопировать параметры кредита" className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-[#647184] outline-offset-2 transition hover:bg-[#F5F7FA] hover:text-[#E83C35] focus-visible:outline-2 dark:text-[#AAB6C5] dark:hover:bg-[#263443]"><Copy className="size-5" /></button></div>
+      <div className="mb-6 flex items-center gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
         <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
           const raw = event.target.value;
@@ -216,7 +219,7 @@ export function LoanCalculator() {
     <div className="min-w-0 space-y-4" aria-live="polite">
       {result ? <>
         <section aria-label="Результаты кредита" className="min-w-0 rounded-3xl border border-[#F3DAD8] bg-[#FCEBEA] p-6 sm:p-8">
-          <div className="flex items-center justify-between gap-3"><h3 className="text-xl font-semibold lg:flex lg:min-h-11 lg:items-center">Результаты расчёта</h3><button type="button" aria-label={isSaved ? "Отменить сохранение" : "Сохранить в историю"} title={isSaved ? "Отменить сохранение" : "Сохранить в историю"} disabled={changed || !!error} onClick={save} className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border transition-all duration-200 hover:scale-105 disabled:opacity-30 ${isSaved ? "border-[#E83C35]/20 bg-[#E83C35] text-white shadow-sm shadow-[#E83C35]/20" : "border-[#F0C9C6] bg-white/80 text-[#E83C35] hover:bg-[#FCEBEA]"}`}><Bookmark className="size-5" strokeWidth={2.2} fill={isSaved ? "currentColor" : "none"} /></button></div>
+          <div className="flex items-center justify-between gap-3"><h3 className="text-xl font-semibold lg:flex lg:min-h-11 lg:items-center">Результаты расчёта</h3><div className="flex items-center gap-2"><button type="button" onClick={copyResults} aria-label="Скопировать результаты расчёта" title="Скопировать результаты расчёта" disabled={changed || !!error} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[#F0C9C6] bg-white/80 text-[#647184] transition hover:bg-[#FCEBEA] hover:text-[#E83C35] disabled:opacity-30"><Copy className="size-5" /></button><button type="button" aria-label={isSaved ? "Отменить сохранение" : "Сохранить в историю"} title={isSaved ? "Отменить сохранение" : "Сохранить в историю"} disabled={changed || !!error} onClick={save} className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border transition-all duration-200 hover:scale-105 disabled:opacity-30 ${isSaved ? "border-[#E83C35]/20 bg-[#E83C35] text-white shadow-sm shadow-[#E83C35]/20" : "border-[#F0C9C6] bg-white/80 text-[#E83C35] hover:bg-[#FCEBEA]"}`}><Bookmark className="size-5" strokeWidth={2.2} fill={isSaved ? "currentColor" : "none"} /></button></div></div>
           {changed && <p className="mt-3 text-xs leading-relaxed text-[#A94442]">Результат обновляется автоматически после изменения параметров.</p>}
           <p className="mb-2 mt-6 text-sm text-[#6E7886]">{reverse ? "Сумма кредита" : "Ежемесячный платёж"}</p><p data-testid={reverse ? "loan-available-principal" : "loan-monthly"} className="text-[clamp(1.5rem,6vw,2.5rem)] font-semibold tracking-tight text-[#E83C35] tabular-nums">{amount(reverse ? result.principal : result.monthlyPayment)}</p>
           <dl className="mt-6 space-y-4 border-t border-[#26364A]/10 pt-5 text-sm">
