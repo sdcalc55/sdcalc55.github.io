@@ -8,48 +8,59 @@ function installKeyboardScrollRestore() {
   if (!viewport) return;
 
   let keyboardOpen = window.innerHeight - viewport.height > 120;
-  let focusedInput: Element | null = null;
-  let savedWindowY = window.scrollY;
-  let savedDocumentY = document.scrollingElement?.scrollTop ?? 0;
-  let userMovedPage = false;
+  let savedScrollY = window.scrollY;
+  let hasSavedPosition = false;
+  let userScrolledWhileKeyboardOpen = false;
   let touchStartY = 0;
   let restoreTimer: number | undefined;
 
-  const isTextField = (target: EventTarget | null): target is HTMLInputElement | HTMLTextAreaElement =>
+  const isTextField = (target: EventTarget | null): boolean =>
     target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+
+  // Save the position on the initial tap, before Android moves the page
+  // to reveal the field above the virtual keyboard.
+  document.addEventListener("pointerdown", event => {
+    if (!isTextField(event.target)) return;
+    savedScrollY = window.scrollY;
+    hasSavedPosition = true;
+    userScrolledWhileKeyboardOpen = false;
+  }, true);
 
   document.addEventListener("focusin", event => {
     if (!isTextField(event.target)) return;
-    focusedInput = event.target;
-    // Capture before the browser adjusts the page for the on-screen keyboard.
-    savedWindowY = window.scrollY;
-    savedDocumentY = document.scrollingElement?.scrollTop ?? savedWindowY;
-    userMovedPage = false;
+    // Fallback for fields focused by script or accessibility controls.
+    if (!hasSavedPosition) {
+      savedScrollY = window.scrollY;
+      hasSavedPosition = true;
+      userScrolledWhileKeyboardOpen = false;
+    }
   }, true);
 
+  // A deliberate finger swipe while the keyboard is open means the user
+  // chose a new page position. Never undo that choice on keyboard dismissal.
   document.addEventListener("touchstart", event => {
     touchStartY = event.touches[0]?.clientY ?? 0;
   }, { passive: true, capture: true });
 
   document.addEventListener("touchmove", event => {
     const y = event.touches[0]?.clientY ?? touchStartY;
-    if (keyboardOpen && Math.abs(y - touchStartY) > 8) userMovedPage = true;
+    if (keyboardOpen && Math.abs(y - touchStartY) > 10) {
+      userScrolledWhileKeyboardOpen = true;
+    }
   }, { passive: true, capture: true });
 
-  const restorePosition = () => {
-    if (userMovedPage) return;
-    const currentWindowY = window.scrollY;
-    const currentDocumentY = document.scrollingElement?.scrollTop ?? currentWindowY;
-    // If the user has navigated to another calculator while the keyboard
-    // remained open, do not pull them back to the field's old position.
-    if (Math.abs(currentWindowY - savedWindowY) > 100 || Math.abs(currentDocumentY - savedDocumentY) > 100) return;
-    window.scrollTo({ top: savedWindowY, left: 0, behavior: "instant" });
-    const scroller = document.scrollingElement;
-    if (scroller) scroller.scrollTop = savedDocumentY;
+  const restoreAfterKeyboard = () => {
+    if (!hasSavedPosition || userScrolledWhileKeyboardOpen) {
+      hasSavedPosition = false;
+      return;
+    }
+    window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
+    hasSavedPosition = false;
   };
 
   viewport.addEventListener("resize", () => {
     const nextKeyboardOpen = window.innerHeight - viewport.height > 120;
+
     if (nextKeyboardOpen) {
       keyboardOpen = true;
       return;
@@ -58,31 +69,31 @@ function installKeyboardScrollRestore() {
     if (keyboardOpen) {
       keyboardOpen = false;
       if (restoreTimer !== undefined) window.clearTimeout(restoreTimer);
-      // Restore only after the keyboard animation has finished. Do not
-      // interfere with scrolling while the keyboard is visible.
+
+      // Wait until Android completes the keyboard closing animation.
       requestAnimationFrame(() => {
-        restorePosition();
-        requestAnimationFrame(restorePosition);
+        requestAnimationFrame(() => {
+          restoreAfterKeyboard();
+        });
       });
       restoreTimer = window.setTimeout(() => {
-        restorePosition();
+        restoreAfterKeyboard();
         restoreTimer = undefined;
-        focusedInput = null;
-      }, 180);
+      }, 220);
     }
   });
 
   document.addEventListener("focusout", event => {
     if (!isTextField(event.target)) return;
-    // Keep the saved position until visualViewport confirms keyboard closure.
-    if (!keyboardOpen) {
-      window.setTimeout(() => {
-        if (!keyboardOpen && !(document.activeElement instanceof HTMLInputElement) && !(document.activeElement instanceof HTMLTextAreaElement)) {
-          restorePosition();
-          focusedInput = null;
-        }
-      }, 220);
-    }
+    // If the keyboard was dismissed without a viewport resize, release
+    // the saved position without forcing any scroll.
+    window.setTimeout(() => {
+      if (!keyboardOpen &&
+          !(document.activeElement instanceof HTMLInputElement) &&
+          !(document.activeElement instanceof HTMLTextAreaElement)) {
+        hasSavedPosition = false;
+      }
+    }, 300);
   }, true);
 }
 
