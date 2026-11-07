@@ -165,15 +165,16 @@ export function LoanCalculator() {
             return;
           }
           edit({ term: raw });
-        }} placeholder="Введите срок" className={inputStyle} /><select aria-label="Единицы срока кредита" value={unit} onChange={event => {
-          const nextUnit = event.target.value;
-          if (nextUnit === unit) return;
-          const numericTerm = term.trim() ? parse(term) : NaN;
-          const converted = Number.isFinite(numericTerm)
-            ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
-            : "";
-          edit({ unit: nextUnit, term: converted });
-        }} className="h-14 shrink-0 rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm outline-none focus:ring-2 focus:ring-[#E83C35]"><option value="years">лет</option><option value="months">месяцев</option></select></div></div>
+        }} placeholder="Введите срок" className={inputStyle} /><div role="group" aria-label="Единицы срока кредита" className="grid h-14 shrink-0 grid-cols-2 overflow-hidden rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] p-1 dark:border-[#35414F] dark:bg-[#0D1219]">
+          {(["years", "months"] as const).map(item => <button key={item} type="button" aria-pressed={unit === item} onClick={() => {
+            if (item === unit) return;
+            const numericTerm = term.trim() ? parse(term) : NaN;
+            const converted = Number.isFinite(numericTerm)
+              ? item === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
+              : "";
+            edit({ unit: item, term: converted });
+          }} className={`min-w-0 rounded-lg px-2 text-sm font-medium transition-colors ${unit === item ? "bg-white text-[#26364A] shadow-sm dark:bg-[#263443] dark:text-white" : "text-[#647184] hover:text-[#26364A] dark:text-[#AAB6C5] dark:hover:text-white"}`}>{item === "years" ? "лет" : "месяцев"}</button>)}
+        </div></div></div>
         <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
