@@ -179,7 +179,7 @@ export function LoanCalculator() {
         <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
-            ? normalized.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1").replace(/^(\d{0,2})(?:\.(\d{0,2})?)?.*$/, (_, whole, fraction) => whole + (fraction !== undefined ? "." + fraction : ""))
+            ? normalized.replace(/[^\d]/g, "").slice(0, 2)
             : normalized.replace(/[^\d]/g, "").slice(0, 3);
           const limit = unit === "years" ? 30 : 360;
           if (raw !== "" && Number(raw) > limit) {
