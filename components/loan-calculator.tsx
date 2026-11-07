@@ -192,7 +192,7 @@ export function LoanCalculator() {
         <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
-            ? normalized.replace(/[^\d]/g, "").slice(0, 2)
+            ? normalized.replace(/[^\d]/g, "").slice(0, 3)
             : normalized.replace(/[^\d]/g, "").slice(0, 3);
           edit({ term: raw });
         }} placeholder="Введите срок" className={inputStyle} /><Select value={unit} onValueChange={nextUnit => {
@@ -217,7 +217,7 @@ export function LoanCalculator() {
           const candidate = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : raw;
           const numeric = Number(candidate);
           const integerPart = candidate.split(".")[0];
-          if (integerPart.length > 2 || (candidate !== "" && Number.isFinite(numeric) && numeric > 99)) return;
+          if (integerPart.length > 3 || (candidate !== "" && Number.isFinite(numeric) && numeric > 999)) return;
           update({ rate: candidate, changed: true, error: "" });
         }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор. С\u00a0такой ставкой кредит лучше не брать 🙂</p>}</div>
       </div>
