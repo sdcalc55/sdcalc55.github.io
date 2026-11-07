@@ -221,6 +221,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                        const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
                        const parts = raw.split(".");
                        const candidate = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : raw;
+                        if (candidate.split(".")[0].length > 2) return;
                        const numeric = Number(candidate);
                        update("motivationPercent", candidate);
                      }} onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); } }} aria-invalid={motivationPercent !== "" && !motivationValid} aria-describedby={motivationPercent !== "" && !motivationValid ? "motivation-hint" : undefined} className="h-12 w-full rounded-xl border border-[#E4E8ED] bg-white px-4 pr-10 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#748195]">%</span></div>
