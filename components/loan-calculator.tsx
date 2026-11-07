@@ -80,6 +80,11 @@ export function LoanCalculator() {
       setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "Кажется, с процентами немного перебор. С такой ставкой кредит лучше не брать 🙂", changed: false } }));
       return;
     }
+    const termLimit = current.unit === "years" ? 30 : 360;
+    if (parse(current.term) > termLimit) {
+      setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: current.unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита.", changed: false } }));
+      return;
+    }
     try {
       const months = current.unit === "years" ? Math.round(parse(current.term) * 12) : parse(current.term);
       const calculation = mode === "payment"
@@ -183,7 +188,7 @@ export function LoanCalculator() {
             : normalized.replace(/[^\d]/g, "").slice(0, 3);
           const limit = unit === "years" ? 30 : 360;
           if (raw !== "" && Number(raw) > limit) {
-            if (unit === "years") update({ error: "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" });
+            update({ term: raw, error: unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита.", result: null, changed: false });
             return;
           }
           edit({ term: raw });
