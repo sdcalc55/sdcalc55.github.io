@@ -61,7 +61,7 @@ export function LoanCalculator() {
     if (!term.trim() && value.trim() && rate.trim()) { update({ error: "Введите срок кредита", result: null }); return; }
     if (!value.trim() || !term.trim()) { update({ error: "Заполните поля", result: null }); return; }
     if (!rate.trim()) { update({ error: "Введите ставку", result: null }); return; }
-    if (!reverse && parse(value) > 999999999) { update({ error: "", result: null, changed: true }); return; }
+    if (parse(value) > 999999999) { update({ error: "", result: null, changed: true }); return; }
     if (Number(term) > (unit === "years" ? 30 : 360) || parse(rate) > 30) { update({ error: "", result: null, changed: true }); return; }
     try {
       const months = unit === "years" ? Math.round(parse(term) * 12) : parse(term);
@@ -77,7 +77,7 @@ export function LoanCalculator() {
       setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "", changed: true } }));
       return;
     }
-    if (mode === "principal" && parse(current.value) > 999999999) {
+    if (parse(current.value) > 999999999) {
       setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "", changed: false } }));
       return;
     }
@@ -186,7 +186,7 @@ export function LoanCalculator() {
           const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           edit({ value: formatInput(raw) });
-        }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={!reverse && value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{!reverse && value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Максимальная сумма кредита - 999 999 999 ₽.</p>}</div>
+        }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж почти миллиард в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Максимальная сумма кредита - 999 999 999 ₽."}</p>}</div>
         <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
