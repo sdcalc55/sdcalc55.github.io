@@ -25,7 +25,7 @@ function ceil(v: Fraction): number {
   return Number(n / d + (n > BigInt(0) && n % d !== BigInt(0) ? BigInt(1) : BigInt(0)));
 }
 /** Formulas and rounding transferred from sd-real-estate-1.8.apk. No intermediate rounding. */
-export function calculateMortgage(mode: MortgageMode, values: string[]): MortgageResult {
+export function calculateMortgage(mode: MortgageMode, values: string[], allowLargeAmount = false): MortgageResult {
   const required = mode === "adjustment" ? 3 : 2;
   const inputs = Array.from({ length: required }, (_, i) => values[i] ?? "");
   if (inputs.some(value => !value.trim() || ["-", "+", ".", "-.", "+."].includes(value.trim()))) return { status: "empty" };
@@ -33,16 +33,14 @@ export function calculateMortgage(mode: MortgageMode, values: string[]): Mortgag
   if (parsed.some(v => v === null)) return { status: "error", message: "Введите число, используя запятую или точку для дробной части." };
   const [amount, second, third] = parsed as Fraction[];
   const maxMoney = BigInt(999999999);
-  if (amount.n > amount.d * maxMoney || (mode === "adjustment" && second.n > second.d * maxMoney) || (mode === "whole" && amount.n > amount.d * maxMoney)) return { status: "error", message: "Введите корректную сумму. Максимум — 999 999 999 ₽." };
+  if ((!allowLargeAmount && amount.n > amount.d * maxMoney) || (mode === "adjustment" && second.n > second.d * maxMoney)) return { status: "error", message: "Введите корректную сумму. Максимум — 999 999 999 ₽." };
   let result: Fraction;
   let formula: string;
   let clientPercent: number | undefined;
   let missingPercent: number | undefined;
   if (mode === "adjustment") {
     if (amount.n <= BigInt(0)) return { status: "error", message: "Стоимость объекта должна быть больше нуля." };
-    if (numeric(amount) > 999999999) return { status: "error", message: "Введите корректную сумму. Максимум — 999 999 999 ₽." };
     if (second.n < BigInt(0)) return { status: "error", message: "Сумма первоначального взноса не может быть отрицательной." };
-    if (numeric(second) > 999999999) return { status: "error", message: "Введите корректную сумму. Максимум — 999 999 999 ₽." };
     if (second.n * amount.d > amount.n * second.d) return { status: "error", message: "Первоначальный взнос не может быть больше стоимости объекта." };
     if (third.n <= BigInt(0) || third.n > third.d * BigInt(100)) return { status: "error", message: "Необходимый первоначальный взнос должен быть больше 0 и не превышать 100%." };
     const client = multiply(divide(second, amount), hundred);
