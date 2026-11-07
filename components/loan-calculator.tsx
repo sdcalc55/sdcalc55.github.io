@@ -192,7 +192,7 @@ export function LoanCalculator() {
             : "";
           edit({ unit: nextUnit, term: converted });
         }}>
-          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 w-28 shrink-0 rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
+          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 min-w-0 flex-1 rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper" align="end" className="min-w-28 rounded-xl border-[#E4E8ED] bg-white shadow-lg dark:border-[#405064] dark:bg-[#253241]">
