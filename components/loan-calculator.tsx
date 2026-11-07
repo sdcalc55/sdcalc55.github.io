@@ -83,7 +83,7 @@ export function LoanCalculator() {
       return;
     }
     if (parse(current.rate) > 30) {
-      setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "Кажется, с процентами немного перебор. С\u00a0такой ставкой кредит лучше не брать 🙂", changed: false } }));
+      setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "Кажется, с процентами немного перебор.\nС такой ставкой кредит лучше не брать 🙂", changed: false } }));
       return;
     }
     const termLimit = current.unit === "years" ? 30 : 360;
@@ -219,9 +219,9 @@ export function LoanCalculator() {
           const integerPart = candidate.split(".")[0];
           if (integerPart.length > 3 || (candidate !== "" && Number.isFinite(numeric) && numeric > 999)) return;
           update({ rate: candidate, changed: true, error: "" });
-        }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор. С\u00a0такой ставкой кредит лучше не брать 🙂</p>}</div>
+        }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор.<br />С такой ставкой кредит лучше не брать 🙂</p>}</div>
       </div>
-      {error && <p role="alert" className="mt-4 text-sm leading-relaxed text-[#BD302A]">{error}</p>}
+      {error && <p role="alert" className="mt-4 whitespace-pre-line text-sm leading-relaxed text-[#BD302A]">{error}</p>}
       <div className="mt-7 flex flex-wrap gap-3">{!calculated && <button type="submit" className="min-h-12 flex-1 rounded-xl bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white hover:bg-[#D6332D] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E83C35]">РАССЧИТАТЬ</button>}{calculated && <p className="flex flex-1 items-center text-sm font-medium text-[#647184]">Автоматический перерасчёт</p>}<button type="button" onClick={reset} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-3 text-sm font-semibold text-[#647184] hover:bg-[#F5F7FA]"><RotateCcw className="size-4" />СБРОСИТЬ</button></div>
     </form>
     <div className="min-w-0 space-y-4" aria-live="polite">
