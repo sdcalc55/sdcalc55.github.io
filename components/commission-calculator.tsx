@@ -162,7 +162,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   };
   const copy = async () => {
     if (result.status !== "ok" || !discounted) return;
-    try { const roundedMoney = (value: number) => money(Math.round(value)); const lines = [`Комиссия: ${roundedMoney(discounted.total)}`, ...(result.fixed > 0 ? [`Фиксированная часть: ${roundedMoney(result.fixed)}`] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${roundedMoney(result.percent)}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${roundedMoney(discounted.saving)}`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); toast.success("Расчёт скопирован в буфер обмена"); }
+    try { const roundedMoney = (value: number) => money(Math.round(value)); const breakdown = [...(result.fixed > 0 ? [roundedMoney(result.fixed)] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${roundedMoney(result.percent)}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${roundedMoney(discounted.saving)}`] : [])]; const copied = `Комиссия: ${roundedMoney(discounted.total)}${breakdown.length ? ` (${breakdown.join(" + ").replace(/ \+ Скидка:/, ", Скидка:")})` : ""}`; await navigator.clipboard.writeText(copied); toast.success("Расчёт скопирован в буфер обмена"); }
     catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); }
   };
   return <><div className="grid items-start gap-6 lg:grid-cols-[1.12fr_1fr]">
