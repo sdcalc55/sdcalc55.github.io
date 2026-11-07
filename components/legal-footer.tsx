@@ -20,7 +20,7 @@ function LegalDialog({ footer = false }: { footer?: boolean }) {
           <DialogTitle className="text-left text-lg leading-snug text-[#26364A] sm:text-xl">Условия использования и политика конфиденциальности</DialogTitle>
           <DialogDescription className="text-left text-xs leading-relaxed">SD | Калькулятор</DialogDescription>
         </DialogHeader>
-        <div className="min-h-0 overflow-y-auto overscroll-contain px-5 pb-6 text-sm leading-relaxed text-[#536175] sm:px-7" tabIndex={0} aria-label="Текст условий и политики">
+        <div className="select-none min-h-0 overflow-y-auto overscroll-contain px-5 pb-6 text-sm leading-relaxed text-[#536175] sm:px-7" tabIndex={0} aria-label="Текст условий и политики">
           <section aria-labelledby="legal-terms" className="space-y-4">
             <h2 id="legal-terms" className="text-base font-semibold text-[#26364A]">Условия использования</h2>
             <LegalSection title="Общие положения">
