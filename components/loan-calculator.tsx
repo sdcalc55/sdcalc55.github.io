@@ -203,7 +203,7 @@ export function LoanCalculator() {
             <SelectItem value="years" className="cursor-pointer rounded-lg py-3 text-sm">лет</SelectItem>
             <SelectItem value="months" className="cursor-pointer rounded-lg py-3 text-sm">месяцев</SelectItem>
           </SelectContent>
-        </Select></div></div>
+        </Select></div>{term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}</div>
         <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
@@ -214,7 +214,6 @@ export function LoanCalculator() {
           update({ rate: candidate, changed: true, error: "" });
         }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор. С такой ставкой кредит лучше не брать 🙂</p>}</div>
       </div>
-      {term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}
       {error && <p role="alert" className="mt-4 text-sm leading-relaxed text-[#BD302A]">{error}</p>}
       <div className="mt-7 flex flex-wrap gap-3">{!calculated && <button type="submit" className="min-h-12 flex-1 rounded-xl bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white hover:bg-[#D6332D] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E83C35]">РАССЧИТАТЬ</button>}{calculated && <p className="flex flex-1 items-center text-sm font-medium text-[#647184]">Автоматический перерасчёт</p>}<button type="button" onClick={reset} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-3 text-sm font-semibold text-[#647184] hover:bg-[#F5F7FA]"><RotateCcw className="size-4" />СБРОСИТЬ</button></div>
     </form>
