@@ -143,7 +143,7 @@ export function LoanCalculator() {
       `Годовая ставка: ${result.annualRate}%`,
     ];
     try {
-      await navigator.clipboard.writeText(lines.join("\\n"));
+      await navigator.clipboard.writeText(lines.join("\n"));
       toast.success("Результаты расчёта скопированы");
     } catch {
       toast.error("Не удалось скопировать результаты");
