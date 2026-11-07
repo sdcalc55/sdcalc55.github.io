@@ -100,7 +100,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   const discounted = result.status !== "ok" ? null : discount?.paired ? pairedDiscounted : applyDiscount(result.total, discount?.percent ?? 0);
   const normalizedPercent = motivationPercent.trim().replace(",", ".");
   const motivation = /^\d+(?:\.\d+)?$/.test(normalizedPercent) ? Number(normalizedPercent) : NaN;
-  const motivationValid = Number.isFinite(motivation) && motivation >= 0 && motivation <= 100;
+  const motivationValid = Number.isFinite(motivation) && motivation >= 0 && motivation <= 99;
   const motivationAmount = discounted && motivationValid ? Math.round((discounted.total * motivation / 100 + Number.EPSILON) * 100) / 100 : null;
   const clear = () => { setPrice(""); setCredit(""); setDiscountId("none"); setPairedPrice(""); update("motivationPercent", ""); update("motivationOpen", false); };
   const [savedKey, setSavedKey] = useState("");
