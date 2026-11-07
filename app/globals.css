@@ -194,3 +194,10 @@ html.dark [role="group"][aria-label="Калькуляторы ипотеки"] >
   background-color: #E83C35 !important;
   color: #FFFFFF !important;
 }
+
+
+/* Prevent accidental selection of interface labels and helper messages. */
+:where(button, label, h1, h2, h3, h4, h5, h6, summary, [role="alert"]) {
+  -webkit-user-select: none;
+  user-select: none;
+}
