@@ -166,6 +166,7 @@ export function LoanCalculator() {
       removeCalculationByParams("loan", snapshotParams);
       setSavedKey("");
       setDismissedKey(snapshotKey);
+      toast.success("Расчёт удалён из истории");
       return;
     }
     saveCalculation({ kind: "loan", title: "Кредитный калькулятор", summary: amount(result.monthlyPayment), params: { mode, value, term, unit, rate }, results: { monthlyPayment: amount(result.monthlyPayment), principal: amount(result.principal), interest: amount(result.interest), totalPayment: amount(result.totalPayment), months: String(result.months), annualRate: `${result.annualRate}%` } });
