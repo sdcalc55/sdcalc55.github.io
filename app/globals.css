@@ -5,6 +5,18 @@ nextjs-portal { display: none !important; }
 
 @custom-variant dark (&:is(.dark *));
 
+/* Responsive layout follows the device, not the browser's requested desktop viewport. */
+@custom-variant sm (@media (width >= 40rem) and (pointer: fine) and (any-pointer: fine));
+@custom-variant md (@media (width >= 48rem) and (pointer: fine) and (any-pointer: fine));
+@custom-variant lg (@media (width >= 64rem) and (pointer: fine) and (any-pointer: fine));
+@custom-variant xl (@media (width >= 80rem) and (pointer: fine) and (any-pointer: fine));
+@custom-variant 2xl (@media (width >= 96rem) and (pointer: fine) and (any-pointer: fine));
+@custom-variant max-sm (@media (width < 40rem) or (pointer: coarse) or (any-pointer: coarse));
+@custom-variant max-md (@media (width < 48rem) or (pointer: coarse) or (any-pointer: coarse));
+@custom-variant max-lg (@media (width < 64rem) or (pointer: coarse) or (any-pointer: coarse));
+@custom-variant max-xl (@media (width < 80rem) or (pointer: coarse) or (any-pointer: coarse));
+@custom-variant max-2xl (@media (width < 96rem) or (pointer: coarse) or (any-pointer: coarse));
+
 :root {
   --background: #FAFBFD;
   --foreground: #26364A;
