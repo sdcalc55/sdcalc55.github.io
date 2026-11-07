@@ -186,3 +186,11 @@ html.dark footer nav[aria-label="Социальные сети"] a:hover {
   border-style: solid !important;
   border-width: 1px !important;
 }
+
+
+/* Selected top-level calculator tabs stay brand red in dark mode. */
+html.dark [role="group"][aria-label="Калькуляторы комиссии"] > button[aria-pressed="true"],
+html.dark [role="group"][aria-label="Калькуляторы ипотеки"] > button[aria-pressed="true"] {
+  background-color: #E83C35 !important;
+  color: #FFFFFF !important;
+}
