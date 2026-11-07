@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Bookmark, Calculator, Copy, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/loan";
@@ -183,16 +184,22 @@ export function LoanCalculator() {
             return;
           }
           edit({ term: raw });
-        }} placeholder="Введите срок" className={inputStyle} /><div role="group" aria-label="Единицы срока кредита" className="grid h-14 shrink-0 grid-cols-2 overflow-hidden rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] p-1 dark:border-[#35414F] dark:bg-[#0D1219]">
-          {(["years", "months"] as const).map(item => <button key={item} type="button" aria-pressed={unit === item} onClick={() => {
-            if (item === unit) return;
-            const numericTerm = term.trim() ? parse(term) : NaN;
-            const converted = Number.isFinite(numericTerm)
-              ? item === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
-              : "";
-            edit({ unit: item, term: converted });
-          }} className={`min-w-0 rounded-lg px-2 text-sm font-medium transition-colors ${unit === item ? "bg-white text-[#26364A] shadow-sm dark:bg-[#263443] dark:text-white" : "text-[#647184] hover:text-[#26364A] dark:text-[#AAB6C5] dark:hover:text-white"}`}>{item === "years" ? "лет" : "месяцев"}</button>)}
-        </div></div></div>
+        }} placeholder="Введите срок" className={inputStyle} /><Select value={unit} onValueChange={nextUnit => {
+          if (nextUnit === unit) return;
+          const numericTerm = term.trim() ? parse(term) : NaN;
+          const converted = Number.isFinite(numericTerm)
+            ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
+            : "";
+          edit({ unit: nextUnit, term: converted });
+        }}>
+          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 w-28 shrink-0 rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper" align="end" className="min-w-28 rounded-xl border-[#E4E8ED] bg-white shadow-lg dark:border-[#405064] dark:bg-[#253241]">
+            <SelectItem value="years" className="cursor-pointer rounded-lg py-3 text-sm">лет</SelectItem>
+            <SelectItem value="months" className="cursor-pointer rounded-lg py-3 text-sm">месяцев</SelectItem>
+          </SelectContent>
+        </Select></div></div>
         <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
