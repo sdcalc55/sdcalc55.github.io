@@ -155,14 +155,14 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
       toast.success("Расчёт убран из истории");
       return;
     }
-    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
+    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
     setSavedKey(currentKey);
     setDismissedKey("");
     toast.success("Расчёт сохранён в историю");
   };
   const copy = async () => {
     if (result.status !== "ok" || !discounted) return;
-    try { await navigator.clipboard.writeText(money(discounted.total)); toast.success("Сумма скопирована в буфер обмена"); }
+    try { const lines = [`Комиссия: ${money(discounted.total)}`, ...(result.fixed > 0 ? [`Фиксированная часть: ${money(result.fixed)}`] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${money(result.percent)}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${money(discounted.saving)}`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); toast.success("Расчёт скопирован в буфер обмена"); }
     catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); }
   };
   return <><div className="grid items-start gap-6 lg:grid-cols-[1.12fr_1fr]">
