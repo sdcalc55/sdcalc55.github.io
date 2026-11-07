@@ -168,7 +168,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
         <section aria-labelledby="form-title" className="rounded-3xl border border-[#EBEEF2] bg-white p-6 shadow-[0_3px_18px_#26364A03] sm:p-8">
           <div className="mb-6 flex items-start gap-3.5">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-[22px]" /></span>
-            <div><h2 id="form-title" className="text-xl font-semibold leading-snug tracking-tight">Рассчитать комиссию при {sale ? "продаже" : "покупке"}</h2><p className="mt-2 text-sm leading-relaxed text-[#748195] dark:text-[#B8C4D2]">Выберите тип недвижимости и укажите её стоимость</p></div>
+            <div><h2 id="form-title" className="text-xl font-semibold leading-snug tracking-tight">Рассчитать комиссию при {sale ? "продаже" : "покупке"}</h2><p className="mt-2 select-none text-sm leading-relaxed text-[#748195] dark:text-[#B8C4D2]">Выберите тип недвижимости и укажите её стоимость</p></div>
           </div>
           <div>
             <label htmlFor="category" className="mb-3 block text-sm font-semibold">Что {sale ? "продаём" : "покупаем"}?</label>
@@ -201,7 +201,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
             {discount?.paired && <MoneyInput id="paired-price" label={sale ? "Стоимость ранее приобретаемой недвижимости, ₽" : "Стоимость ранее продаваемой недвижимости, ₽"} value={pairedPrice} onChange={setPairedPrice} />}
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5 text-xs text-[#748195] dark:text-[#B8C4D2]"><span className="size-1.5 rounded-full bg-[#84A992]" />Автоматический расчёт</span>
+            <span className="flex select-none items-center gap-1.5 text-xs text-[#748195] dark:text-[#B8C4D2]"><span className="size-1.5 rounded-full bg-[#84A992]" />Автоматический расчёт</span>
             <button onClick={clear} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[#E83C35]/25 bg-[#FFF1F0] px-3 py-1.5 text-[13px] font-semibold text-[#C94B45] shadow-sm transition hover:border-[#E83C35]/50 hover:bg-[#FCE5E3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] dark:border-[#8D4845] dark:bg-[#3A292B] dark:text-[#F0A09A] dark:hover:bg-[#493033]"><RotateCcw className="size-3" />Сбросить</button>
           </div>
         </section>
@@ -281,7 +281,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                       </div>
                     </details>
                   </div>
-                </> : result.status === "undefined" ? <div className="py-12"><Info className="mb-4 size-8 text-[#647184]" /><p className="text-lg font-medium leading-relaxed dark:text-[#E6EDF5]">Для указанной стоимости тариф не определён. Уточните размер комиссии</p></div> : <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
+                </> : result.status === "undefined" ? <div className="py-12"><Info className="mb-4 size-8 text-[#647184]" /><p className="text-lg font-medium leading-relaxed dark:text-[#E6EDF5]">Для указанной стоимости тариф не определён. Уточните размер комиссии</p></div> : <div className="flex min-h-[300px] select-none flex-col items-center justify-center text-center">
                   <div className="relative mb-5 flex size-[76px] items-center justify-center rounded-[22px] border border-white/90 bg-white/65"><Calculator className={`size-9 stroke-[1.3] ${sale ? "text-[#D68B86]" : "text-[#7B8797]"}`} /><span className={`absolute -bottom-1.5 -right-1.5 flex size-7 items-center justify-center rounded-full border-4 bg-white ${sale ? "border-[#FCEBEA]" : "border-[#EEF1F5]"}`}><span className={`text-sm ${sale ? "text-[#D68B86]" : "text-[#7B8797]"}`}>₽</span></span></div>
                   <p className="text-lg font-semibold">Здесь появится ваша комиссия</p><p className="mt-2 max-w-[285px] text-sm leading-relaxed text-[#737D8D]">{category === "land" ? "Укажите стоимость участка и сумму одобренного кредита - мы рассчитаем вознаграждение" : "Укажите стоимость объекта - мы автоматически рассчитаем вознаграждение"}</p>
                 </div>}
