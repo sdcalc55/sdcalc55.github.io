@@ -176,7 +176,7 @@ export function LoanCalculator() {
           if (digitsBeforeDecimal.length > 9) return;
           edit({ value: formatInput(raw) });
         }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} className={`${inputStyle} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div></div>
-        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-2 gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
+        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
             ? normalized.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1").replace(/^(\d{0,2})(?:\.(\d{0,2})?)?.*$/, (_, whole, fraction) => whole + (fraction !== undefined ? "." + fraction : ""))
@@ -195,7 +195,7 @@ export function LoanCalculator() {
             : "";
           edit({ unit: nextUnit, term: converted });
         }}>
-          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 w-full min-w-0 rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
+          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 w-28 min-w-0 rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper" align="end" className="min-w-28 rounded-xl border-[#E4E8ED] bg-white shadow-lg dark:border-[#405064] dark:bg-[#253241]">
