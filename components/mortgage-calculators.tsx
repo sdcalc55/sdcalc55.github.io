@@ -59,7 +59,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
   }} onChange={event => {
     const raw = event.target.value;
     const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
-    if (money && digitsBeforeDecimal.length > 10) return;
+    if (money && digitsBeforeDecimal.length > (id.startsWith("mortgage-adjustment-") ? 9 : 10)) return;
     const position = event.target.selectionStart ?? raw.length;
     const significant = raw.slice(0, position).replace(/\s/g, "").length;
     const next = money
