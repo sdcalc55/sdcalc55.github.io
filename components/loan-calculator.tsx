@@ -15,6 +15,7 @@ const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
 };
+const exceedsAmountLimit = (value: string) => Number(value.replace(/\D/g, "")) > 999999999;
 
 const dismissKeyboard = (event: KeyboardEvent<HTMLInputElement>) => {
   if (event.key === "Enter" && !event.nativeEvent.isComposing) {
@@ -61,7 +62,7 @@ export function LoanCalculator() {
     if (!term.trim() && value.trim() && rate.trim()) { update({ error: "Введите срок кредита", result: null }); return; }
     if (!value.trim() || !term.trim()) { update({ error: "Заполните поля", result: null }); return; }
     if (!rate.trim()) { update({ error: "Введите ставку", result: null }); return; }
-    if (parse(value) > 999999999) { update({ error: "", result: null, changed: true }); return; }
+    if (exceedsAmountLimit(value)) { update({ error: "", result: null, changed: true }); return; }
     if (Number(term) > (unit === "years" ? 30 : 360) || parse(rate) > 30) { update({ error: "", result: null, changed: true }); return; }
     try {
       const months = unit === "years" ? Math.round(parse(term) * 12) : parse(term);
@@ -77,7 +78,7 @@ export function LoanCalculator() {
       setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "", changed: true } }));
       return;
     }
-    if (parse(current.value) > 999999999) {
+    if (exceedsAmountLimit(current.value)) {
       setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], result: null, error: "", changed: false } }));
       return;
     }
@@ -179,7 +180,7 @@ export function LoanCalculator() {
     </div>
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.1fr]">
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
-      <div className="mb-6 flex items-center gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
+      <div className="mb-6 flex items-center gap-3"><span className="relative left-3 flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
         <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
           const raw = event.target.value;
