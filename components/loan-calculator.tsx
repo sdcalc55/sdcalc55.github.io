@@ -61,7 +61,7 @@ export function LoanCalculator() {
     if (!term.trim() && value.trim() && rate.trim()) { update({ error: "Введите срок кредита", result: null }); return; }
     if (!value.trim() || !term.trim()) { update({ error: "Заполните поля", result: null }); return; }
     if (!rate.trim()) { update({ error: "Введите ставку", result: null }); return; }
-    if (parse(rate) > 30) { update({ error: "Кажется, с процентами немного перебор. С такой ставкой кредит лучше не брать 🙂", result: null }); return; }
+    if (Number(term) > (unit === "years" ? 30 : 360) || parse(rate) > 30) { update({ error: "", result: null, changed: true }); return; }
     try {
       const months = unit === "years" ? Math.round(parse(term) * 12) : parse(term);
       const calculation = reverse ? calculateLoanFromPayment(parse(value), months, parse(rate)) : calculateLoan(parse(value), months, parse(rate));
@@ -187,11 +187,6 @@ export function LoanCalculator() {
           const raw = unit === "years"
             ? normalized.replace(/[^\d]/g, "").slice(0, 2)
             : normalized.replace(/[^\d]/g, "").slice(0, 3);
-          const limit = unit === "years" ? 30 : 360;
-          if (raw !== "" && Number(raw) > limit) {
-            update({ term: raw, error: unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита.", result: null, changed: false });
-            return;
-          }
           edit({ term: raw });
         }} placeholder="Введите срок" className={inputStyle} /><Select value={unit} onValueChange={nextUnit => {
           if (nextUnit === unit) return;
@@ -216,9 +211,10 @@ export function LoanCalculator() {
           const numeric = Number(candidate);
           const integerPart = candidate.split(".")[0];
           if (integerPart.length > 2 || (candidate !== "" && Number.isFinite(numeric) && numeric > 99)) return;
-          update({ rate: candidate, changed: true, error: candidate !== "" && Number.isFinite(numeric) && numeric > 30 ? "Кажется, с процентами немного перебор. С такой ставкой кредит лучше не брать 🙂" : "" });
-        }} placeholder="Введите % ставки" className={inputStyle} /></div></div>
+          update({ rate: candidate, changed: true, error: "" });
+        }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор. С такой ставкой кредит лучше не брать 🙂</p>}</div>
       </div>
+      {term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}
       {error && <p role="alert" className="mt-4 text-sm leading-relaxed text-[#BD302A]">{error}</p>}
       <div className="mt-7 flex flex-wrap gap-3">{!calculated && <button type="submit" className="min-h-12 flex-1 rounded-xl bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white hover:bg-[#D6332D] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E83C35]">РАССЧИТАТЬ</button>}{calculated && <p className="flex flex-1 items-center text-sm font-medium text-[#647184]">Автоматический перерасчёт</p>}<button type="button" onClick={reset} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-3 text-sm font-semibold text-[#647184] hover:bg-[#F5F7FA]"><RotateCcw className="size-4" />СБРОСИТЬ</button></div>
     </form>
