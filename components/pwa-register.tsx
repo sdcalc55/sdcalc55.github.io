@@ -39,16 +39,13 @@ export default function PwaRegister() {
       });
     };
 
+    // Reveal the field only when it receives focus. Do not react to viewport
+    // resize or clicks: dismissing the keyboard after scrolling must not pull
+    // the page back to the previously focused input.
     document.addEventListener("focusin", revealFocusedField);
-    document.addEventListener("click", revealFocusedField, true);
-    window.addEventListener("resize", revealFocusedField);
-    window.visualViewport?.addEventListener("resize", revealFocusedField);
     return () => {
       cancelAnimationFrame(frame);
       document.removeEventListener("focusin", revealFocusedField);
-      document.removeEventListener("click", revealFocusedField, true);
-      window.removeEventListener("resize", revealFocusedField);
-      window.visualViewport?.removeEventListener("resize", revealFocusedField);
     };
   }, []);
 
