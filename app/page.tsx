@@ -8,7 +8,7 @@ import { App } from "@capacitor/app";
 import { ArrowLeft, ChevronRight, ArrowDownLeft, ArrowUpRight, HousePlus, KeyRound, WalletCards, Calculator, House, Instagram, Sparkles, History, Settings, Trash2, Copy, ChevronDown, type LucideIcon } from "lucide-react";
 import { CommissionCalculator } from "@/components/commission-calculator";
 import { MortgageCalculators } from "@/components/mortgage-calculators";
-import { LegalFooter } from "@/components/legal-footer";
+import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
 import { LoanCalculator } from "@/components/loan-calculator";
 import type { Operation } from "@/lib/calculator";
 import { discounts } from "@/lib/discounts";
@@ -365,6 +365,7 @@ export default function Home() {
         </div>
         </div>
       </div>
+      <AuthorCopyright />
       {screen === "settings" && <LegalFooter />}
     </footer>
   </div>;
