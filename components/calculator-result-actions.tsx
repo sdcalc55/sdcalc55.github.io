@@ -49,11 +49,11 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-start gap-2" data-testid="calculator-result-actions">
-      <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={`${actionClass} w-[124px] shrink-0 whitespace-nowrap`}>
+    <div className="mt-4 grid min-w-0 grid-cols-2 items-center gap-2 sm:flex sm:flex-nowrap" data-testid="calculator-result-actions">
+      <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={`${actionClass} w-full min-w-0 gap-1 px-2 text-[10px] whitespace-nowrap sm:w-[124px] sm:shrink-0 sm:gap-2 sm:px-3 sm:text-xs`}>
         {copied ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}{copied ? "Скопировано" : "Копировать"}
       </button>
-      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} min-w-[150px] whitespace-nowrap ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
+      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} w-full min-w-0 gap-1 px-2 text-[10px] whitespace-nowrap sm:w-auto sm:min-w-[150px] sm:gap-2 sm:px-3 sm:text-xs ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
         {isSaved ? <BookmarkCheck aria-hidden="true" className="size-4" /> : <Bookmark aria-hidden="true" className="size-4" />}
         {isSaved ? "Убрать сохранение" : "Сохранить"}
       </button>
