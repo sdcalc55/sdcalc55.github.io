@@ -110,6 +110,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
   const theme = themes[config.mode];
   const historyKind = config.mode === "part" ? "mortgage-part" : config.mode === "whole" ? "mortgage-whole" : "mortgage-adjustment";
   const snapshotKey = JSON.stringify(values);
+  const hasUserInput = values.some((value, index) => value !== config.defaults[index]);
   const snapshotParams = Object.fromEntries(config.labels.map((label, index) => [label, values[index]]));
   useEffect(() => {
     const syncSavedState = () => {
@@ -180,7 +181,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
         </div>}
       </div>
     </div>
-    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${adjustment ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center border-r ${theme.border} text-sm font-semibold text-[#26364A] hover:text-[#E83C35] ${adjustment ? "" : "lg:hidden"}`}>Наверх</button><button type="button" onClick={() => { setValues(previous => previous.map((value, i) => i === previous.length - 1 ? value : "")); setSavedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button></div>
+    {hasUserInput && <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${adjustment ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center border-r ${theme.border} text-sm font-semibold text-[#26364A] hover:text-[#E83C35] ${adjustment ? "" : "lg:hidden"}`}>Наверх</button><button type="button" onClick={() => { setValues(config.defaults); setSavedKey(""); setDismissedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button></div>}
   </section>;
 }
 
