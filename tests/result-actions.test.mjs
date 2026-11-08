@@ -61,6 +61,6 @@ test("primary result typography has stronger contrast than secondary actions", (
   assert.match(mortgage, /dark:text-\[#FF827B\]/);
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
-  assert.match(shared, /min-h-10/);
+  assert.match(shared, /min-h-11/);
   assert.match(shared, /text-sm/);
 });
