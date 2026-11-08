@@ -38,7 +38,6 @@ test("copy/save handlers retain success and failure feedback", () => {
   assert.match(shared, /copied \? "Скопировано" : "Копировать"/);
   assert.match(shared, /isSaved \? "Убрать сохранение" : "Сохранить"/);
   assert.match(shared, /if \(await onCopy\(\)\)/);
-  }
 });
 
 test("all calculator money and rate inputs opt out of browser autofill", () => {
