@@ -55,6 +55,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     if (cursor.current !== null) { ref.current?.setSelectionRange(cursor.current, cursor.current); cursor.current = null; }
   });
   return <div><label htmlFor={id} className="mb-3 block text-sm font-semibold">{label}</label><div className="relative"><input id={id} ref={ref} value={value} inputMode="decimal" enterKeyHint="done" autoComplete="off" placeholder={placeholder} onFocus={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onClick={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onKeyDown={event => {
+    if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
     if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); }
   }} onChange={event => {
     const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
