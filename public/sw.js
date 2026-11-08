@@ -1,9 +1,10 @@
-const CACHE_NAME = "sd-calculator-pwa-v5";
+const CACHE_NAME = "sd-calculator-pwa-v6";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
   "/icons/sd-192.png",
   "/icons/sd-512.png",
+  "/icons/apple-touch-icon-180.png",
   "/icons/sd-32.png",
   "/favicon.png",
   "/favicon.ico",
