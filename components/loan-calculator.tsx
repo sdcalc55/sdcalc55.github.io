@@ -183,7 +183,7 @@ export function LoanCalculator() {
     </div>
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.1fr]">
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
-      <div className="mb-6 flex items-center gap-3"><span className="relative left-3 flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
+      <div className="mb-6 flex items-center gap-5"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
         <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
           const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
