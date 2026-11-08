@@ -8,7 +8,7 @@ import { CalculatorResultActions } from "@/components/calculator-result-actions"
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { calculateMortgage, type MortgageMode } from "@/lib/mortgage";
-import { getCalculationHistory, getHistoryMode, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
+import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
 const rubles = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 6 });
@@ -89,8 +89,13 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
       if (isRefresh && activeCalculator) window.sessionStorage.removeItem(storageKey);
       const saved = isRefresh && activeCalculator ? null : window.sessionStorage.getItem(storageKey);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length === config.defaults.length && parsed.every(value => typeof value === "string")) setValues(parsed);
+        const parsed: unknown = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === config.defaults.length &&
+            parsed.every(value => typeof value === "string" && value.length <= 24 && /^[\d\s.,]*$/.test(value))) {
+          const candidate = parsed as string[];
+          const checked = calculateMortgage(config.mode, candidate);
+          if (checked.status !== "error") setValues(candidate);
+        }
       }
     } catch {}
     setValuesRestored(true);
@@ -125,8 +130,12 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
     const restore = (event: Event) => {
       const record = (event as CustomEvent<CalculationRecord>).detail;
       const expected = config.mode === "part" ? "mortgage-part" : config.mode === "whole" ? "mortgage-whole" : "mortgage-adjustment";
-      if (record?.kind !== expected) return;
-      setValues(config.labels.map(label => record.params[label] ?? ""));
+      if (!isValidCalculationRecord(record) || record.kind !== expected) return;
+      const restoredValues = config.labels.map(label => record.params[label] ?? "");
+      if (restoredValues.some(value => !value || value.length > 24 || !/^[\d\s.,]+$/.test(value))) return;
+      if (calculateMortgage(config.mode, restoredValues).status !== "ok" &&
+          !(config.mode === "adjustment" && calculateMortgage(config.mode, restoredValues).status === "sufficient")) return;
+      setValues(restoredValues);
       setSavedKey("");
     };
     window.addEventListener("sd-history-restore", restore);
