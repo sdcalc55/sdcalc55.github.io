@@ -25,9 +25,7 @@ test("partial down-payment result is not capped at one billion rubles", () => {
 });
 
 
-test("mortgage inputs preserve the exact entered digits and decimal separator", () => {
+test("mortgage money fields retain thousands separators while percentage values retain decimals", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
-  assert.match(mortgage, /const next = raw;/);
-  assert.doesNotMatch(mortgage, /formatInput\(raw\)/);
-  assert.match(mortgage, /const normalized = raw\.replace\(",", "\."\)/);
+  assert.match(mortgage, /const next = money \? formatInput\(raw\) : candidate;/);
 });
