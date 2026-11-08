@@ -5,6 +5,33 @@ nextjs-portal { display: none !important; }
 
 @custom-variant dark (&:is(.dark *));
 
+/* Desktop breakpoints require a real fine pointer, not merely a wide browser viewport. */
+@custom-variant sm {
+  @media (width >= 40rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant md {
+  @media (width >= 48rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant lg {
+  @media (width >= 64rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant xl {
+  @media (width >= 80rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant 2xl {
+  @media (width >= 96rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+
 
 :root {
   --background: #FAFBFD;
