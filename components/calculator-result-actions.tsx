@@ -39,7 +39,7 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
   };
 
   return (
-    <div className="mt-4 grid grid-cols-2 gap-2" data-testid="calculator-result-actions">
+    <div className="mt-4 flex flex-wrap items-center justify-start gap-2" data-testid="calculator-result-actions">
       <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={actionClass}>
         {copied ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}{copied ? "Скопировано" : "Копировать"}
       </button>
