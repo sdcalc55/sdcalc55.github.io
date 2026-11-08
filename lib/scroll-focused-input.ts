@@ -1,10 +1,10 @@
 // Keep the focused field and the next input visible while the mobile keyboard opens.
-// Once the keyboard is closed, stop immediately and preserve the user's current scroll position.
+// Never move the page while the keyboard is closing or after the user starts scrolling.
 export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?: HTMLElement | null) {
   if (!window.matchMedia("(max-width: 768px)").matches) return;
 
   const viewport = window.visualViewport;
-  const initialHeight = window.innerHeight;
+  const initialHeight = viewport?.height ?? window.innerHeight;
   const findNextInput = () => {
     const scope = element.closest("section, form") ?? element.parentElement;
     if (!scope) return element;
@@ -17,6 +17,7 @@ export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?:
   const target = revealThrough ?? findNextInput();
   let active = true;
   let keyboardOpened = false;
+  let lastViewportHeight = initialHeight;
   let cleanupTimer: number | undefined;
   let frame = 0;
 
@@ -26,6 +27,8 @@ export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?:
     cancelAnimationFrame(frame);
     viewport?.removeEventListener("resize", onViewportResize);
     window.removeEventListener("resize", onWindowResize);
+    document.removeEventListener("touchstart", onUserInteraction, true);
+    document.removeEventListener("wheel", onUserInteraction, true);
     if (cleanupTimer !== undefined) window.clearTimeout(cleanupTimer);
   };
 
@@ -50,30 +53,40 @@ export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?:
     });
   };
 
-  const checkKeyboardState = () => {
+  const handleViewportChange = () => {
+    if (!active) return;
     const currentHeight = viewport?.height ?? window.innerHeight;
+
     if (currentHeight < initialHeight - 120) keyboardOpened = true;
-    // A growing viewport means the keyboard is closing. Do not scroll or restore anything.
-    if (keyboardOpened && currentHeight > initialHeight - 80) {
+
+    // The first viewport growth marks keyboard dismissal. Stop before any corrective scroll.
+    if (keyboardOpened && currentHeight > lastViewportHeight + 2) {
       cleanup();
-      return false;
+      return;
     }
-    return true;
+
+    lastViewportHeight = currentHeight;
+    if (keyboardOpened) reveal();
   };
 
   function onViewportResize() {
-    if (!checkKeyboardState()) return;
-    reveal();
+    handleViewportChange();
   }
 
   function onWindowResize() {
-    if (!checkKeyboardState()) return;
-    reveal();
+    handleViewportChange();
+  }
+
+  function onUserInteraction() {
+    // Once the user touches or scrolls the page with the keyboard open, their position wins.
+    if (keyboardOpened) cleanup();
   }
 
   reveal();
   viewport?.addEventListener("resize", onViewportResize, { passive: true });
   window.addEventListener("resize", onWindowResize, { passive: true });
-  // Only follow the keyboard's opening animation; never fight the user's manual scrolling.
+  document.addEventListener("touchstart", onUserInteraction, { passive: true, capture: true });
+  document.addEventListener("wheel", onUserInteraction, { passive: true, capture: true });
+  // Follow only the keyboard-opening animation; never restore or adjust scroll on dismissal.
   cleanupTimer = window.setTimeout(cleanup, 1800);
 }
