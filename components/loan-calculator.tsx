@@ -198,7 +198,7 @@ export function LoanCalculator() {
               <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="next" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
                 const raw = event.target.value.replace(/[^\d]/g, "").slice(0, 3);
                 edit({ term: raw });
-              }} placeholder="Введите срок" className="${inputStyle} pr-11" />
+              }} placeholder="Введите срок" className="h-14 w-full min-w-0 rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 pr-11 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" />
               {term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
             </div>
             <Select value={unit} onValueChange={nextUnit => {
