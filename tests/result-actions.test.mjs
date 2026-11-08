@@ -20,8 +20,8 @@ test("all calculators use one shared result action component", () => {
 
 test("shared actions expose one consistent mobile and dark-mode layout", () => {
   assert.match(shared, /grid grid-cols-2 gap-2/);
-  assert.match(shared, /min-h-10/);
-  assert.match(shared, /rounded-lg/);
+  assert.match(shared, /min-h-11/);
+  assert.match(shared, /rounded-xl/);
   assert.match(shared, /dark:border-/);
   assert.match(shared, /dark:bg-/);
   assert.match(shared, /disabled=\{disabled\}/);
@@ -62,5 +62,5 @@ test("primary result typography has stronger contrast than secondary actions", (
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
   assert.match(shared, /min-h-10/);
-  assert.match(shared, /text-\[13px\]/);
+  assert.match(shared, /text-sm/);
 });
