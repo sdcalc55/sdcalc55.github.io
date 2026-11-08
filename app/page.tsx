@@ -36,7 +36,7 @@ const historyFieldLabels: Record<string, string> = {
   pairedPrice: "Стоимость второго объекта",
   discount: "Скидка",
   final: "Итоговая комиссия",
-  clientReceives: "Итого на руки",
+  clientReceives: "Продавцу на руки",
   price: "Стоимость недвижимости",
   amount: "Сумма",
   downPayment: "Первоначальный взнос",
