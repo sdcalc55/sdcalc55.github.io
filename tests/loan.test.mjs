@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateLoan } from '../lib/loan.ts';
+import { calculateLoan, calculateLoanFromPayment } from '../lib/loan.ts';
 
 test('Аннуитет: 3 млн, 15 лет, 18% и согласованность итогов', () => {
   const result = calculateLoan(3000000, 180, 18);
@@ -45,4 +45,17 @@ test('Некорректные значения не дают результат
   for (const values of [[0,180,18],[-1,180,18],[3000000,0,18],[3000000,1.5,18],[3000000,180,-1],[NaN,180,18],[3000000,180,Infinity]]) {
     assert.throws(() => calculateLoan(...values));
   }
+});
+
+test('Обратный расчёт допускает вычисленную сумму кредита выше лимита вводимой суммы', () => {
+  const result = calculateLoanFromPayment(255555555, 264, 12);
+  assert(result.principal > 999999999);
+  assert(result.principal < 255555555 * 264);
+  assert(result.monthlyPayment <= 255555555);
+  assert.equal(result.principal * 100, Math.round(result.principal * 100));
+});
+
+test('Лимит 999 999 999 ₽ применяется к введённой сумме, но не к результату', () => {
+  assert.throws(() => calculateLoan(1000000000, 240, 12), { message: 'Введите корректную сумму. Максимум — 999 999 999 ₽.' });
+  assert.throws(() => calculateLoanFromPayment(1000000000, 240, 12), { message: 'Введите корректную сумму. Максимум — 999 999 999 ₽.' });
 });
