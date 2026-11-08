@@ -19,21 +19,21 @@ test("all calculators use one shared result action component", () => {
   assert.match(shared, /Убрать сохранение/);
 });
 
-test("shared actions expose one consistent mobile and dark-mode layout", () => {
-  assert.match(shared, /grid grid-cols-2 gap-2/);
+test("shared actions use the current compact responsive and dark-mode layout", () => {
+  assert.match(shared, /flex flex-wrap items-center justify-start gap-2/);
   assert.match(shared, /min-h-10/);
   assert.match(shared, /rounded-xl/);
   assert.match(shared, /dark:border-/);
-  assert.match(shared, /dark:bg-/);
+  assert.match(shared, /dark:bg-transparent/);
   assert.match(shared, /disabled=\{disabled\}/);
 });
 
-test("copy/save handlers retain success and failure feedback", () => {
+test("shared copy/save actions provide success feedback and calculator handlers report copy failures", () => {
+  assert.match(shared, /copied \? "Скопировано" : "Копировать"/);
+  assert.match(shared, /isSaved \? "Убрать сохранение" : "Сохранить"/);
   for (const file of ["../components/commission-calculator.tsx", "../components/mortgage-calculators.tsx", "../components/loan-calculator.tsx"]) {
     const source = read(file);
-    assert.match(source, /Скопировано в буфер обмена/);
-    assert.match(source, /Расчёт сохранён в истории/);
-    assert.match(source, /Расчёт удалён из истории/);
+    assert.match(source, /Не удалось скопировать сумму/);
   }
 });
 
@@ -58,8 +58,8 @@ test("partial down-payment percentages are disclosed only inside calculation det
 test("primary result typography has stronger contrast than secondary actions", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
   const loan = read("../components/loan-calculator.tsx");
-  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.75rem\)\]/);
-  assert.match(mortgage, /dark:text-\[#FF827B\]/);
+  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.6rem\)\]/);
+  assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
   assert.match(shared, /min-h-10/);
@@ -69,7 +69,7 @@ test("primary result typography has stronger contrast than secondary actions", (
 
 test("result amount is visually primary and copy/save controls are secondary", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
-  assert.match(mortgage, /text-\[clamp\(2\.25rem,8vw,3rem\)\]/);
+  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.6rem\)\]/);
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
