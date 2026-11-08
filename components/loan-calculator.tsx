@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Bookmark, Calculator, Copy, RotateCcw, X } from "lucide-react";
+import { Calculator, RotateCcw, X } from "lucide-react";
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
