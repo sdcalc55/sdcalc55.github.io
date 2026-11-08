@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v4";
+const CACHE_NAME = "sd-calculator-pwa-v5";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -73,17 +73,36 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith((async () => {
-      const cached = await caches.match(request, { ignoreSearch: true }) || await caches.match("/");
-      try {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(request, { ignoreSearch: true }) || await cache.match("/");
+      const refreshAppShell = async () => {
         const response = await fetch(request, { cache: "no-store" });
-        if (response.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          await cache.put("/", response.clone());
-          return response;
-        }
-        return cached || response;
+        if (!response.ok) return;
+        const html = await response.clone().text();
+        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+          .map((match) => new URL(match[1], self.location.origin).pathname);
+        await Promise.all([...new Set(assets)].map(async (assetUrl) => {
+          try {
+            const asset = await fetch(assetUrl, { cache: "no-store" });
+            if (asset.ok) await cache.put(assetUrl, asset);
+          } catch {
+            // Keep the last working cached asset when refresh is unavailable.
+          }
+        }));
+        await cache.put("/", response);
+      };
+
+      if (cached) {
+        event.waitUntil(refreshAppShell().catch(() => {}));
+        return cached;
+      }
+
+      try {
+        const response = await fetch(request);
+        if (response.ok) await cache.put("/", response.clone());
+        return response;
       } catch {
-        return cached || Response.error();
+        return Response.error();
       }
     })());
     return;
