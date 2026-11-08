@@ -103,6 +103,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   const pairedResult = discount?.paired ? calculate(sale ? "purchase" : "sale", category === "land" ? "country" : category, parseMoney(pairedPrice), null, tariffs) : null;
   const pairedDiscounted = result.status === "ok" && pairedResult?.status === "ok" ? applyPairedDiscount(result.total, pairedResult.total) : null;
   const discounted = result.status !== "ok" ? null : discount?.paired ? pairedDiscounted : applyDiscount(result.total, discount?.percent ?? 0);
+  const clientReceives = sale && discounted && parseMoney(price) !== null ? parseMoney(price)! - discounted.total : null;
   const normalizedPercent = motivationPercent.trim().replace(",", ".");
   const motivation = /^\d+(?:\.\d+)?$/.test(normalizedPercent) ? Number(normalizedPercent) : NaN;
   const motivationValid = Number.isFinite(motivation) && motivation >= 0 && motivation <= 99;
@@ -134,7 +135,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
     const key = JSON.stringify(params);
     if (savedKey === key || dismissedKey === key) return;
     const timer = window.setTimeout(() => {
-      upsertCalculationByParams({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params, results: { commission: money(result.total), final: money(discounted.total), discount: discount?.name ?? "Без скидки" } });
+      upsertCalculationByParams({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params, results: { commission: money(result.total), final: money(discounted.total), ...(sale && clientReceives !== null ? { clientReceives: money(clientReceives) } : {}), discount: discount?.name ?? "Без скидки" } });
       setSavedKey(key);
     }, 650);
     return () => window.clearTimeout(timer);
@@ -160,13 +161,13 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
       setDismissedKey(currentKey);
       return;
     }
-    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
+    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), ...(sale && clientReceives !== null ? { clientReceives: money(clientReceives) } : {}), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
     setSavedKey(currentKey);
     setDismissedKey("");
   };
   const copy = async () => {
     if (result.status !== "ok" || !discounted) return false;
-    try { const roundedMoney = (value: number) => money(Math.round(value)); const breakdown = [...(result.fixed > 0 && (result.rate > 0 || discounted.saving > 0) ? [roundedMoney(result.fixed)] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${roundedMoney(result.percent)}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${roundedMoney(discounted.saving)}`] : [])]; const copied = `Комиссия: ${roundedMoney(discounted.total)}${breakdown.length ? ` (${breakdown.join(" + ").replace(/ \+ Скидка:/, ", Скидка:")})` : ""}`; await navigator.clipboard.writeText(copied); return true; }
+    try { const roundedMoney = (value: number) => money(Math.round(value)); const breakdown = [...(result.fixed > 0 && (result.rate > 0 || discounted.saving > 0) ? [roundedMoney(result.fixed)] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${roundedMoney(result.percent)}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${roundedMoney(discounted.saving)}`] : [])]; const copied = `Комиссия: ${roundedMoney(discounted.total)}${breakdown.length ? ` (${breakdown.join(" + ").replace(/ \+ Скидка:/, ", Скидка:")})` : ""}${sale && clientReceives !== null ? `\nКлиент получит на руки: ${roundedMoney(clientReceives)}` : ""}`; await navigator.clipboard.writeText(copied); return true; }
     catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); return false; }
   };
   return <><div className="grid items-start gap-6 lg:grid-cols-[1.12fr_1fr]">
@@ -217,7 +218,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
               <div aria-live="polite" aria-atomic="true">
                 {result.status === "ok" ? <>
                   <div className="mb-2 mt-5 flex flex-wrap items-center gap-3"><p data-testid="total" className="text-[clamp(1.8rem,6vw,2.4rem)] font-bold leading-tight tracking-tight text-[#D93630] tabular-nums dark:text-[#FF665F]">{discounted ? money(discounted.total) : "-"}</p><span className="inline-flex shrink-0 items-center gap-1"><button type="button" onClick={() => update("motivationOpen", !motivationOpen)} disabled={!discounted} aria-label="Рассчитать вознаграждение риелтора" title="Рассчитать вознаграждение риелтора" aria-expanded={motivationOpen} aria-controls="motivation-panel" className={`inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-offset-2 hover:bg-white/60 focus-visible:outline-2 disabled:opacity-40 ${motivationOpen ? "bg-white/65 text-[#E83C35]" : "text-[#647184]"}`}><Wallet aria-hidden="true" className="size-5" /></button></span></div>
-                  <p className="text-xs text-[#6E7886] dark:text-[#B8C4D2]">Комиссия со скидкой, округлённая до рубля</p><CalculatorResultActions onCopy={copy} onSave={save} isSaved={isSaved} copyKey={discounted ? `Комиссия: ${numberFormat.format(Math.round(discounted.total))}\u00a0₽${(() => { const breakdown = [...(result.fixed > 0 && (result.rate > 0 || discounted.saving > 0) ? [money(Math.round(result.fixed))] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${money(Math.round(result.percent))}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${money(Math.round(discounted.saving))}`] : [])]; return breakdown.length ? ` (${breakdown.join(" + ").replace(" + Скидка:", ", Скидка:")})` : ""; })()}` : ""} disabled={!discounted} />
+                  <p className="text-xs text-[#6E7886] dark:text-[#B8C4D2]">Комиссия со скидкой, округлённая до рубля</p>{sale && clientReceives !== null && <div className="mt-5 rounded-2xl border border-[#D8E5DC] bg-white/70 p-4 dark:border-[#456454] dark:bg-[#24382F]"><p className="text-xs font-medium text-[#647184] dark:text-[#B8C4D2]">Клиент получит на руки</p><p data-testid="client-receives" className="mt-1 text-[clamp(1.5rem,5vw,2rem)] font-bold tracking-tight tabular-nums text-[#287348] dark:text-[#8BD5A7]">{money(clientReceives)}</p></div>}<CalculatorResultActions onCopy={copy} onSave={save} isSaved={isSaved} copyKey={discounted ? `Комиссия: ${numberFormat.format(Math.round(discounted.total))}\u00a0₽${(() => { const breakdown = [...(result.fixed > 0 && (result.rate > 0 || discounted.saving > 0) ? [money(Math.round(result.fixed))] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${money(Math.round(result.percent))}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${money(Math.round(discounted.saving))}`] : [])]; return breakdown.length ? ` (${breakdown.join(" + ").replace(" + Скидка:", ", Скидка:")})` : ""; })()}` : ""} disabled={!discounted} />
                   {motivationOpen && discounted && <div id="motivation-panel" className="mt-4 rounded-2xl border border-white/80 bg-white/75 p-4 sm:p-5">
                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold"><Wallet aria-hidden="true" className="size-4 text-[#647184]" />Агентское вознаграждение</div>
                     <label htmlFor="motivation-percent" className="mb-2 block text-sm font-semibold">Ваш партнерский процент</label>
@@ -256,7 +257,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                     <dl className="space-y-3 text-sm">
                       <Row label="Операция" value={sale ? "Продажа" : "Покупка"} />
                       <Row label="Тип недвижимости" value={titles[category]} />
-                      <Row label={category === "land" ? "Стоимость участка" : "Стоимость объекта"} value={money(parseMoney(price)!)} />
+                      <Row label={category === "land" ? "Стоимость участка" : "Стоимость объекта"} value={money(parseMoney(price)!)} />{sale && clientReceives !== null && <Row label="Клиент получит на руки" value={money(clientReceives)} />}
                       {category === "land" && <><Row label="Одобренный кредит" value={money(parseMoney(credit)!)} /><Row label="Общая база" value={money(result.base)} /></>}
                       <div className="border-t border-[#26364A]/10" />
                       <Row label="Фиксированная часть" value={money(result.fixed)} />
