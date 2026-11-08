@@ -9,7 +9,7 @@ type CalculatorResultActionsProps = {
   disabled?: boolean;
 };
 
-const actionClass = "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-transparent bg-[#EEF1F5] px-3 text-xs font-medium text-[#657184] transition hover:bg-[#E4E9EF] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#263442] dark:text-[#AEBBCB] dark:hover:bg-[#304153]";
+const actionClass = "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#D8DEE7] bg-transparent px-3 text-xs font-medium text-[#657184] transition hover:bg-[#F3F5F7] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#46576A] dark:bg-transparent dark:text-[#AEBBCB] dark:hover:bg-[#263442]";
 
 export function CalculatorResultActions({ onCopy, onSave, isSaved, disabled = false }: CalculatorResultActionsProps) {
   return (
