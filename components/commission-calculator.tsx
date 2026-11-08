@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Calculator, Info, RotateCcw, Wallet, X } from "lucide-react";
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
-import { getCalculationHistory, getHistoryMode, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
+import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -77,8 +77,31 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
       } else {
         const saved = window.sessionStorage.getItem("sd-commission-drafts");
         if (saved) {
-          const parsed = JSON.parse(saved) as Partial<Record<Operation, Draft>>;
-          setDrafts(previous => ({ sale: { ...previous.sale, ...(parsed.sale ?? {}) }, purchase: { ...previous.purchase, ...(parsed.purchase ?? {}) } }));
+          const parsed: unknown = JSON.parse(saved);
+          const validDraft = (value: unknown, target: Operation): Partial<Draft> => {
+            if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+            const item = value as Record<string, unknown>;
+            const allowed: Category[] = target === "sale"
+              ? ["apartment", "country", "garage", "commercial"]
+              : ["apartment", "country", "land", "garage", "commercial"];
+            const validNumber = (key: string, max = 24) => typeof item[key] === "string" && (item[key] as string).length <= max && /^[\d\s.,]*$/.test(item[key] as string);
+            return {
+              ...(allowed.includes(item.category as Category) ? { category: item.category as Category } : {}),
+              ...(validNumber("price") ? { price: item.price as string } : {}),
+              ...(validNumber("credit") ? { credit: item.credit as string } : {}),
+              discountId: typeof item.discountId === "string" && (item.discountId === "none" || discounts.some(discount => discount.id === item.discountId)) ? item.discountId : "none",
+              ...(validNumber("pairedPrice") ? { pairedPrice: item.pairedPrice as string } : {}),
+              motivationOpen: item.motivationOpen === true,
+              motivationPercent: typeof item.motivationPercent === "string" && item.motivationPercent.length <= 6 && /^\d*(?:[.,]\d*)?$/.test(item.motivationPercent) ? item.motivationPercent : ""
+            };
+          };
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            const savedDrafts = parsed as Partial<Record<Operation, unknown>>;
+            setDrafts(previous => ({
+              sale: { ...previous.sale, ...validDraft(savedDrafts.sale, "sale") },
+              purchase: { ...previous.purchase, ...validDraft(savedDrafts.purchase, "purchase") }
+            }));
+          }
         }
       }
     } catch {}
@@ -117,9 +140,15 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   useEffect(() => {
     const restore = (event: Event) => {
       const record = (event as CustomEvent<CalculationRecord>).detail;
-      if (record?.kind !== "commission") return;
+      if (!isValidCalculationRecord(record) || record.kind !== "commission") return;
       const p = record.params;
-      const target = p.operation === "purchase" ? "purchase" : "sale";
+      const target: Operation = p.operation === "purchase" ? "purchase" : p.operation === "sale" ? "sale" : "sale";
+      const allowed: Category[] = target === "sale" ? ["apartment", "country", "garage", "commercial"] : ["apartment", "country", "land", "garage", "commercial"];
+      if (!allowed.includes(p.category as Category) ||
+          !/^\d[\d\s.,]{0,23}$/.test(p.price) ||
+          (p.credit && !/^\d[\d\s.,]{0,23}$/.test(p.credit)) ||
+          (p.pairedPrice && !/^\d[\d\s.,]{0,23}$/.test(p.pairedPrice)) ||
+          (p.motivationPercent && !/^\d{1,2}(?:[.,]\d{1,2})?$/.test(p.motivationPercent))) return;
       setDrafts(previous => ({ ...previous, [target]: {
         category: (p.category || "apartment") as Category, price: p.price || "", credit: p.credit || "",
         discountId: p.discountId || "none", pairedPrice: p.pairedPrice || "", motivationOpen: Boolean(p.motivationPercent),
