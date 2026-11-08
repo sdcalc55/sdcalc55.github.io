@@ -31,5 +31,6 @@ export function calculateLoanFromPayment(payment: number, months: number, annual
   const cents = monthlyRate === 0 ? Math.round(payment * 100) * months : Math.floor(principal * 100);
   if (!Number.isSafeInteger(cents)) throw new Error("Для этих параметров сумма выходит за пределы точного расчёта. Уточните платёж и срок.");
   if (cents < 1) throw new Error("При этих параметрах сумма кредита меньше 0,01 ₽. Увеличьте платёж или измените срок и ставку.");
+  if (cents / 100 > 999999999) throw new Error("При таком платеже сумма кредита превышает 999 999 999 ₽. Уменьшите платёж, срок или ставку.");
   return calculateLoan(cents / 100, months, annualRate);
 }
