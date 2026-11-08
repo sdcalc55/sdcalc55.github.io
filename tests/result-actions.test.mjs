@@ -20,7 +20,7 @@ test("all calculators use one shared result action component", () => {
 
 test("shared actions expose one consistent mobile and dark-mode layout", () => {
   assert.match(shared, /grid grid-cols-2 gap-2/);
-  assert.match(shared, /min-h-11/);
+  assert.match(shared, /min-h-10/);
   assert.match(shared, /rounded-xl/);
   assert.match(shared, /dark:border-/);
   assert.match(shared, /dark:bg-/);
@@ -62,5 +62,15 @@ test("primary result typography has stronger contrast than secondary actions", (
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
   assert.match(shared, /min-h-11/);
-  assert.match(shared, /text-sm/);
+  assert.match(shared, /text-xs/);
+});
+
+
+test("result amount is visually primary and copy/save controls are secondary", () => {
+  const mortgage = read("../components/mortgage-calculators.tsx");
+  assert.match(mortgage, /text-\[clamp\(2\.5rem,9vw,3\.25rem\)\]/);
+  assert.match(mortgage, /dark:text-\[#FF766F\]/);
+  assert.match(shared, /bg-\[#EEF1F5\]/);
+  assert.match(shared, /dark:text-\[#AEBBCB\]/);
+  assert.doesNotMatch(shared, /border-\[#D8DEE7\]/);
 });
