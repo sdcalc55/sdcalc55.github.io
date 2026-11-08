@@ -62,7 +62,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
   }} onChange={event => {
     const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
     const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
-    if (money && (digitsBeforeDecimal.length > 9 || (raw !== "" && Number(raw.replace(",", ".")) > 999999999))) return;
+    if (money && digitsBeforeDecimal.length > 10) return;
     const position = event.target.selectionStart ?? raw.length;
     const significant = raw.slice(0, position).replace(/\s/g, "").length;
     const normalized = raw.replace(",", ".").replace(/[^\d.]/g, "");
@@ -75,7 +75,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     let index = 0, count = 0;
     while (index < next.length && count < significant) { if (!/\s/.test(next[index])) count++; index++; }
     cursor.current = index; onChange(next); render(n => n + 1);
-  }} aria-invalid=</div>;
+  }} aria-invalid={money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} className={`h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 ${suffix ? "pr-[4.5rem]" : "pr-11"} text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); ref.current?.focus(); }} className={`absolute ${suffix ? "right-10" : "right-2"} top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white`}><X className="size-4" /></button>}{suffix && <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">{suffix}</span>}</div>{money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999 && <p role="alert" className="mt-2 text-sm text-[#BD302A]">{label.toLowerCase().includes("первоначального взноса") ? "Первоначальный взнос больше миллиарда? Кажется, ипотека вам уже не нужна! 😄" : "Объект дороже 999 999 999 рублей? Кажется, мы нашли элитную недвижимость! 😄"}</p>}</div>;
 }
 
 function MortgageCard({ config }: { config: typeof configs[number] }) {
