@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/loan";
-import { getCalculationHistory, getHistoryMode, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
+import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
 const currency = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const amount = (value: number) => `${currency.format(value)}\u00a0₽`;
@@ -42,8 +42,26 @@ export function LoanCalculator() {
       if (isRefresh && activeCalculator) window.sessionStorage.removeItem("sd-loan-drafts");
       const saved = isRefresh && activeCalculator ? null : window.sessionStorage.getItem("sd-loan-drafts");
       if (saved) {
-        const parsed = JSON.parse(saved) as Partial<Record<LoanMode, LoanDraft>>;
-        setDrafts(previous => ({ principal: { ...previous.principal, ...(parsed.principal ?? {}) }, payment: { ...previous.payment, ...(parsed.payment ?? {}) } }));
+        const parsed: unknown = JSON.parse(saved);
+        const restoreDraft = (value: unknown): Partial<LoanDraft> => {
+          if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+          const item = value as Record<string, unknown>;
+          const numericText = (key: string, max: number) => typeof item[key] === "string" && (item[key] as string).length <= max && /^[\d\s.,]*$/.test(item[key] as string);
+          return {
+            ...(numericText("value", 24) ? { value: item.value as string } : {}),
+            ...(numericText("term", 3) ? { term: item.term as string } : {}),
+            unit: item.unit === "months" ? "months" : "years",
+            ...(numericText("rate", 6) ? { rate: item.rate as string } : {}),
+            result: null, error: "", changed: true, calculated: false
+          };
+        };
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          const savedDrafts = parsed as Partial<Record<LoanMode, unknown>>;
+          setDrafts({
+            principal: { ...emptyDraft(), ...restoreDraft(savedDrafts.principal) },
+            payment: { ...emptyDraft(), ...restoreDraft(savedDrafts.payment) }
+          });
+        }
       }
     } catch {}
     setDraftsRestored(true);
@@ -122,11 +140,17 @@ export function LoanCalculator() {
   useEffect(() => {
     const restore = (event: Event) => {
       const record = (event as CustomEvent<CalculationRecord>).detail;
-      if (record?.kind !== "loan") return;
-      const target: LoanMode = record.params.mode === "payment" ? "payment" : "principal";
+      if (!isValidCalculationRecord(record) || record.kind !== "loan") return;
+      const p = record.params;
+      if ((p.mode !== "payment" && p.mode !== "principal") ||
+          !/^\d[\d\s.,]{0,23}$/.test(p.value) ||
+          !/^\d{1,3}$/.test(p.term) ||
+          (p.unit !== "years" && p.unit !== "months") ||
+          !/^\d{1,3}(?:[.,]\d{1,4})?$/.test(p.rate)) return;
+      const target: LoanMode = p.mode;
       const restored = {
-        ...emptyDraft(), value: record.params.value || "", term: record.params.term || "",
-        unit: record.params.unit || "years", rate: record.params.rate || "", calculated: true
+        ...emptyDraft(), value: p.value, term: p.term,
+        unit: p.unit, rate: p.rate, calculated: true
       };
       try {
         const months = restored.unit === "years" ? Math.round(parse(restored.term) * 12) : parse(restored.term);
