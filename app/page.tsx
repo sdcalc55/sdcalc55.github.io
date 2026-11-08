@@ -281,10 +281,10 @@ export default function Home() {
       <div className="mx-auto flex min-h-20 max-w-[1200px] flex-nowrap items-center justify-between gap-x-2 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-4 sm:gap-x-4 sm:px-8 max-sm:min-h-16 max-sm:pt-[calc(.75rem+env(safe-area-inset-top,0px))] max-sm:pb-3">
         <a href="#" onClick={event => { event.preventDefault(); navigate("home"); }} aria-label="Калькулятор SD - главная" className="flex shrink-0 items-center gap-1 rounded-lg outline-offset-4 focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:gap-3">
           <span className="flex size-10 shrink-0 select-none items-center justify-center sm:size-12" onContextMenu={event => event.preventDefault()} onDragStart={event => event.preventDefault()} style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none" }}><Image src={publicAsset("/images/sd-calculator-logo-transparent.svg")} alt="Логотип SD" width={96} height={96} unoptimized draggable={false} onContextMenu={event => event.preventDefault()} onDragStart={event => event.preventDefault()} className="pointer-events-none size-full object-contain" /></span>
-          <span className="relative whitespace-nowrap pb-[3px] text-[13px] font-bold italic tracking-tight text-[#202329] dark:text-white min-[375px]:text-sm sm:text-[18px]">
+          <span className="relative whitespace-nowrap pb-[3px] text-[13px] font-bold italic tracking-tight text-[#202329] dark:text-white min-[375px]:text-sm sm:pb-1 sm:text-[22px]">
             <span>Sv</span><span className="text-[#E50914]">D</span><span>emidenko</span>
-            <svg aria-hidden="true" viewBox="0 0 100 5" preserveAspectRatio="none" className="pointer-events-none absolute -bottom-[1px] left-[28%] h-[3px] w-[70%] overflow-visible">
-              <path d="M1 4 C22 0.8 61 0.5 99 1.8" fill="none" stroke="#E50914" strokeWidth="2.6" strokeLinecap="round" />
+            <svg aria-hidden="true" viewBox="0 0 100 5" preserveAspectRatio="none" className="pointer-events-none absolute -bottom-[1px] left-[28%] h-[3px] w-[70%] overflow-visible sm:h-1">
+              <path d="M1 4 C22 0.8 61 0.5 99 1.8" fill="none" stroke="#E50914" strokeWidth="2.6" className="sm:[stroke-width:3.2]" strokeLinecap="round" />
             </svg>
           </span>
         </a>
