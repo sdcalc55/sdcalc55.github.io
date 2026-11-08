@@ -124,11 +124,21 @@ export function LoanCalculator() {
       const record = (event as CustomEvent<CalculationRecord>).detail;
       if (record?.kind !== "loan") return;
       const target: LoanMode = record.params.mode === "payment" ? "payment" : "principal";
-      setMode(target);
-      setDrafts(previous => ({ ...previous, [target]: {
+      const restored = {
         ...emptyDraft(), value: record.params.value || "", term: record.params.term || "",
         unit: record.params.unit || "years", rate: record.params.rate || "", calculated: true
-      }}));
+      };
+      try {
+        const months = restored.unit === "years" ? Math.round(parse(restored.term) * 12) : parse(restored.term);
+        restored.result = target === "payment"
+          ? calculateLoanFromPayment(parse(restored.value), months, parse(restored.rate))
+          : calculateLoan(parse(restored.value), months, parse(restored.rate));
+      } catch (restoreError) {
+        restored.error = restoreError instanceof Error ? restoreError.message : "Проверьте параметры кредита.";
+      }
+      restored.changed = false;
+      setMode(target);
+      setDrafts(previous => ({ ...previous, [target]: restored }));
     };
     window.addEventListener("sd-history-restore", restore);
     return () => window.removeEventListener("sd-history-restore", restore);
