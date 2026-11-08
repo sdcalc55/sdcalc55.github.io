@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     images: ["https://sdcalc55.github.io/og-preview.png?v=og-20261108"],
   },
   icons: {
-    icon: publicAsset("/favicon.png?v=sd-icon-20261109"),
-    apple: [{ url: publicAsset("/icons/apple-touch-icon-180.png?v=sd-icon-20261109"), sizes: "180x180", type: "image/png" }],
+    icon: [{ url: publicAsset("/favicon.png?v=vk-icon-20261108"), sizes: "192x192", type: "image/png" }],
+    apple: [{ url: publicAsset("/icons/apple-touch-icon-180.png?v=vk-icon-20261108"), sizes: "180x180", type: "image/png" }],
   },
   manifest: publicAsset("/manifest.webmanifest"),
   appleWebApp: { capable: true, title: "SD | Калькулятор", statusBarStyle: "default" },
