@@ -184,12 +184,12 @@ export function LoanCalculator() {
       <div className="mb-6 flex items-center gap-3"><span className="relative left-3 flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
         <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
-          const raw = event.target.value;
+          const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           edit({ value: formatInput(raw) });
         }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
-        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
+        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
             ? normalized.replace(/[^\d]/g, "").slice(0, 3)
