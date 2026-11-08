@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
-import { ArrowLeft, ChevronRight, ArrowDownLeft, ArrowUpRight, HousePlus, KeyRound, WalletCards, Calculator, House, Instagram, Sparkles, History, Settings, Trash2, Copy, Check, ChevronDown, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ChevronRight, ArrowDownLeft, ArrowUpRight, HousePlus, KeyRound, WalletCards, Calculator, House, Instagram, History, Settings, Trash2, Copy, Check, ChevronDown, type LucideIcon } from "lucide-react";
 import { CommissionCalculator } from "@/components/commission-calculator";
 import { MortgageCalculators } from "@/components/mortgage-calculators";
 import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
@@ -289,7 +289,7 @@ export default function Home() {
           </span>
         </a>
         <div className="ml-auto flex shrink-0 items-center gap-2 min-[375px]:gap-2.5 sm:gap-3">
-          <div className="flex w-fit items-center gap-1 whitespace-nowrap rounded-full border border-[#F3C7C5] bg-[#FCEBEA] px-2 py-[5px] text-left text-[9px] font-medium leading-[14px] text-[#A94442] min-[375px]:text-[10px] sm:gap-1.5 sm:px-[15px] sm:py-[7.5px] sm:text-[11.25px] sm:leading-[18px]"><Sparkles aria-hidden="true" className="size-2.5 shrink-0 text-[#E83C35] sm:size-3" />Alpha Team</div>
+          <Image src={publicAsset("/images/alpha-team-header.webp?v=20261108")} alt="Alpha Team" title="Alpha Team" width={960} height={212} unoptimized draggable={false} onContextMenu={event => event.preventDefault()} onDragStart={event => event.preventDefault()} className="pointer-events-none h-auto w-[clamp(76px,25vw,190px)] shrink-0 object-contain" />
           <button type="button" title="История" aria-label="История" onClick={() => navigate("history")} className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-[#E7EBF0] bg-white text-[#26364A] transition hover:bg-[#F5F7FA] focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:size-10"><History aria-hidden="true" className="size-[17px] sm:size-5" strokeWidth={1.8} /></button>
           <button type="button" title="Настройки" aria-label="Настройки" onClick={() => navigate("settings")} className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-[#E7EBF0] bg-white text-[#26364A] transition hover:bg-[#F5F7FA] focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:size-10"><Settings aria-hidden="true" className="size-[17px] sm:size-5" strokeWidth={1.8} /></button>
         </div>
