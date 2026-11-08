@@ -11,19 +11,21 @@ export function parseMoney(value: string): number | null {
   const normalized = value.replace(/[ \u00a0\u202f]/g, "").replace(",", ".");
   if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
   const number = Number(normalized);
-  return Number.isFinite(number) && number > 0 && number <= Number.MAX_SAFE_INTEGER ? number : null;
+  return Number.isFinite(number) && number > 0 && number <= 999999999 ? number : null;
 }
 
 export function formatInput(value: string): string {
   const normalized = value.replace(/[ \u00a0\u202f]/g, "");
   if (!/^\d*(?:[.,]\d*)?$/.test(normalized)) return value;
-  const [whole, fraction] = normalized.split(/[.,]/);
+  const [rawWhole, fraction] = normalized.split(/[.,]/);
+  const cleanedWhole = rawWhole.replace(/^0+(?=\d)/, "");
+  const whole = cleanedWhole;
   const separator = normalized.includes(",") ? "," : ".";
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (fraction !== undefined ? separator + fraction : "");
 }
 
 export function calculate(operation: Operation, category: Category, price: number | null, credit: number | null = null, tariffs?: TariffSnapshot): Calculation {
-  const valid = (v: number | null): v is number => v !== null && Number.isFinite(v) && v > 0 && v <= Number.MAX_SAFE_INTEGER;
+  const valid = (v: number | null): v is number => v !== null && Number.isFinite(v) && v > 0 && v <= 999999999;
   if (!valid(price) || (operation !== "sale" && operation !== "purchase")) return { status: "invalid" };
   if (tariffs) {
     const rule = tariffs.rules.find(r => r.operation === operation && r.category === category && price >= r.from && (r.to === null || price <= r.to));

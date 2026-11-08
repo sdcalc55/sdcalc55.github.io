@@ -5,6 +5,34 @@ nextjs-portal { display: none !important; }
 
 @custom-variant dark (&:is(.dark *));
 
+/* Desktop breakpoints require a real fine pointer, not merely a wide browser viewport. */
+@custom-variant sm {
+  @media (width >= 40rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant md {
+  @media (width >= 48rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant lg {
+  @media (width >= 64rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant xl {
+  @media (width >= 80rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+@custom-variant 2xl {
+  @media (width >= 96rem) and (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+
+
 :root {
   --background: #FAFBFD;
   --foreground: #26364A;
@@ -124,4 +152,82 @@ nextjs-portal { display: none !important; }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Dark premium palette: keep the brand red while adapting common surfaces. */
+html.dark body { background: #111820; color: #E8EDF3; color-scheme: dark; }
+html.dark [class*="bg-white"] { background-color: #1B2632 !important; }
+html.dark [class*="bg-[#F5F7FA]"],
+html.dark [class*="bg-[#EEF1F5]"],
+html.dark [class*="bg-[#F7F8FA]"] { background-color: #111820 !important; }
+html.dark [class*="border-[#E7EBF0]"],
+html.dark [class*="border-[#EBEEF2]"],
+html.dark [class*="border-[#E4E8ED]"],
+html.dark [class*="border-[#E1E6ED]"] { border-color: #344252 !important; }
+html.dark [class*="text-[#26364A]"] { color: #E8EDF3 !important; }
+html.dark [class*="text-[#647184]"],
+html.dark [class*="text-[#748195]"],
+html.dark [class*="text-[#8993A2]"] { color: #AAB6C4 !important; }
+html.dark [class*="bg-[#26364A]"] { background-color: #344252 !important; }
+html.dark [class*="bg-[#EEF1F5]"] { background-color: #253241 !important; }
+html.dark input, html.dark select, html.dark textarea { background-color: #1B2632; color: #E8EDF3; border-color: #465568; }
+html.dark .sd-commission-money-field { background-color: #111820 !important; }
+html.dark .sd-commission-money-field input { background-color: transparent !important; }
+
+
+/* Dark-mode refinements: use cool slate surfaces instead of burgundy-tinted panels. */
+html.dark [class*="bg-[#FCEBEA]"],
+html.dark [class*="bg-[#FFF7F6]"] { background-color: #253241 !important; }
+html.dark [class*="bg-[#F7F8FA]"],
+html.dark [class*="bg-[#F5F7FA]"] { background-color: #111820 !important; }
+html.dark [class*="border-[#F0DBD9]"],
+html.dark [class*="border-[#F3DAD8]"],
+html.dark [class*="border-[#F3C7C5]"],
+html.dark [class*="border-[#F1DCD9]"] { border-color: #405064 !important; }
+html.dark [class*="border-[#E4E8ED]"],
+html.dark [class*="border-[#EBEEF2]"] { border-color: #344252 !important; }
+html.dark [class*="text-[#A94442]"] { color: #F07870 !important; }
+html.dark button:disabled { opacity: .48; }
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #8795A5; }
+html.dark :focus-visible { outline-color: #F07870; }
+
+
+/* Keep social media marks visually neutral in dark mode. */
+html.dark footer nav[aria-label="Социальные сети"] a,
+html.dark footer nav[aria-label="Социальные сети"] a:hover {
+  background-color: transparent !important;
+}
+
+/* Show an interactive cursor on desktop for every clickable control. */
+@media (hover: hover) and (pointer: fine) {
+  :is(button, a[href], select, summary, [role="button"], [role="option"], input[type="checkbox"], input[type="radio"], label:has(input[type="checkbox"]), label:has(input[type="radio"])):not(:disabled):not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  :is(button, a[href], select, summary, [role="button"], [role="option"], input[type="checkbox"], input[type="radio"], label:has(input[type="checkbox"]), label:has(input[type="radio"])):disabled,
+  :is(button, a[href], select, summary, [role="button"], [role="option"], input[type="checkbox"], input[type="radio"], label[aria-disabled="true"]) {
+    cursor: not-allowed;
+  }
+}
+
+
+/* Restore visible outlines for bordered cards and controls throughout the app. */
+[class~="border"] {
+  border-style: solid !important;
+  border-width: 1px !important;
+}
+
+
+/* Selected top-level calculator tabs stay brand red in dark mode. */
+html.dark [role="group"][aria-label="Калькуляторы комиссии"] > button[aria-pressed="true"],
+html.dark [role="group"][aria-label="Калькуляторы ипотеки"] > button[aria-pressed="true"] {
+  background-color: #E83C35 !important;
+  color: #FFFFFF !important;
+}
+
+
+/* Prevent accidental selection of interface labels and helper messages. */
+:where(button, label, h1, h2, h3, h4, h5, h6, summary, [role="alert"]) {
+  -webkit-user-select: none;
+  user-select: none;
 }

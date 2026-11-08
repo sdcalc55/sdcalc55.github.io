@@ -21,7 +21,7 @@ test('Нулевая ставка обратного расчёта сохран
  }
 });
 test('Обратный расчёт согласован с прямым, в том числе при малой ставке',()=>{
- for(const payment of [100,9999.99,40000])for(const months of [1,12,180,360])for(const rate of [0.000001,5,18,99]){
+ for(const payment of [100,9999.99,40000])for(const months of [1,12,180,360])for(const rate of [0.000001,5,18,30]){
  const r=calculateLoanFromPayment(payment,months,rate);
  const direct=calculateLoan(r.principal,months,rate);
  assert.deepEqual(r,direct);

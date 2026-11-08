@@ -15,21 +15,52 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run calculation and UI contract tests
+        run: node --experimental-strip-types --test tests/*.test.mjs
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+
       - name: Build static site
         run: npm run build
+
       - name: Confirm static output exists
         run: test -f out/index.html
+
+      - name: Start static site
+        run: |
+          python3 -m http.server 3000 --directory out > /tmp/sd-static-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl --fail http://127.0.0.1:3000/ >/dev/null && break
+            sleep 1
+          done
+          curl --fail http://127.0.0.1:3000/ >/dev/null
+
+      - name: Run browser interaction tests
+        run: node tests/result-actions-browser.cjs
 
       - name: Package static site
         run: |
           cd out
           zip -r ../sd-calculator-static-site.zip .
+
       - name: Upload static site archive
         uses: actions/upload-artifact@v4
         with:

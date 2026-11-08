@@ -4,7 +4,7 @@ import { useEffect, ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 // Next.js signals control-flow via thrown errors with digest prefixes (redirect, notFound, etc).
-// These are NOT actual errors — Next.js runtime handles them upstream.
+// These are NOT actual errors - Next.js runtime handles them upstream.
 const NEXT_CONTROL_FLOW_DIGESTS = ["NEXT_REDIRECT", "NEXT_NOT_FOUND", "NEXT_HTTP_ERROR_FALLBACK"];
 
 const isNextControlFlow = (err: unknown): boolean => {
