@@ -157,9 +157,9 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
     toast.success("Расчёт сохранён в истории");
   };
   const copy = async () => {
-    if (result.status !== "ok") return;
-    try { const lines = [`${config.resultLabel}: ${rubles.format(result.total)} ₽`, ...(downPayment?.status === "ok" ? [`Первоначальный взнос: ${rubles.format(downPayment.total)} ₽`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); toast.success("Скопировано в буфер обмена"); }
-    catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); }
+    if (result.status !== "ok") return false;
+    try { const lines = [`${config.resultLabel}: ${rubles.format(result.total)} ₽`, ...(downPayment?.status === "ok" ? [`Первоначальный взнос: ${rubles.format(downPayment.total)} ₽`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); toast.success("Скопировано в буфер обмена"); return true; }
+    catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); return false; }
   };
   return <section id={`mortgage-${config.mode}`} tabIndex={-1} aria-labelledby={`mortgage-${config.mode}-title`} className={`min-w-0 scroll-mt-6 rounded-3xl border border-[#EBEEF2] bg-white p-6 outline-offset-4 focus-visible:outline-2 focus-visible:outline-[#26364A] sm:p-8 ${adjustment ? "lg:col-span-2" : ""}`}>
     <div className="mb-4 flex items-center gap-3"><span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${theme.background} ${theme.accent}`}><Icon className="size-5" /></span><h2 id={`mortgage-${config.mode}-title`} className="text-xl font-semibold leading-snug tracking-tight">{config.title}</h2></div>
