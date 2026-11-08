@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowUp, Bookmark, ChartNoAxesCombined, Copy, House, RotateCcw, Wallet } from "lucide-react";
+import { ArrowUp, Bookmark, ChartNoAxesCombined, Copy, House, RotateCcw, Wallet, X } from "lucide-react";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
@@ -56,7 +57,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
   });
   return <div><label htmlFor={id} className="mb-3 block text-sm font-semibold">{label}</label><div className="relative"><input id={id} name={`sd-calc-${id}`} ref={ref} value={value} inputMode="decimal" enterKeyHint="done" autoComplete="new-password" placeholder={placeholder} onFocus={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onClick={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onKeyDown={event => {
     if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
-    if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); }
+    if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
   }} onChange={event => {
     const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
     const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
@@ -76,7 +77,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     let index = 0, count = 0;
     while (index < next.length && count < significant) { if (!/\s/.test(next[index])) count++; index++; }
     cursor.current = index; onChange(next); render(n => n + 1);
-  }} aria-invalid={money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} className={`h-[54px] w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 ${suffix ? "pr-11" : ""} text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10`} />{suffix && <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">{suffix}</span>}</div>{money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999 && <p role="alert" className="mt-2 text-sm text-[#BD302A]">{label.toLowerCase().includes("первоначального взноса") ? "Первоначальный взнос больше миллиарда? Кажется, ипотека вам уже не нужна! 😄" : "Объект дороже 999 999 999 рублей? Кажется, мы нашли элитную недвижимость! 😄"}</p>}</div>;
+  }} aria-invalid={money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} className={`h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 ${suffix ? "pr-[4.5rem]" : "pr-11"} text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); ref.current?.focus(); }} className={`absolute ${suffix ? "right-10" : "right-2"} top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white`}><X className="size-4" /></button>}{suffix && <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">{suffix}</span>}</div>{money && value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999 && <p role="alert" className="mt-2 text-sm text-[#BD302A]">{label.toLowerCase().includes("первоначального взноса") ? "Первоначальный взнос больше миллиарда? Кажется, ипотека вам уже не нужна! 😄" : "Объект дороже 999 999 999 рублей? Кажется, мы нашли элитную недвижимость! 😄"}</p>}</div>;
 }
 
 function MortgageCard({ config }: { config: typeof configs[number] }) {
