@@ -32,12 +32,12 @@ export default function PwaRegister() {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if ((!isAndroid && !isIOS) || isStandalone) return;
+    if (isStandalone) return;
 
     // На Android предлагаем системную установку, на iPhone показываем
     // инструкцию добавления сайта на экран «Домой».
     try {
-      if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") {
+      if ((isAndroid || isIOS) && sessionStorage.getItem("sd-install-banner-dismissed") !== "1") {
         setShowInstallBanner(true);
       }
     } catch {
@@ -46,14 +46,14 @@ export default function PwaRegister() {
 
     const handleInstallAvailable = (event: Event) => {
       event.preventDefault();
-      setInstallPrompt(event as InstallPromptEvent);
+      setInstallPrompt(event as InstallPromptEvent);\n      try {\n        if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") setShowInstallBanner(true);\n      } catch {\n        setShowInstallBanner(true);\n      }
     };
     const handleInstalled = () => {
       setShowInstallBanner(false);
       setInstallPrompt(null);
     };
 
-    if (isAndroid) window.addEventListener("beforeinstallprompt", handleInstallAvailable);
+    if (!isIOS) window.addEventListener("beforeinstallprompt", handleInstallAvailable);
     window.addEventListener("appinstalled", handleInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", handleInstallAvailable);
