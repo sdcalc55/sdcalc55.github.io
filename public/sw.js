@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v10";
+const CACHE_NAME = "sd-calculator-pwa-v11";
 const APP_SHELL = [
   "/", "/manifest.webmanifest",
   "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-180.png", "/icons/SD-192.png", "/icons/sd-512.png",
@@ -64,11 +64,21 @@ self.addEventListener("fetch", (event) => {
   const isAppAsset = url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") || url.pathname.startsWith("/fonts/") ||
     /\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
-  if (isAppAsset) event.respondWith(caches.match(request).then((cached) => {
+  if (isAppAsset) event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Ignore cache-busting query strings so an already downloaded asset is
+    // available offline even when the page requests a newer URL variant.
+    const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
-    return fetch(request).then((response) => {
-      if (response.ok) { const copy = response.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)); }
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const copy = response.clone();
+        await cache.put(url.pathname, copy);
+      }
       return response;
-    });
-  }));
+    } catch {
+      return Response.error();
+    }
+  })());
 });
