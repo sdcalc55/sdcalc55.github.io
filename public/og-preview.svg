@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f7f8fa"/>
-  <rect width="1200" height="12" fill="#ed0909"/>
-  <image x="410" y="70" width="380" height="380" href="/images/sd-calculator-logo-transparent.svg"/>
-  <text x="600" y="555" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#222">SD | Калькулятор</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">SD Calculator</title>
+  <desc id="desc">Красная иконка калькулятора на светло-голубом фоне</desc>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f00000"/>
+      <stop offset="1" stop-color="#c90000"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#d8f2f8"/>
+  <rect x="380" y="95" width="440" height="440" rx="100" fill="url(#red)"/>
+  <path d="M500 146h200c25 0 45 20 45 45v237c0 25-20 45-45 45h-22c-12 0-21 5-28 15l-7 10c-7 10-17 15-30 15H500c-25 0-45-20-45-45V191c0-25 20-45 45-45z" fill="#fff"/>
+  <rect x="480" y="173" width="241" height="67" rx="22" fill="url(#red)"/>
+  <g fill="url(#red)">
+    <rect x="480" y="259" width="114" height="74" rx="22"/>
+    <rect x="608" y="259" width="113" height="74" rx="22"/>
+    <rect x="480" y="347" width="114" height="76" rx="22"/>
+    <rect x="608" y="347" width="113" height="76" rx="22"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M537 276v40M517 296h40"/>
+    <path d="M644 296h42"/>
+    <path d="M523 370l34 34M557 370l-34 34"/>
+    <path d="M644 370h42M644 400h42"/>
+  </g>
+  <text x="674" y="494" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="65" font-weight="700" letter-spacing="-3">SD</text>
 </svg>
