@@ -1,6 +1,7 @@
 // Keep the focused field clear of the Android keyboard and its autofill toolbar.
 // A related next field may be revealed when a multi-field calculator is used.
 export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?: HTMLElement | null) {
+  if (!window.matchMedia("(max-width: 768px)").matches) return;
   const viewport = window.visualViewport;
   const target = revealThrough ?? element;
   let active = true;
