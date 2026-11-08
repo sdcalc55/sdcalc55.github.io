@@ -158,8 +158,6 @@ export default function Home() {
   const [historyMode, setHistoryModeState] = useState<HistoryMode>("manual");
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
   const [themeReady, setThemeReady] = useState(false);
-  const [isNativeApp, setIsNativeApp] = useState(false);
-  useEffect(() => { setIsNativeApp(Capacitor.isNativePlatform()); }, []);
   const [expandedHistory, setExpandedHistory] = useState<Set<string>>(() => new Set());
   const [historyFilter, setHistoryFilter] = useState<"all" | "commission" | "downpayment" | "loan">("all");
   useEffect(() => { try { const saved = window.sessionStorage.getItem("sd-history-filter"); if (saved === "all" || saved === "commission" || saved === "downpayment" || saved === "loan") setHistoryFilter(saved); } catch {} }, []);
