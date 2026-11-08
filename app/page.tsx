@@ -170,26 +170,9 @@ export default function Home() {
         setHistoryCopiedId(null);
       }
     };
-    const verifyClipboardOnReturn = async () => {
-      if (document.visibilityState !== "visible" || !historyCopiedTextRef.current) return;
-      try {
-        if (!navigator.clipboard?.readText) return;
-        const currentClipboard = await navigator.clipboard.readText();
-        if (currentClipboard !== historyCopiedTextRef.current) {
-          historyCopiedTextRef.current = null;
-          setHistoryCopiedId(null);
-        }
-      } catch {
-        // Clipboard reading may be blocked by the browser; keep the last known state.
-      }
-    };
     window.addEventListener("sd-calculator-copy", resetCopied);
-    document.addEventListener("visibilitychange", verifyClipboardOnReturn);
-    window.addEventListener("focus", verifyClipboardOnReturn);
     return () => {
       window.removeEventListener("sd-calculator-copy", resetCopied);
-      document.removeEventListener("visibilitychange", verifyClipboardOnReturn);
-      window.removeEventListener("focus", verifyClipboardOnReturn);
     };
   }, []);
   const [historyFilter, setHistoryFilter] = useState<"all" | "commission" | "downpayment" | "loan">("all");
