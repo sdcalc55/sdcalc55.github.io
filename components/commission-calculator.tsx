@@ -38,6 +38,7 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
     <div className={`relative rounded-2xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
       <input ref={input} id={id} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
+          if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); }
         }}
         onChange={e => {
@@ -223,7 +224,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                         if (candidate.split(".")[0].length > 3) return;
                        const numeric = Number(candidate);
                        update("motivationPercent", candidate);
-                     }} onKeyDown={event => { if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); } }} aria-invalid={motivation > 99} aria-describedby={motivation > 99 ? "motivation-hint" : undefined} className="h-12 w-full rounded-xl border border-[#E4E8ED] bg-white px-4 pr-10 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#748195]">%</span></div>
+                     }} onKeyDown={event => { if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault(); if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); } }} aria-invalid={motivation > 99} aria-describedby={motivation > 99 ? "motivation-hint" : undefined} className="h-12 w-full rounded-xl border border-[#E4E8ED] bg-white px-4 pr-10 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#748195]">%</span></div>
                     {motivation > 99 && <p id="motivation-hint" className="mt-2 text-xs leading-relaxed text-[#BD302A]">Больше 99%? Кажется, с партнёрством что-то пошло не так! 😉</p>}
                     <div className="mt-4 border-t border-[#26364A]/10 pt-4"><p className="text-xs text-[#647184]">От итоговой комиссии с учётом скидки</p><p data-testid="motivation-amount" className="mt-1 text-3xl font-semibold tracking-tight tabular-nums text-[#26364A]">{motivationAmount === null ? "-" : money(motivationAmount)}</p>{motivationAmount !== null && <p className="mt-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C4D2]"><span className="whitespace-nowrap">{money(discounted.total)}</span> × {motivationPercent}%</p>}</div>
                   </div>}
