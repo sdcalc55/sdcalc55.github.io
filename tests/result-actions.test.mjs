@@ -68,9 +68,9 @@ test("primary result typography has stronger contrast than secondary actions", (
 
 test("result amount is visually primary and copy/save controls are secondary", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
-  assert.match(mortgage, /text-\[clamp\(2\.5rem,9vw,3\.25rem\)\]/);
+  assert.match(mortgage, /text-\[clamp\(2\.25rem,8vw,3rem\)\]/);
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
-  assert.match(shared, /bg-\[#EEF1F5\]/);
+  assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
   assert.doesNotMatch(shared, /border-\[#D8DEE7\]/);
 });
