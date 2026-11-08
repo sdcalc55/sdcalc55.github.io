@@ -148,18 +148,16 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
     if (isSaved) {
       removeCalculationByParams(historyKind, snapshotParams);
       setSavedKey("");
-      toast.success("Расчёт удалён из истории");
       setDismissedKey(snapshotKey);
       return;
     }
     saveCalculation({ kind: historyKind, title: config.title, summary: `${rubles.format(result.total)} ₽`, params: Object.fromEntries(config.labels.map((label, index) => [label, values[index]])), results: { [config.resultLabel]: `${rubles.format(result.total)} ₽`, formula: result.formula, ...(downPayment?.status === "ok" ? { downPayment: `${rubles.format(downPayment.total)} ₽` } : {}) } });
     setSavedKey(snapshotKey);
     setDismissedKey("");
-    toast.success("Расчёт сохранён в истории");
   };
   const copy = async () => {
     if (result.status !== "ok") return false;
-    try { const lines = [`${config.resultLabel}: ${rubles.format(result.total)} ₽`, ...(downPayment?.status === "ok" ? [`Первоначальный взнос: ${rubles.format(downPayment.total)} ₽`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); toast.success("Скопировано в буфер обмена"); return true; }
+    try { const lines = [`${config.resultLabel}: ${rubles.format(result.total)} ₽`, ...(downPayment?.status === "ok" ? [`Первоначальный взнос: ${rubles.format(downPayment.total)} ₽`] : [])]; await navigator.clipboard.writeText(lines.join("\n")); return true; }
     catch { toast.error("Не удалось скопировать сумму. Выделите и скопируйте её вручную."); return false; }
   };
   return <section id={`mortgage-${config.mode}`} tabIndex={-1} aria-labelledby={`mortgage-${config.mode}-title`} className={`min-w-0 scroll-mt-6 rounded-3xl border border-[#EBEEF2] bg-white p-6 outline-offset-4 focus-visible:outline-2 focus-visible:outline-[#26364A] sm:p-8 ${adjustment ? "lg:col-span-2" : ""}`}>
@@ -181,7 +179,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
         </div>}
       </div>
     </div>
-    {hasUserInput && <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${adjustment ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center border-r ${theme.border} text-sm font-semibold text-[#26364A] hover:text-[#E83C35] ${adjustment ? "" : "lg:hidden"}`}>Наверх</button><button type="button" onClick={() => { setValues(config.defaults); setSavedKey(""); setDismissedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button></div>}
+    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${hasUserInput ? "grid-cols-2" : "grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center ${hasUserInput ? `border-r ${theme.border}` : ""} text-sm font-semibold text-[#26364A] hover:text-[#E83C35]`}>Наверх</button>{hasUserInput && <button type="button" onClick={() => { setValues(config.defaults); setSavedKey(""); setDismissedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button>}</div>
   </section>;
 }
 
