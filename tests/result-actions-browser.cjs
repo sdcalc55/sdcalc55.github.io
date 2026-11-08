@@ -12,31 +12,33 @@ const assert = require('node:assert/strict');
     await page.evaluate(() => localStorage.clear());
 
     const click = name => page.getByRole('button', { name, exact: true }).click();
-    const actions = page.getByTestId('calculator-result-actions');
-    const checkActions = async () => {
+    const checkActions = async container => {
+      const actions = container.getByTestId('calculator-result-actions');
+      const copy = container.getByTestId('calculator-copy');
+      const save = container.getByTestId('calculator-save');
       await actions.waitFor({ state: 'visible' });
-      assert.equal(await page.getByTestId('calculator-copy').innerText(), 'Копировать');
-      assert.equal(await page.getByTestId('calculator-save').innerText(), 'Сохранить');
-      await page.getByTestId('calculator-copy').click();
+      assert.equal(await copy.innerText(), 'Копировать');
+      assert.equal(await save.innerText(), 'Сохранить');
+      await copy.click();
       await page.getByText('Скопировано в буфер обмена', { exact: true }).waitFor();
-      await page.getByTestId('calculator-save').click();
+      await save.click();
       await page.getByText('Расчёт сохранён в истории', { exact: true }).waitFor();
-      assert.equal(await page.getByTestId('calculator-save').innerText(), 'Сохранено');
-      await page.getByTestId('calculator-save').click();
+      assert.equal(await save.innerText(), 'Сохранено');
+      await save.click();
       await page.getByText('Расчёт удалён из истории', { exact: true }).waitFor();
-      assert.equal(await page.getByTestId('calculator-save').innerText(), 'Сохранить');
+      assert.equal(await save.innerText(), 'Сохранить');
     };
 
     await click('Расчёт комиссии при продаже');
     await page.locator('#price').fill('3000000');
     await page.getByTestId('total').waitFor();
-    await checkActions();
+    await checkActions(page.getByLabel('Комиссия'));
 
     await click('На главный экран');
     await click('Расчёт по первоначальному взносу');
     await page.locator('#mortgage-part-0').fill('6000000');
     await page.getByTestId('mortgage-result-part').waitFor();
-    await checkActions();
+    await checkActions(page.getByRole('region', { name: 'Рассчитать первоначальный взнос' }));
 
     await click('На главный экран');
     await click('Кредитный калькулятор');
@@ -45,7 +47,7 @@ const assert = require('node:assert/strict');
     await page.locator('#loan-rate').fill('18');
     await click('РАССЧИТАТЬ');
     await page.getByTestId('loan-monthly').waitFor();
-    await checkActions();
+    await checkActions(page.getByRole('region', { name: 'Результаты кредита' }));
 
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     console.log('PASS: copy, save, unsave notifications and shared action controls in commission, down-payment and loan calculators.');
