@@ -1,23 +1,24 @@
 "use client";
 
 import { Bookmark, BookmarkCheck, Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type CalculatorResultActionsProps = {
   onCopy: () => Promise<boolean>;
   onSave: () => void;
+  copyKey: string;
   isSaved: boolean;
   disabled?: boolean;
 };
 
 const actionClass = "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#D8DEE7] bg-transparent px-3 text-xs font-medium text-[#657184] transition hover:bg-[#F3F5F7] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#46576A] dark:bg-transparent dark:text-[#AEBBCB] dark:hover:bg-[#263442]";
 
-export function CalculatorResultActions({ onCopy, onSave, isSaved, disabled = false }: CalculatorResultActionsProps) {
+export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disabled = false }: CalculatorResultActionsProps) {
   const [copied, setCopied] = useState(false);
+  useEffect(() => { setCopied(false); }, [copyKey]);
   const handleCopy = async () => {
     if (await onCopy()) {
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2200);
     }
   };
   return (
