@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowUp, Bookmark, ChartNoAxesCombined, Copy, House, RotateCcw, Wallet, X } from "lucide-react";
+import { Bookmark, ChartNoAxesCombined, Copy, House, Wallet, X } from "lucide-react";
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { formatInput } from "@/lib/calculator";
@@ -149,12 +149,14 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
     if (isSaved) {
       removeCalculationByParams(historyKind, snapshotParams);
       setSavedKey("");
+      toast.success("Расчёт удалён из истории");
       setDismissedKey(snapshotKey);
       return;
     }
     saveCalculation({ kind: historyKind, title: config.title, summary: `${rubles.format(result.total)} ₽`, params: Object.fromEntries(config.labels.map((label, index) => [label, values[index]])), results: { [config.resultLabel]: `${rubles.format(result.total)} ₽`, formula: result.formula, ...(downPayment?.status === "ok" ? { downPayment: `${rubles.format(downPayment.total)} ₽` } : {}) } });
     setSavedKey(snapshotKey);
     setDismissedKey("");
+    toast.success("Расчёт сохранён в истории");
   };
   const copy = async () => {
     if (result.status !== "ok") return;
@@ -171,7 +173,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
         <output data-testid={`mortgage-result-${config.mode}`} className={`mt-3 block break-words ${result.status === "sufficient" ? "text-base sm:text-lg" : "text-[32px]"} font-semibold leading-tight tracking-tight tabular-nums ${theme.accent}`}>{result.status === "ok" ? <span className="whitespace-nowrap">{rubles.format(result.total)} ₽</span> : result.status === "sufficient" ? <><span data-testid="mortgage-sufficient-percent" className="block whitespace-nowrap text-base font-bold sm:text-lg">У клиента {percent.format(result.clientPercent)}% ПВ</span></> : "-"}</output>
         {result.status === "ok" && adjustment && <dl className={`mt-5 space-y-3 border-t pt-4 text-xs ${theme.border}`}><div className="flex flex-wrap justify-between gap-2"><dt className="text-[#6E7886]">Первоначальный взнос у клиента</dt><dd data-testid="mortgage-client-percent" className="font-medium">{percent.format(result.clientPercent!)} %</dd></div><div className="flex flex-wrap justify-between gap-2"><dt className="text-[#6E7886]">Сколько % ПВ не хватает для ипотеки</dt><dd data-testid="mortgage-missing-percent" className="font-medium">{percent.format(result.missingPercent!)} %</dd></div></dl>}
         <p role={result.status === "error" ? "alert" : undefined} className={`mt-3 break-words text-xs leading-relaxed ${result.status === "error" ? "text-[#A94442]" : "text-[#6E7886]"} ${result.status === "empty" ? "select-none" : ""}`}>{result.status === "error" ? result.message : result.status === "empty" ? "Заполните поля" : result.status === "sufficient" ? "Корректировка стоимости не требуется." : null}</p>
-        {result.status === "ok" && <><details className="mt-3 border-t pt-3 text-xs leading-relaxed text-[#6E7886]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><p data-testid={`mortgage-formula-explanation-${config.mode}`} className="mt-2 break-words">{formulas[config.mode]}</p><p className="mt-2 break-words">{config.mode === "part" ? result.formula.replace(/ ÷ 100$/, "%") : result.formula} = <span className="whitespace-nowrap">{rubles.format(result.total)} ₽</span></p></details><div className="mt-5 grid grid-cols-2 gap-2"><button type="button" onClick={copy} disabled={result.status !== "ok"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-current/20 bg-white/55 px-3 text-sm font-semibold text-[#465467] transition hover:bg-white/80 disabled:opacity-40 dark:bg-[#101820]/35 dark:text-[#E6EDF5] dark:hover:bg-[#101820]/65"><Copy className="size-4" />Копировать</button><button type="button" onClick={save} disabled={result.status !== "ok"} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-current/20 bg-white/55 px-3 text-sm font-semibold transition hover:bg-white/80 disabled:opacity-40 dark:bg-[#101820]/35 dark:hover:bg-[#101820]/65 ${isSaved ? "text-[#E83C35]" : "text-[#465467] dark:text-[#E6EDF5]"}`}><Bookmark className="size-4" fill={isSaved ? "currentColor" : "none"} />{isSaved ? "Сохранено" : "Сохранить"}</button></div></>}
+        {result.status === "ok" && <><div className="mt-5 grid grid-cols-2 gap-2"><button type="button" onClick={copy} disabled={result.status !== "ok"} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-current/20 bg-white/55 px-3 text-sm font-semibold text-[#465467] transition hover:bg-white/80 disabled:opacity-40 dark:border-[#62748A] dark:bg-[#182330] dark:text-[#F1F5F9] dark:hover:bg-[#314154]"><Copy className="size-4" />Копировать</button><button type="button" onClick={save} disabled={result.status !== "ok"} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-current/20 bg-white/55 px-3 text-sm font-semibold transition hover:bg-white/80 disabled:opacity-40 dark:border-[#62748A] dark:bg-[#182330] dark:hover:bg-[#314154] ${isSaved ? "text-[#E83C35]" : "text-[#465467] dark:text-[#E6EDF5]"}`}><Bookmark className="size-4" fill={isSaved ? "currentColor" : "none"} />{isSaved ? "Сохранено" : "Сохранить"}</button></div>details className="mt-3 border-t pt-3 text-xs leading-relaxed text-[#6E7886]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><p data-testid={`mortgage-formula-explanation-${config.mode}`} className="mt-2 break-words">{formulas[config.mode]}</p><p className="mt-2 break-words">{config.mode === "part" ? result.formula.replace(/ ÷ 100$/, "%") : result.formula} = <span className="whitespace-nowrap">{rubles.format(result.total)} ₽</span></p></details></>}
         {downPayment && <div className={`mt-4 border-t pt-4 ${theme.border}`}>
           <p className="text-xs font-medium text-[#6E7886]">Сумма первоначального взноса</p>
           <output data-testid="mortgage-adjustment-down-payment" className={`mt-2 block text-xl font-semibold tabular-nums ${theme.accent}`}>
@@ -181,7 +183,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
         </div>}
       </div>
     </div>
-    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${adjustment ? "grid-cols-3" : "grid-cols-3 lg:grid-cols-2"}`}><button type="button" aria-label="Наверх" title="Наверх" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center border-r ${theme.border} text-[#26364A] hover:text-[#E83C35] ${adjustment ? "" : "lg:hidden"}`}><ArrowUp className="size-5" /></button><button type="button" aria-label={`Сбросить: ${config.title}`} title="Сбросить" onClick={() => { setValues(previous => previous.map((value, i) => i === previous.length - 1 ? value : "")); setSavedKey(""); }} className="flex h-12 items-center justify-center text-[#26364A] hover:text-[#E83C35]"><RotateCcw className="size-5" /></button></div>
+    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${adjustment ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center border-r ${theme.border} text-sm font-semibold text-[#26364A] hover:text-[#E83C35] ${adjustment ? "" : "lg:hidden"}`}>Наверх</button><button type="button" onClick={() => { setValues(previous => previous.map((value, i) => i === previous.length - 1 ? value : "")); setSavedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button></div>
   </section>;
 }
 
