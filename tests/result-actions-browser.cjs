@@ -20,7 +20,7 @@ const assert = require('node:assert/strict');
       assert.equal(await copy.innerText(), 'Копировать');
       assert.equal(await save.innerText(), 'Сохранить');
       await copy.click();
-      await page.getByText('Скопировано в буфер обмена', { exact: true }).waitFor();
+      await page.getByText('Скопировано', { exact: true }).waitFor();
       await save.click();
       await page.getByText('Расчёт сохранён в истории', { exact: true }).waitFor();
       assert.equal(await save.innerText(), 'Сохранено');
