@@ -191,28 +191,35 @@ export function LoanCalculator() {
           if (digitsBeforeDecimal.length > 10) return;
           edit({ value: formatInput(raw) });
         }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-[4.5rem]`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ value: "" }); document.getElementById(reverse ? "loan-payment" : "loan-principal")?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
-        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><div className="relative"><input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="next" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
-          const normalized = event.target.value.replace(",", ".");
-          const raw = unit === "years"
-            ? normalized.replace(/[^\d]/g, "").slice(0, 3)
-            : normalized.replace(/[^\d]/g, "").slice(0, 3);
-          edit({ term: raw });
-        }} placeholder="Введите срок" className={`${inputStyle} pr-11`} />{term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button></div><Select value={unit} onValueChange={nextUnit => {
-          if (nextUnit === unit) return;
-          const numericTerm = term.trim() ? parse(term) : NaN;
-          const converted = Number.isFinite(numericTerm)
-            ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
-            : "";
-          edit({ unit: nextUnit, term: converted });
-        }}>
-          <SelectTrigger aria-label="Единицы срока кредита" className="h-14 min-h-14 data-[size=default]:h-14 w-28 min-w-0 self-start rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper" align="end" className="min-w-28 rounded-xl border-[#E4E8ED] bg-white shadow-lg dark:border-[#405064] dark:bg-[#253241]">
-            <SelectItem value="years" className="cursor-pointer rounded-lg py-3 text-sm">лет</SelectItem>
-            <SelectItem value="months" className="cursor-pointer rounded-lg py-3 text-sm">месяцев</SelectItem>
-          </SelectContent>
-        </Select></div>{term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}</div>
+        <div>
+          <label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label>
+          <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+            <div className="relative">
+              <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="next" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
+                const raw = event.target.value.replace(/[^\\d]/g, "").slice(0, 3);
+                edit({ term: raw });
+              }} placeholder="Введите срок" className={`${inputStyle} pr-11`} />
+              {term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
+            </div>
+            <Select value={unit} onValueChange={nextUnit => {
+              if (nextUnit === unit) return;
+              const numericTerm = term.trim() ? parse(term) : NaN;
+              const converted = Number.isFinite(numericTerm)
+                ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\\.0+$|(?<=\\.[0-9])0$/, "").replace(/\\.$/, "") : String(Math.round(numericTerm * 12))
+                : "";
+              edit({ unit: nextUnit, term: converted });
+            }}>
+              <SelectTrigger aria-label="Единицы срока кредита" className="h-14 min-h-14 data-[size=default]:h-14 w-28 min-w-0 self-start rounded-xl border-[#E4E8ED] bg-[#F7F8FA] px-3 text-sm shadow-none focus:ring-2 focus:ring-[#E83C35] dark:border-[#35414F] dark:bg-[#0D1219]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper" align="end" className="min-w-28 rounded-xl border-[#E4E8ED] bg-white shadow-lg dark:border-[#405064] dark:bg-[#253241]">
+                <SelectItem value="years" className="cursor-pointer rounded-lg py-3 text-sm">лет</SelectItem>
+                <SelectItem value="months" className="cursor-pointer rounded-lg py-3 text-sm">месяцев</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}
+        </div> && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}</div>
         <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input name="sd-calc-loan-rate" id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="new-password" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
