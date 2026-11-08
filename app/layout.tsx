@@ -21,17 +21,15 @@ export const metadata: Metadata = {
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
     images: [{
-      url: "https://sdcalc55.github.io/images/sd-calculator-logo.png?v=160-white",
-      width: 160,
-      height: 160,
+      url: "https://sdcalc55.github.io/og-preview.png",
       alt: "SD - калькулятор расчётов",
     }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
-    images: ["https://sdcalc55.github.io/images/sd-calculator-logo.png?v=160"],
+    images: ["https://sdcalc55.github.io/og-preview.png"],
   },
   icons: { icon: publicAsset("/favicon.png?v=sd-calculator-1") },
   manifest: publicAsset("/manifest.webmanifest"),
@@ -57,7 +55,7 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;var touch=Number(navigator.maxTouchPoints||0)>0||window.matchMedia("(pointer: coarse)").matches;if(standalone)document.documentElement.classList.add("sd-installed-app");if(standalone||touch){if(touch)document.documentElement.classList.add("sd-touch-device");var viewport=document.querySelector("meta[name=viewport]");if(viewport)viewport.setAttribute("content","width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content");}})();` }} />
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var m=null;var match=document.cookie.match(/(?:^|;\s*)sd-theme-mode-v1=(light|dark|system)(?:;|$)/);if(match)m=match[1];if(!m){try{m=localStorage.getItem("sd-theme-mode-v1");}catch(e){}}var d=m==="dark"||(m!=="light"&&m!=="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches)||(m==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);})();` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var m=null;var match=document.cookie.match(/(?:^|;\\s*)sd-theme-mode-v1=(light|dark|system)(?:;|$)/);if(match)m=match[1];if(!m){try{m=localStorage.getItem("sd-theme-mode-v1");}catch(e){}}var d=m==="dark"||(m!=="light"&&m!=="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches)||(m==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);})();` }} />
       </head>
       <body className={`${inter.className} antialiased [touch-action:pan-x_pan-y]`}>
         <ReactErrorBoundary>
