@@ -47,7 +47,11 @@ export default function PwaRegister() {
     const handleInstallAvailable = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as InstallPromptEvent);
-      try {\n        if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") setShowInstallBanner(true);\n      } catch {\n        setShowInstallBanner(true);\n      }
+      try {
+        if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") setShowInstallBanner(true);
+      } catch {
+        setShowInstallBanner(true);
+      }
     };
     const handleInstalled = () => {
       setShowInstallBanner(false);
