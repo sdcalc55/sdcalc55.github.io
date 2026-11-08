@@ -166,8 +166,17 @@ export default function Home() {
       const source = (event as CustomEvent<{ source?: string }>).detail?.source;
       if (source !== "history") setHistoryCopiedId(null);
     };
+    const resetOnLeave = () => {
+      if (document.visibilityState !== "visible") setHistoryCopiedId(null);
+    };
     window.addEventListener("sd-calculator-copy", resetCopied);
-    return () => window.removeEventListener("sd-calculator-copy", resetCopied);
+    document.addEventListener("visibilitychange", resetOnLeave);
+    window.addEventListener("focus", resetOnLeave);
+    return () => {
+      window.removeEventListener("sd-calculator-copy", resetCopied);
+      document.removeEventListener("visibilitychange", resetOnLeave);
+      window.removeEventListener("focus", resetOnLeave);
+    };
   }, []);
   const [historyFilter, setHistoryFilter] = useState<"all" | "commission" | "downpayment" | "loan">("all");
   useEffect(() => { try { const saved = window.sessionStorage.getItem("sd-history-filter"); if (saved === "all" || saved === "commission" || saved === "downpayment" || saved === "loan") setHistoryFilter(saved); } catch {} }, []);
