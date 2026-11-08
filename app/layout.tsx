@@ -21,17 +21,17 @@ export const metadata: Metadata = {
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
     images: [{
-      url: "https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261109",
-      width: 160,
-      height: 160,
+      url: "https://sdcalc55.github.io/og-preview.png?v=og-20261108",
+      width: 1200,
+      height: 630,
       alt: "SD - калькулятор расчётов",
     }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
-    images: ["https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261109"],
+    images: ["https://sdcalc55.github.io/og-preview.png?v=og-20261108"],
   },
   icons: {
     icon: publicAsset("/favicon.png?v=sd-icon-20261109"),
