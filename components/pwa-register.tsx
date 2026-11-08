@@ -131,7 +131,7 @@ export default function PwaRegister() {
     <>
     {showInstallBanner ? (
     <div className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-[100] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-[#E7D5D4] bg-white p-3 shadow-[0_8px_30px_rgba(22,34,51,0.18)] dark:border-[#46576A] dark:bg-[#1B2633]">
-      <img src="/icons/sd-512.png?v=sd-icon-20261109"" alt="" className="size-12 shrink-0 rounded-xl object-cover" />
+      <img src="/icons/sd-512.png?v=sd-icon-20261109" alt="" className="size-12 shrink-0 rounded-xl object-cover" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-[#26364A] dark:text-[#E6ECF3]">SD | Калькулятор</p>
         <p className="text-xs text-[#748195] dark:text-[#AAB6C5]">Установить приложение</p>
