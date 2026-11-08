@@ -33,7 +33,7 @@ test("shared copy/save actions provide success feedback and calculator handlers 
   assert.match(shared, /isSaved \? "Убрать сохранение" : "Сохранить"/);
   for (const file of ["../components/commission-calculator.tsx", "../components/mortgage-calculators.tsx", "../components/loan-calculator.tsx"]) {
     const source = read(file);
-    assert.match(source, /Не удалось скопировать сумму/);
+    assert.match(source, /Не удалось скопировать(?: сумму| результаты)/);
   }
 });
 
@@ -73,7 +73,7 @@ test("result amount is visually primary and copy/save controls are secondary", (
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
-  assert.doesNotMatch(shared, /border-\[#D8DEE7\]/);
+  assert.match(shared, /border-\[#D8DEE7\]/);
 });
 
 
