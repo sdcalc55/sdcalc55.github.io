@@ -23,3 +23,11 @@ test("partial down-payment result is not capped at one billion rubles", () => {
   assert.match(calculation, /if \(!Number\.isSafeInteger\(total\)/);
   assert.doesNotMatch(calculation, /total\s*>\s*maxMoney|total\.n\s*>/);
 });
+
+
+test("mortgage inputs preserve the exact entered digits and decimal separator", () => {
+  const mortgage = read("../components/mortgage-calculators.tsx");
+  assert.match(mortgage, /const next = raw;/);
+  assert.doesNotMatch(mortgage, /formatInput\(raw\)/);
+  assert.match(mortgage, /const normalized = raw\.replace\(",", "\."\)/);
+});
