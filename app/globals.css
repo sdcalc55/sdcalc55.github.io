@@ -171,6 +171,7 @@ html.dark [class*="text-[#8993A2]"] { color: #AAB6C4 !important; }
 html.dark [class*="bg-[#26364A]"] { background-color: #344252 !important; }
 html.dark [class*="bg-[#EEF1F5]"] { background-color: #253241 !important; }
 html.dark input, html.dark select, html.dark textarea { background-color: #1B2632; color: #E8EDF3; border-color: #465568; }
+html.dark .sd-commission-money-field { background-color: #1B2632 !important; }
 
 
 /* Dark-mode refinements: use cool slate surfaces instead of burgundy-tinted panels. */
