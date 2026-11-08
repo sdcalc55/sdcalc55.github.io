@@ -169,13 +169,14 @@ export default function Home() {
     const resetOnLeave = () => {
       if (document.visibilityState !== "visible") setHistoryCopiedId(null);
     };
+    const resetOnReturn = () => setHistoryCopiedId(null);
     window.addEventListener("sd-calculator-copy", resetCopied);
     document.addEventListener("visibilitychange", resetOnLeave);
-    window.addEventListener("focus", resetOnLeave);
+    window.addEventListener("focus", resetOnReturn);
     return () => {
       window.removeEventListener("sd-calculator-copy", resetCopied);
       document.removeEventListener("visibilitychange", resetOnLeave);
-      window.removeEventListener("focus", resetOnLeave);
+      window.removeEventListener("focus", resetOnReturn);
     };
   }, []);
   const [historyFilter, setHistoryFilter] = useState<"all" | "commission" | "downpayment" | "loan">("all");
