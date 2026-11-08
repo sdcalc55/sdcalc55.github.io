@@ -1,9 +1,10 @@
 "use client";
 
-import { Bookmark, Copy } from "lucide-react";
+import { Bookmark, BookmarkCheck, Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 type CalculatorResultActionsProps = {
-  onCopy: () => void;
+  onCopy: () => Promise<boolean>;
   onSave: () => void;
   isSaved: boolean;
   disabled?: boolean;
@@ -12,14 +13,21 @@ type CalculatorResultActionsProps = {
 const actionClass = "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#D8DEE7] bg-transparent px-3 text-xs font-medium text-[#657184] transition hover:bg-[#F3F5F7] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#46576A] dark:bg-transparent dark:text-[#AEBBCB] dark:hover:bg-[#263442]";
 
 export function CalculatorResultActions({ onCopy, onSave, isSaved, disabled = false }: CalculatorResultActionsProps) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    if (await onCopy()) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    }
+  };
   return (
     <div className="mt-4 grid grid-cols-2 gap-2" data-testid="calculator-result-actions">
-      <button type="button" data-testid="calculator-copy" onClick={onCopy} disabled={disabled} className={actionClass}>
-        <Copy aria-hidden="true" className="size-4" />Копировать
+      <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={actionClass}>
+        {copied ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}{copied ? "Скопировано" : "Копировать"}
       </button>
-      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} ${isSaved ? "border-transparent bg-[#FCEBEA] text-[#B94742] dark:bg-[#352B2B] dark:text-[#FF9A93]" : ""}`}>
-        <Bookmark aria-hidden="true" className="size-4" fill={isSaved ? "currentColor" : "none"} />
-        {isSaved ? "Сохранено" : "Сохранить"}
+      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
+        {isSaved ? <BookmarkCheck aria-hidden="true" className="size-4" /> : <Bookmark aria-hidden="true" className="size-4" />}
+        {isSaved ? "Убрать сохранение" : "Сохранить"}
       </button>
     </div>
   );
