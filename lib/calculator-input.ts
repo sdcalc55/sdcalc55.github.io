@@ -1,5 +1,5 @@
 export function focusNextCalculatorInput(current: HTMLInputElement) {
-  const scope = current.closest("form") ?? current.closest("section");
+  const scope = current.closest("form") ?? current.closest("section") ?? current.closest("main") ?? document;
   if (!scope) { current.blur(); return; }
   const fields = Array.from(scope.querySelectorAll<HTMLInputElement>('input:not([disabled]):not([type="hidden"])'))
     .filter(field => field.getClientRects().length > 0);
