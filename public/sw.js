@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v3";
+const CACHE_NAME = "sd-calculator-pwa-v4";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -74,21 +74,17 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith((async () => {
       const cached = await caches.match(request, { ignoreSearch: true }) || await caches.match("/");
-      if (cached) {
-        event.waitUntil(fetch(request).then(async (response) => {
-          if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put("/", response.clone());
-          }
-        }).catch(() => {}));
-        return cached;
+      try {
+        const response = await fetch(request, { cache: "no-store" });
+        if (response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put("/", response.clone());
+          return response;
+        }
+        return cached || response;
+      } catch {
+        return cached || Response.error();
       }
-      const response = await fetch(request);
-      if (response.ok) {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put("/", response.clone());
-      }
-      return response;
     })());
     return;
   }
