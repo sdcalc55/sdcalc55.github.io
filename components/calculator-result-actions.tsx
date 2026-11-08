@@ -50,10 +50,10 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
 
   return (
     <div className="mt-4 flex flex-wrap items-center justify-start gap-2" data-testid="calculator-result-actions">
-      <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={actionClass}>
+      <button type="button" data-testid="calculator-copy" onClick={handleCopy} disabled={disabled} className={`${actionClass} w-[124px] shrink-0 whitespace-nowrap`}>
         {copied ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}{copied ? "Скопировано" : "Копировать"}
       </button>
-      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
+      <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} min-w-[150px] whitespace-nowrap ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
         {isSaved ? <BookmarkCheck aria-hidden="true" className="size-4" /> : <Bookmark aria-hidden="true" className="size-4" />}
         {isSaved ? "Убрать сохранение" : "Сохранить"}
       </button>
