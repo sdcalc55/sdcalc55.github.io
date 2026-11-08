@@ -15,7 +15,8 @@ test("all calculators use one shared result action component", () => {
   assert.match(shared, /data-testid="calculator-save"/);
   assert.match(shared, /Копировать/);
   assert.match(shared, /Сохранить/);
-  assert.match(shared, /Сохранено/);
+  assert.match(shared, /Скопировано/);
+  assert.match(shared, /Убрать сохранение/);
 });
 
 test("shared actions expose one consistent mobile and dark-mode layout", () => {
@@ -61,7 +62,7 @@ test("primary result typography has stronger contrast than secondary actions", (
   assert.match(mortgage, /dark:text-\[#FF827B\]/);
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
-  assert.match(shared, /min-h-11/);
+  assert.match(shared, /min-h-10/);
   assert.match(shared, /text-xs/);
 });
 
@@ -73,4 +74,13 @@ test("result amount is visually primary and copy/save controls are secondary", (
   assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
   assert.doesNotMatch(shared, /border-\[#D8DEE7\]/);
+});
+
+
+test("copy button confirms success and saved result can be unsaved without removing its outline", () => {
+  assert.match(shared, /const \[copied, setCopied\] = useState\(false\)/);
+  assert.match(shared, /copied \? "Скопировано" : "Копировать"/);
+  assert.match(shared, /isSaved \? "Убрать сохранение" : "Сохранить"/);
+  assert.match(shared, /border-\[#D98A85\]/);
+  assert.match(shared, /dark:border-\[#A96560\]/);
 });
