@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Bookmark, Calculator, Copy, RotateCcw } from "lucide-react";
+import { Bookmark, Calculator, Copy, RotateCcw, X } from "lucide-react";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatInput } from "@/lib/calculator";
@@ -21,7 +22,7 @@ const dismissKeyboard = (event: KeyboardEvent<HTMLInputElement>) => {
   if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
   if (event.key === "Enter" && !event.nativeEvent.isComposing) {
     event.preventDefault();
-    event.currentTarget.blur();
+    focusNextCalculatorInput(event.currentTarget);
   }
 };
 
@@ -60,9 +61,9 @@ export function LoanCalculator() {
   const edit = (patch: Partial<LoanDraft>) => update({ ...patch, changed: true, error: "" });
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (!term.trim() && value.trim() && rate.trim()) { update({ error: "Введите срок кредита", result: null }); return; }
-    if (!value.trim() || !term.trim()) { update({ error: "Заполните поля", result: null }); return; }
-    if (!rate.trim()) { update({ error: "Введите ставку", result: null }); return; }
+    if (!term.trim() && value.trim() && rate.trim()) { update({ error: "Введите срок кредита", result: null }); document.getElementById("loan-term")?.focus(); return; }
+    if (!value.trim() || !term.trim()) { update({ error: "Заполните поля", result: null }); document.getElementById(!value.trim() ? (reverse ? "loan-payment" : "loan-principal") : "loan-term")?.focus(); return; }
+    if (!rate.trim()) { update({ error: "Введите ставку", result: null }); document.getElementById("loan-rate")?.focus(); return; }
     if (exceedsAmountLimit(value)) { update({ error: "", result: null, changed: true }); return; }
     if (Number(term) > (unit === "years" ? 30 : 360) || parse(rate) > 30) { update({ error: "", result: null, changed: true }); return; }
     try {
@@ -189,14 +190,14 @@ export function LoanCalculator() {
           const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           edit({ value: formatInput(raw) });
-        }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-12`} /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
-        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="done" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
+        }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-[4.5rem]`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ value: "" }); document.getElementById(reverse ? "loan-payment" : "loan-principal")?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
+        <div><label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label><div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2"><div className="relative"><input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="done" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
           const normalized = event.target.value.replace(",", ".");
           const raw = unit === "years"
             ? normalized.replace(/[^\d]/g, "").slice(0, 3)
             : normalized.replace(/[^\d]/g, "").slice(0, 3);
           edit({ term: raw });
-        }} placeholder="Введите срок" className={inputStyle} /><Select value={unit} onValueChange={nextUnit => {
+        }} placeholder="Введите срок" className={`${inputStyle} pr-11`} />{term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button></div><Select value={unit} onValueChange={nextUnit => {
           if (nextUnit === unit) return;
           const numericTerm = term.trim() ? parse(term) : NaN;
           const converted = Number.isFinite(numericTerm)
@@ -220,7 +221,7 @@ export function LoanCalculator() {
           const integerPart = candidate.split(".")[0];
           if (integerPart.length > 3 || (candidate !== "" && Number.isFinite(numeric) && numeric > 999)) return;
           update({ rate: candidate, changed: true, error: "" });
-        }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={inputStyle} /></div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор.<br />С такой ставкой кредит лучше не брать 🙂</p>}</div>
+        }} placeholder="Введите % ставки" aria-invalid={rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30} className={`${inputStyle} pr-11`} />{rate !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ rate: "" }); document.getElementById("loan-rate")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}</div>{rate !== "" && Number.isFinite(parse(rate)) && parse(rate) > 30 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">Кажется, с процентами немного перебор.<br />С такой ставкой кредит лучше не брать 🙂</p>}</div>
       </div>
       {error && <p role="alert" className="mt-4 whitespace-pre-line text-sm leading-relaxed text-[#BD302A]">{error}</p>}
       <div className="mt-7 flex flex-wrap gap-3">{!calculated && <button type="submit" className="min-h-12 flex-1 rounded-xl bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white hover:bg-[#D6332D] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E83C35]">РАССЧИТАТЬ</button>}{calculated && <p className="flex flex-1 items-center text-sm font-medium text-[#647184]">Автоматический перерасчёт</p>}<button type="button" onClick={reset} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-3 text-sm font-semibold text-[#647184] hover:bg-[#F5F7FA]"><RotateCcw className="size-4" />СБРОСИТЬ</button></div>
