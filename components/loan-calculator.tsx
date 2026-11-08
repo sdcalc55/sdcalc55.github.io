@@ -182,10 +182,10 @@ export function LoanCalculator() {
       {(["principal", "payment"] as const).map(item => <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)} className={`min-h-14 min-w-0 text-balance border-b-2 px-2 py-3 text-sm leading-5 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#26364A] sm:min-h-12 sm:min-w-max sm:flex-1 sm:whitespace-nowrap sm:px-3 ${mode === item ? "border-[#E83C35] text-[#26364A]" : "border-transparent text-[#647184] hover:border-[#C5CDD8] hover:text-[#26364A]"}`} aria-label={item === "principal" ? "По сумме кредита" : "По ежемесячному платежу"}>{item === "principal" ? "По сумме кредита" : "По ежемесячному платежу"}</button>)}
     </div>
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.1fr]">
-    <form onSubmit={submit} autoComplete="new-password" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
+    <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-3"><span className="relative left-3 flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
-        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="new-password" value={value} onChange={event => {
+        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
           const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
@@ -195,7 +195,7 @@ export function LoanCalculator() {
           <label htmlFor="loan-term" className="mb-3 block text-sm font-semibold">Срок кредита</label>
           <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
             <div className="relative">
-              <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="next" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
+              <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
                 const raw = event.target.value.replace(/[^\d]/g, "").slice(0, 3);
                 edit({ term: raw });
               }} placeholder="Введите срок" className="h-14 w-full min-w-0 rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 pr-11 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" />
@@ -220,7 +220,7 @@ export function LoanCalculator() {
           </div>
           {term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}
         </div>
-        <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input name="sd-calc-loan-rate" id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="new-password" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
+        <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input name="sd-calc-loan-rate" id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="done" autoComplete="off" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
           const candidate = parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : raw;
