@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Bookmark, Calculator, Copy, Info, RotateCcw, Wallet, X } from "lucide-react";
+import { ArrowUp, Calculator, Info, RotateCcw, Wallet, X } from "lucide-react";
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { getCalculationHistory, getHistoryMode, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 import { toast } from "sonner";
