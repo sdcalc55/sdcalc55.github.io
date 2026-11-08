@@ -20,7 +20,7 @@ test("all calculators use one shared result action component", () => {
 });
 
 test("shared actions use the current compact responsive and dark-mode layout", () => {
-  assert.match(shared, /flex flex-wrap items-center justify-start gap-2/);
+  assert.match(shared, /grid min-w-0 grid-cols-\[minmax\(0,1fr\)_minmax\(0,1fr\)\] items-center gap-2/);
   assert.match(shared, /min-h-10/);
   assert.match(shared, /rounded-xl/);
   assert.match(shared, /dark:border-/);
