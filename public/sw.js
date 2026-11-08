@@ -1,10 +1,10 @@
-const CACHE_NAME = "sd-calculator-pwa-v9";
+const CACHE_NAME = "sd-calculator-pwa-v10";
 const APP_SHELL = [
   "/", "/manifest.webmanifest",
-  "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-180.png", "/icons/sd-192.png", "/icons/sd-512.png",
+  "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-192.png", "/icons/sd-512.png",
   "/icons/apple-touch-icon-180.png", "/favicon.png", "/favicon.ico",
   "/images/sd-calculator-logo-transparent.png", "/images/sd-calculator-logo-transparent.svg",
-  "/images/social-max.svg", "/images/social-telegram.svg", "/images/social-vk.svg", "/images/svdemidenko-portrait-v3.png",
+  "/images/social-max.svg", "/images/social-telegram.svg", "/images/social-vk.svg", "/images/svdemidenko-portrait.webp",
   "/og-preview.png", "/og-preview-128.png", "/og-preview-256.png", "/og-preview-small.png", "/og-preview.svg",
   "/fonts/InterVariable.woff2", "/fonts/MontserratVariable.ttf", "/fonts/OnestVariable.ttf"
 ];
