@@ -79,7 +79,7 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request, { cache: "no-store" });
         if (!response.ok) return;
         const html = await response.clone().text();
-        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)]
           .map((match) => new URL(match[1], self.location.origin).pathname);
         await Promise.all([...new Set(assets)].map(async (assetUrl) => {
           try {
