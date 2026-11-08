@@ -22,10 +22,10 @@ const assert = require('node:assert/strict');
       await copy.click();
       await page.getByText('Скопировано', { exact: true }).waitFor();
       await save.click();
-      await page.getByText('Расчёт сохранён в истории', { exact: true }).waitFor();
-      assert.equal(await save.innerText(), 'Сохранено');
+      assert.equal(await save.getAttribute('aria-pressed'), 'true');
+      assert.equal(await save.innerText(), 'Убрать сохранение');
       await save.click();
-      await page.getByText('Расчёт удалён из истории', { exact: true }).waitFor();
+      assert.equal(await save.getAttribute('aria-pressed'), 'false');
       assert.equal(await save.innerText(), 'Сохранить');
     };
 
@@ -50,7 +50,7 @@ const assert = require('node:assert/strict');
     await checkActions(page.getByRole('region', { name: 'Результаты кредита' }));
 
     assert.deepEqual(errors, [], 'No uncaught browser errors');
-    console.log('PASS: copy, save, unsave notifications and shared action controls in commission, down-payment and loan calculators.');
+    console.log('PASS: copy feedback, save state and shared action controls in commission, down-payment and loan calculators.');
   } finally {
     await browser.close();
   }
