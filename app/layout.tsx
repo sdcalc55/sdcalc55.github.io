@@ -8,7 +8,7 @@ import PwaRegister from "@/components/pwa-register"
 
 const inter = localFont({ src: "../public/fonts/InterVariable.woff2", display: "swap", weight: "100 900" });
 const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
-const iconVersion = "sd-icon-20261108-v3";
+const iconVersion = "sd-icon-20261108-v4";
 const previewVersion = "sd-preview-20261108-v3";
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
       { url: publicAsset(`/favicon.ico?v=${iconVersion}`), sizes: "any" },
       { url: publicAsset(`/icons/sd-32.png?v=${iconVersion}`), sizes: "32x32", type: "image/png" },
       { url: publicAsset(`/icons/sd-64.png?v=${iconVersion}`), sizes: "64x64", type: "image/png" },
-      { url: publicAsset(`/icons/sd-192.png?v=${iconVersion}`), sizes: "192x192", type: "image/png" },
+      { url: publicAsset(`/icons/SD-192.png?v=${iconVersion}`), sizes: "192x192", type: "image/png" },
     ],
     apple: [{ url: publicAsset(`/icons/apple-touch-icon-180.png?v=${iconVersion}`), sizes: "180x180", type: "image/png" }],
   },
