@@ -14,9 +14,10 @@ export type CalculationRecord = {
 export type HistoryMode = "manual" | "auto";
 const STORAGE_KEY = "sd-calculation-history-v1";
 const MODE_KEY = "sd-calculation-history-mode-v1";
-export const HISTORY_LIMIT = 15;
+export const HISTORY_LIMIT = 30;
+const PER_KIND_LIMIT = 15;
 const VALID_KINDS = new Set<CalculationKind>(["commission", "mortgage-part", "mortgage-whole", "mortgage-adjustment", "loan"]);
-const MAX_RECORDS = HISTORY_LIMIT * VALID_KINDS.size;
+const MAX_RECORDS = HISTORY_LIMIT;
 const MAX_FIELD_LENGTH = 500;
 const isPlainStringMap = (value: unknown): value is Record<string, string> =>
   !!value && typeof value === "object" && !Array.isArray(value) &&
@@ -62,7 +63,7 @@ export function getCalculationHistory(): CalculationRecord[] {
     const counts = new Map<CalculationKind, number>();
     const limited = valid.filter(item => {
       const count = counts.get(item.kind) ?? 0;
-      if (count >= HISTORY_LIMIT) return false;
+      if (count >= PER_KIND_LIMIT) return false;
       counts.set(item.kind, count + 1);
       return true;
     }).slice(0, MAX_RECORDS);
@@ -83,9 +84,9 @@ export function saveCalculation(record: Omit<CalculationRecord, "id" | "createdA
   const next = replaceLatestOfKind
     ? [entry]
     : replaceMatchingParam
-      ? [...sameKind.filter(item => item.params[replaceMatchingParam.key] !== replaceMatchingParam.value), entry].slice(-HISTORY_LIMIT)
+      ? [...sameKind.filter(item => item.params[replaceMatchingParam.key] !== replaceMatchingParam.value), entry].slice(-PER_KIND_LIMIT)
       : [...sameKind, entry].slice(-HISTORY_LIMIT);
-  if (writeStorage(STORAGE_KEY, JSON.stringify([...otherKinds, ...next].sort((a, b) => b.createdAt.localeCompare(a.createdAt))))) notifyHistoryChanged();
+  if (writeStorage(STORAGE_KEY, JSON.stringify([...otherKinds, ...next].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, MAX_RECORDS)))) notifyHistoryChanged();
   return entry;
 }
 
