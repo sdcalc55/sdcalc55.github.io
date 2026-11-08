@@ -188,7 +188,7 @@ function MortgageCard({ config }: { config: typeof configs[number] }) {
         </div>}
       </div>
     </div>
-    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${hasUserInput ? "grid-cols-2" : "grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center ${hasUserInput ? `border-r ${theme.border}` : ""} text-sm font-semibold text-[#26364A] hover:text-[#E83C35]`}>Наверх</button>{hasUserInput && <button type="button" onClick={() => { setValues(config.defaults); setSavedKey(""); setDismissedKey(""); }} className="flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35]">Сбросить</button>}</div>
+    <div className={`mt-5 grid items-center border-t border-[#EBEEF2] pt-3 ${hasUserInput ? config.mode === "adjustment" ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-1" : "grid-cols-1"}`}><button type="button" onClick={scrollPageToTop} className={`flex h-12 items-center justify-center ${config.mode !== "adjustment" ? "lg:hidden" : ""} ${hasUserInput ? `border-r ${theme.border}` : ""} text-sm font-semibold text-[#26364A] hover:text-[#E83C35]`}>Наверх</button>{hasUserInput && <button type="button" onClick={() => { setValues(config.defaults); setSavedKey(""); setDismissedKey(""); }} className={`flex h-12 items-center justify-center text-sm font-semibold text-[#26364A] hover:text-[#E83C35] ${config.mode !== "adjustment" ? "lg:col-span-1" : ""}`}>Сбросить</button>}</div>
   </section>;
 }
 
