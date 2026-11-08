@@ -103,6 +103,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   const pairedResult = discount?.paired ? calculate(sale ? "purchase" : "sale", category === "land" ? "country" : category, parseMoney(pairedPrice), null, tariffs) : null;
   const pairedDiscounted = result.status === "ok" && pairedResult?.status === "ok" ? applyPairedDiscount(result.total, pairedResult.total) : null;
   const discounted = result.status !== "ok" ? null : discount?.paired ? pairedDiscounted : applyDiscount(result.total, discount?.percent ?? 0);
+  const clientReceives = sale && discounted && parseMoney(price) !== null ? Math.max(0, parseMoney(price)! - discounted.total) : null;
   const normalizedPercent = motivationPercent.trim().replace(",", ".");
   const motivation = /^\d+(?:\.\d+)?$/.test(normalizedPercent) ? Number(normalizedPercent) : NaN;
   const motivationValid = Number.isFinite(motivation) && motivation >= 0 && motivation <= 99;
@@ -134,7 +135,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
     const key = JSON.stringify(params);
     if (savedKey === key || dismissedKey === key) return;
     const timer = window.setTimeout(() => {
-      upsertCalculationByParams({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params, results: { commission: money(result.total), final: money(discounted.total), discount: discount?.name ?? "Без скидки" } });
+      upsertCalculationByParams({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params, results: { commission: money(result.total), final: money(discounted.total), ...(clientReceives !== null ? { clientReceives: money(clientReceives) } : {}), discount: discount?.name ?? "Без скидки" } });
       setSavedKey(key);
     }, 650);
     return () => window.clearTimeout(timer);
@@ -160,7 +161,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
       setDismissedKey(currentKey);
       return;
     }
-    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
+    saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), ...(clientReceives !== null ? { clientReceives: money(clientReceives) } : {}), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
     setSavedKey(currentKey);
     setDismissedKey("");
   };
@@ -218,7 +219,8 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                 {result.status === "ok" ? <>
                   <div className="mb-2 mt-5 flex flex-wrap items-center gap-3"><p data-testid="total" className="text-[clamp(1.8rem,6vw,2.4rem)] font-bold leading-tight tracking-tight text-[#D93630] tabular-nums dark:text-[#FF665F]">{discounted ? money(discounted.total) : "-"}</p><span className="inline-flex shrink-0 items-center gap-1"><button type="button" onClick={() => update("motivationOpen", !motivationOpen)} disabled={!discounted} aria-label="Рассчитать вознаграждение риелтора" title="Рассчитать вознаграждение риелтора" aria-expanded={motivationOpen} aria-controls="motivation-panel" className={`inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-offset-2 hover:bg-white/60 focus-visible:outline-2 disabled:opacity-40 ${motivationOpen ? "bg-white/65 text-[#E83C35]" : "text-[#647184]"}`}><Wallet aria-hidden="true" className="size-5" /></button></span></div>
                   <p className="text-xs text-[#6E7886] dark:text-[#B8C4D2]">Комиссия со скидкой, округлённая до рубля</p><CalculatorResultActions onCopy={copy} onSave={save} isSaved={isSaved} copyKey={discounted ? `Комиссия: ${numberFormat.format(Math.round(discounted.total))}\u00a0₽${(() => { const breakdown = [...(result.fixed > 0 && (result.rate > 0 || discounted.saving > 0) ? [money(Math.round(result.fixed))] : []), ...(result.rate > 0 ? [`${numberFormat.format(result.rate * 100)}% от стоимости: ${money(Math.round(result.percent))}`] : []), ...(discounted.saving > 0 ? [`Скидка: ${money(Math.round(discounted.saving))}`] : [])]; return breakdown.length ? ` (${breakdown.join(" + ").replace(" + Скидка:", ", Скидка:")})` : ""; })()}` : ""} disabled={!discounted} />
-                  {motivationOpen && discounted && <div id="motivation-panel" className="mt-4 rounded-2xl border border-white/80 bg-white/75 p-4 sm:p-5">
+                  {sale && clientReceives !== null && <div data-testid="client-receives" className="mt-5 rounded-2xl border border-[#E4C8C5] bg-white/75 p-4 dark:border-[#6D4A49] dark:bg-[#26313D]"><p className="text-xs font-medium text-[#6E7886] dark:text-[#B8C4D2]">Продавцу на руки</p><p className="mt-1 text-2xl font-bold tracking-tight tabular-nums text-[#26364A] dark:text-[#F1F5F9]">{money(clientReceives)}</p><p className="mt-1 text-xs text-[#748195] dark:text-[#B8C4D2]">Стоимость объекта за вычетом комиссии</p></div>}
+                   {motivationOpen && discounted && <div id="motivation-panel" className="mt-4 rounded-2xl border border-white/80 bg-white/75 p-4 sm:p-5">
                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold"><Wallet aria-hidden="true" className="size-4 text-[#647184]" />Агентское вознаграждение</div>
                     <label htmlFor="motivation-percent" className="mb-2 block text-sm font-semibold">Ваш партнерский процент</label>
                     <div className="relative max-w-48"><input id="motivation-percent" name="sd-calc-motivation" autoFocus onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="done" autoComplete="off" placeholder="Например, 43.5" value={motivationPercent} onChange={event => {
