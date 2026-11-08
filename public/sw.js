@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v11";
+const CACHE_NAME = "sd-calculator-pwa-v12";
 const APP_SHELL = [
   "/", "/manifest.webmanifest",
   "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-192.png", "/icons/sd-512.png",
