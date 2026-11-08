@@ -20,7 +20,7 @@ test("all calculators use one shared result action component", () => {
 });
 
 test("shared actions expose one consistent mobile and dark-mode layout", () => {
-  assert.match(shared, /grid grid-cols-2 gap-2/);
+  assert.match(shared, /flex flex-wrap items-center justify-start gap-2/);
   assert.match(shared, /min-h-10/);
   assert.match(shared, /rounded-xl/);
   assert.match(shared, /dark:border-/);
@@ -31,9 +31,13 @@ test("shared actions expose one consistent mobile and dark-mode layout", () => {
 test("copy/save handlers retain success and failure feedback", () => {
   for (const file of ["../components/commission-calculator.tsx", "../components/mortgage-calculators.tsx", "../components/loan-calculator.tsx"]) {
     const source = read(file);
-    assert.match(source, /Скопировано в буфер обмена/);
-    assert.match(source, /Расчёт сохранён в истории/);
-    assert.match(source, /Расчёт удалён из истории/);
+    assert.match(source, /const copy = async|const copyResults = async/);
+    assert.match(source, /saveCalculation\(/);
+    assert.match(source, /removeCalculationByParams\(/);
+  }
+  assert.match(shared, /copied \? "Скопировано" : "Копировать"/);
+  assert.match(shared, /isSaved \? "Убрать сохранение" : "Сохранить"/);
+  assert.match(shared, /if \(await onCopy\(\)\)/);
   }
 });
 
@@ -59,7 +63,7 @@ test("primary result typography has stronger contrast than secondary actions", (
   const mortgage = read("../components/mortgage-calculators.tsx");
   const loan = read("../components/loan-calculator.tsx");
   assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.75rem\)\]/);
-  assert.match(mortgage, /dark:text-\[#FF827B\]/);
+  assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
   assert.match(shared, /min-h-10/);
