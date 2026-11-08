@@ -18,6 +18,7 @@ const parse = (value: string) => {
 const exceedsAmountLimit = (value: string) => Number(value.replace(/\D/g, "")) > 999999999;
 
 const dismissKeyboard = (event: KeyboardEvent<HTMLInputElement>) => {
+  if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
   if (event.key === "Enter" && !event.nativeEvent.isComposing) {
     event.preventDefault();
     event.currentTarget.blur();
