@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f7f8fa"/>
-  <rect width="1200" height="12" fill="#ed0909"/>
-  <image x="410" y="70" width="380" height="380" href="/images/sd-calculator-logo-transparent.svg"/>
-  <text x="600" y="555" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#222">SD | Калькулятор</text>
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <image href="sd-calculator-logo-transparent.png" x="390" y="69" width="420" height="420"/>
 </svg>
