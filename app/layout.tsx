@@ -33,7 +33,10 @@ export const metadata: Metadata = {
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
     images: ["https://sdcalc55.github.io/images/sd-calculator-logo.png?v=160"],
   },
-  icons: { icon: publicAsset("/favicon.png?v=sd-calculator-1") },
+  icons: {
+    icon: publicAsset("/favicon.png?v=sd-calculator-1"),
+    apple: [{ url: publicAsset("/icons/apple-touch-icon-180.png"), sizes: "180x180", type: "image/png" }],
+  },
   manifest: publicAsset("/manifest.webmanifest"),
   appleWebApp: { capable: true, title: "SD | Калькулятор", statusBarStyle: "default" },
 };
