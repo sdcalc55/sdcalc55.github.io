@@ -5,6 +5,7 @@ import { ArrowUp, Bookmark, Calculator, Copy, Info, RotateCcw, Wallet, X } from 
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { getCalculationHistory, getHistoryMode, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 import { toast } from "sonner";
+import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { applyDiscount, applyPairedDiscount, discounts } from "@/lib/discounts";
 import { DEFAULT_TARIFFS, type TariffSnapshot } from "@/lib/tariffs";
@@ -154,6 +155,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
       removeCalculationByParams("commission", currentParams);
       setSavedKey("");
       setDismissedKey(currentKey);
+      toast.success("Расчёт удалён из истории");
       return;
     }
     saveCalculation({ kind: "commission", title: `Комиссия - ${sale ? "Продажа" : "Покупка"}`, summary: money(discounted.total), params: currentParams, results: { commission: money(result.total), final: money(discounted.total), fixedPart: money(result.fixed), percentPart: money(result.percent), percentRate: `${numberFormat.format(result.rate * 100)}%`, ...(discounted.saving > 0 ? { discountSaving: money(discounted.saving) } : {}), discount: discount?.name ?? "Без скидки" } });
@@ -214,7 +216,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
               <div aria-live="polite" aria-atomic="true">
                 {result.status === "ok" ? <>
                   <div className="mb-2 mt-5 flex flex-wrap items-center gap-3"><p data-testid="total" className="text-[42px] font-semibold leading-tight tracking-[-0.04em] text-[#E83C35] tabular-nums sm:text-[50px]">{discounted ? money(discounted.total) : "-"}</p><span className="inline-flex shrink-0 items-center gap-1"><button type="button" onClick={() => update("motivationOpen", !motivationOpen)} disabled={!discounted} aria-label="Рассчитать вознаграждение риелтора" title="Рассчитать вознаграждение риелтора" aria-expanded={motivationOpen} aria-controls="motivation-panel" className={`inline-flex size-10 shrink-0 items-center justify-center rounded-xl outline-offset-2 hover:bg-white/60 focus-visible:outline-2 disabled:opacity-40 ${motivationOpen ? "bg-white/65 text-[#E83C35]" : "text-[#647184]"}`}><Wallet aria-hidden="true" className="size-5" /></button></span></div>
-                  <p className="text-xs text-[#6E7886] dark:text-[#B8C4D2]">Комиссия со скидкой, округлённая до рубля</p><div className="mt-5 grid grid-cols-2 gap-2"><button type="button" onClick={copy} disabled={!discounted} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#D8DEE7] bg-white/65 px-3 text-sm font-semibold text-[#465467] transition hover:bg-white disabled:opacity-40 dark:border-[#65768A] dark:bg-[#182330] dark:text-[#F1F5F9] dark:hover:bg-[#314154]"><Copy className="size-4" />Копировать</button><button type="button" onClick={save} disabled={!discounted} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#D8DEE7] bg-white/65 px-3 text-sm font-semibold transition hover:bg-white disabled:opacity-40 dark:border-[#65768A] dark:bg-[#182330] dark:hover:bg-[#314154] ${isSaved ? "text-[#E83C35]" : "text-[#465467] dark:text-[#F1F5F9]"}`}><Bookmark className="size-4" fill={isSaved ? "currentColor" : "none"} />{isSaved ? "Сохранено" : "Сохранить"}</button></div>
+                  <p className="text-xs text-[#6E7886] dark:text-[#B8C4D2]">Комиссия со скидкой, округлённая до рубля</p><CalculatorResultActions onCopy={copy} onSave={save} isSaved={isSaved} disabled={!discounted} />
                   {motivationOpen && discounted && <div id="motivation-panel" className="mt-4 rounded-2xl border border-white/80 bg-white/75 p-4 sm:p-5">
                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold"><Wallet aria-hidden="true" className="size-4 text-[#647184]" />Агентское вознаграждение</div>
                     <label htmlFor="motivation-percent" className="mb-2 block text-sm font-semibold">Ваш партнерский процент</label>
