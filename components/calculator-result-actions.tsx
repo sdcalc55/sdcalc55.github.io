@@ -54,7 +54,7 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
         {copied ? <Check aria-hidden="true" className="size-4" /> : <Copy aria-hidden="true" className="size-4" />}{copied ? "Скопировано" : "Копировать"}
       </button>
       <button type="button" data-testid="calculator-save" onClick={onSave} disabled={disabled} aria-pressed={isSaved} className={`${actionClass} w-full min-w-0 gap-1 px-2 text-[10px] whitespace-nowrap ${isSaved ? "border-[#D98A85] bg-transparent text-[#B94742] dark:border-[#A96560] dark:bg-transparent dark:text-[#FF9A93]" : ""}`}>
-        {isSaved ? <BookmarkCheck aria-hidden="true" className="size-4" /> : <Bookmark aria-hidden="true" className="size-4" />}
+        {isSaved ? <BookmarkCheck aria-hidden="true" className="hidden size-4 sm:inline-block" /> : <Bookmark aria-hidden="true" className="hidden size-4 sm:inline-block" />}
         {isSaved ? "Убрать сохранение" : "Сохранить"}
       </button>
     </div>
