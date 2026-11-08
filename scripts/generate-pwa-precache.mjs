@@ -25,7 +25,13 @@ const manifest = ["/", "/manifest.webmanifest", ...files];
 const uniqueManifest = [...new Set(manifest)];
 await writeFile(path.join(outputDir, "precache-manifest.json"), JSON.stringify(uniqueManifest));
 
-const digest = createHash("sha256").update(uniqueManifest.join("\n")).digest("hex").slice(0, 12);
+const digestHash = createHash("sha256");
+digestHash.update(await readFile(path.join(outputDir, "index.html")));
+for (const url of uniqueManifest) {
+  digestHash.update(url);
+  if (url !== "/") digestHash.update(await readFile(path.join(outputDir, url.slice(1))));
+}
+const digest = digestHash.digest("hex").slice(0, 12);
 const swPath = path.join(outputDir, "sw.js");
 const sw = await readFile(swPath, "utf8");
 if (!sw.includes("sd-calculator-pwa-build")) {
