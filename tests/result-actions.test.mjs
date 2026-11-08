@@ -61,7 +61,7 @@ test("partial down-payment percentages are disclosed only inside calculation det
 test("primary result typography has stronger contrast than secondary actions", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
   const loan = read("../components/loan-calculator.tsx");
-  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.75rem\)\]/);
+  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.6rem\)\]/);
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(loan, /dark:text-\[#FF665F\]/);
   assert.match(loan, /dark:bg-\[#253241\]/);
@@ -72,7 +72,7 @@ test("primary result typography has stronger contrast than secondary actions", (
 
 test("result amount is visually primary and copy/save controls are secondary", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
-  assert.match(mortgage, /text-\[clamp\(2\.25rem,8vw,3rem\)\]/);
+  assert.match(mortgage, /text-\[clamp\(2rem,7vw,2\.6rem\)\]/);
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
