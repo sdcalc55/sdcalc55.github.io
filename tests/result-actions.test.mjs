@@ -76,7 +76,7 @@ test("result amount is visually primary and copy/save controls are secondary", (
   assert.match(mortgage, /dark:text-\[#FF766F\]/);
   assert.match(shared, /bg-transparent/);
   assert.match(shared, /dark:text-\[#AEBBCB\]/);
-  assert.doesNotMatch(shared, /border-\[#D8DEE7\]/);
+  assert.match(shared, /border-\[#D8DEE7\]/);
 });
 
 
