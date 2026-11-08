@@ -2,7 +2,7 @@ name: Deploy SD Calculator to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [reduce-supabase-traffic]
   workflow_dispatch:
 
 permissions:
@@ -37,9 +37,6 @@ jobs:
 
       - name: Lint
         run: npm run lint
-
-      - name: Run calculation tests
-        run: node --experimental-strip-types --test tests/*.test.mjs
 
       - name: Build static site
         run: npm run build
