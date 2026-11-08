@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
     images: [{
-      url: "https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261108",
+      url: "https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261109",
       width: 160,
       height: 160,
       alt: "SD - калькулятор расчётов",
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     card: "summary",
     title: "SD | Калькулятор",
     description: "Расчёт агентского вознаграждения и кредитный калькулятор",
-    images: ["https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261108"],
+    images: ["https://sdcalc55.github.io/images/sd-calculator-logo.png?v=sd-icon-20261109"],
   },
   icons: {
-    icon: publicAsset("/favicon.png?v=sd-icon-20261108"),
-    apple: [{ url: publicAsset("/icons/apple-touch-icon-180.png?v=sd-icon-20261108"), sizes: "180x180", type: "image/png" }],
+    icon: publicAsset("/favicon.png?v=sd-icon-20261109"),
+    apple: [{ url: publicAsset("/icons/apple-touch-icon-180.png?v=sd-icon-20261109"), sizes: "180x180", type: "image/png" }],
   },
   manifest: publicAsset("/manifest.webmanifest"),
   appleWebApp: { capable: true, title: "SD | Калькулятор", statusBarStyle: "default" },
