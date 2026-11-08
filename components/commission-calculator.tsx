@@ -108,6 +108,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   const motivationValid = Number.isFinite(motivation) && motivation >= 0 && motivation <= 99;
   const motivationAmount = discounted && motivationValid ? Math.round((discounted.total * motivation / 100 + Number.EPSILON) * 100) / 100 : null;
   const clear = () => { setPrice(""); setCredit(""); setDiscountId("none"); setPairedPrice(""); update("motivationPercent", ""); update("motivationOpen", false); };
+  const hasUserInput = price.trim() !== "" || credit.trim() !== "" || pairedPrice.trim() !== "" || motivationPercent.trim() !== "" || discountId !== "none";
   const [savedKey, setSavedKey] = useState("");
   const [dismissedKey, setDismissedKey] = useState("");
   const [historyModeVersion, setHistoryModeVersion] = useState(0);
@@ -208,7 +209,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <span className="flex select-none items-center gap-1.5 text-xs text-[#748195] dark:text-[#B8C4D2]"><span className="size-1.5 rounded-full bg-[#84A992]" />Автоматический расчёт</span>
-            <button onClick={clear} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[#E83C35]/25 bg-[#FFF1F0] px-3 py-1.5 text-[13px] font-semibold text-[#C94B45] shadow-sm transition hover:border-[#E83C35]/50 hover:bg-[#FCE5E3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] dark:border-[#8D4845] dark:bg-[#3A292B] dark:text-[#F0A09A] dark:hover:bg-[#493033]"><RotateCcw className="size-3" />Сбросить</button>
+            {hasUserInput && <button onClick={clear} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[#E83C35]/25 bg-[#FFF1F0] px-3 py-1.5 text-[13px] font-semibold text-[#C94B45] shadow-sm transition hover:border-[#E83C35]/50 hover:bg-[#FCE5E3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] dark:border-[#8D4845] dark:bg-[#3A292B] dark:text-[#F0A09A] dark:hover:bg-[#493033]"><RotateCcw className="size-3" />Сбросить</button>}
           </div>
         </section>
         <div className="space-y-4">
