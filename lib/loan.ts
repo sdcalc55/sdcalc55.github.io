@@ -6,8 +6,8 @@ function validateTermAndRate(months: number, annualRate: number) {
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Проверьте ставку.");
 }
 
-export function calculateLoan(principal: number, months: number, annualRate: number): LoanResult {
-  if (!Number.isFinite(principal) || principal <= 0 || principal > 999999999) throw new Error("Введите корректную сумму. Максимум — 999 999 999 ₽.");
+function calculateLoanForPrincipal(principal: number, months: number, annualRate: number): LoanResult {
+  if (!Number.isFinite(principal) || principal <= 0) throw new Error("Введите корректную сумму кредита.");
   if (principal < 0.01) throw new Error("Сумма кредита должна быть не меньше 0,01 ₽.");
   if (Math.round(principal * 100) / 100 !== principal) throw new Error("Укажите сумму кредита с точностью до копеек.");
   validateTermAndRate(months, annualRate);
@@ -18,6 +18,11 @@ export function calculateLoan(principal: number, months: number, annualRate: num
   if (!Number.isSafeInteger(totalCents) || !Number.isFinite(payment) || payment <= 0) throw new Error("Для этих параметров сумма выходит за пределы точного расчёта. Уточните сумму и срок.");
   const totalPayment = totalCents / 100;
   return { principal, months, annualRate, monthlyPayment: payment, totalPayment, interest: Math.max(0, Math.round((totalPayment - principal) * 100) / 100) };
+}
+
+export function calculateLoan(principal: number, months: number, annualRate: number): LoanResult {
+  if (!Number.isFinite(principal) || principal <= 0 || principal > 999999999) throw new Error("Введите корректную сумму. Максимум — 999 999 999 ₽.");
+  return calculateLoanForPrincipal(principal, months, annualRate);
 }
 
 export function calculateLoanFromPayment(payment: number, months: number, annualRate: number): LoanResult {
@@ -31,5 +36,5 @@ export function calculateLoanFromPayment(payment: number, months: number, annual
   const cents = monthlyRate === 0 ? Math.round(payment * 100) * months : Math.floor(principal * 100);
   if (!Number.isSafeInteger(cents)) throw new Error("Для этих параметров сумма выходит за пределы точного расчёта. Уточните платёж и срок.");
   if (cents < 1) throw new Error("При этих параметрах сумма кредита меньше 0,01 ₽. Увеличьте платёж или измените срок и ставку.");
-  return calculateLoan(cents / 100, months, annualRate);
+  return calculateLoanForPrincipal(cents / 100, months, annualRate);
 }
