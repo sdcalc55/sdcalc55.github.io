@@ -80,11 +80,12 @@ export function LegalSettings() {
   </div>;
 }
 
+export function AuthorCopyright() {
+  return <p className="mt-2 select-none text-center text-[11px] leading-5 text-[#748195]">© 2026 Автор: Светлана Демиденко</p>;
+}
+
 export function LegalFooter() {
-  return <div className="mt-3 border-t border-[#DDE3EB] pt-3 text-[#748195]">
-    <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-      <p className="select-none text-[11px] leading-5">© 2026 Автор: Светлана Демиденко</p>
-      <LegalDialog footer />
-    </div>
+  return <div className="mt-1 text-center text-[#748195]">
+    <LegalDialog footer />
   </div>;
 }
