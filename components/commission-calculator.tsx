@@ -36,12 +36,12 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
   return <div>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold">{label}</label>
     <div className={`relative rounded-2xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
-      <input ref={input} id={id} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="new-password" placeholder="Введите стоимость" value={value} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : undefined}
+      <input ref={input} id={id} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); }
         }}
         onChange={e => {
-          const raw = e.target.value;
+          const raw = e.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.replace(/[ \u00a0\u202f]/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           const caret = e.target.selectionStart ?? raw.length;
