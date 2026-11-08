@@ -30,13 +30,14 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
     const resetOnLeave = () => {
       if (document.visibilityState !== "visible") setCopied(false);
     };
+    const resetOnReturn = () => setCopied(false);
     window.addEventListener(COPY_EVENT, handleOtherCopy);
     document.addEventListener("visibilitychange", resetOnLeave);
-    window.addEventListener("focus", resetOnLeave);
+    window.addEventListener("focus", resetOnReturn);
     return () => {
       window.removeEventListener(COPY_EVENT, handleOtherCopy);
       document.removeEventListener("visibilitychange", resetOnLeave);
-      window.removeEventListener("focus", resetOnLeave);
+      window.removeEventListener("focus", resetOnReturn);
     };
   }, [instanceId]);
 
