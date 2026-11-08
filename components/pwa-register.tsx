@@ -12,6 +12,7 @@ export default function PwaRegister() {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [showIosInstructions, setShowIosInstructions] = useState(false);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -27,13 +28,14 @@ export default function PwaRegister() {
 
   useEffect(() => {
     const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if (!isAndroid || isStandalone) return;
+    if ((!isAndroid && !isIOS) || isStandalone) return;
 
-    // Показываем предложение сразу при запуске Android-версии сайта.
-    // Само системное окно Chrome можно открыть только после нажатия пользователя
-    // и только если браузер передал событие beforeinstallprompt.
+    // На Android предлагаем системную установку, на iPhone показываем
+    // инструкцию добавления сайта на экран «Домой».
     try {
       if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") {
         setShowInstallBanner(true);
@@ -51,7 +53,7 @@ export default function PwaRegister() {
       setInstallPrompt(null);
     };
 
-    window.addEventListener("beforeinstallprompt", handleInstallAvailable);
+    if (isAndroid) window.addEventListener("beforeinstallprompt", handleInstallAvailable);
     window.addEventListener("appinstalled", handleInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", handleInstallAvailable);
@@ -66,6 +68,12 @@ export default function PwaRegister() {
 
   const installApp = async () => {
     if (installing) return;
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      setShowIosInstructions(true);
+      return;
+    }
     if (!installPrompt) {
       window.alert("Установка через системное окно пока недоступна. Откройте меню браузера ⋮ и выберите «Установить приложение» или «Добавить на главный экран».");
       return;
@@ -119,7 +127,9 @@ export default function PwaRegister() {
     };
   }, []);
 
-  return showInstallBanner ? (
+  return (
+    <>
+    {showInstallBanner ? (
     <div className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-[100] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-[#E7D5D4] bg-white p-3 shadow-[0_8px_30px_rgba(22,34,51,0.18)] dark:border-[#46576A] dark:bg-[#1B2633]">
       <img src="data:image/webp;base64,UklGRq4FAABXRUJQVlA4IKIFAABwHQCdASpgAGAAPp1Gnkulo6KhpHmbGLATiWwAzjBa1BfKcof1BCycMPzf4D/c+yPbMeaH9rvWQ9MnoAf0TqV/QA8uf2af3R9KrNYdPH9mpGvuLFotZ7sVxPhe0rky/yE/VqSKsb8vilWUwfdlp8edCjDcXpglLFwidYJNORefRFQmNlgodl8Z/k6ORSf6XgveZtGJVMPHAt/DkIjHRZ8tPGz/vcFPg/mZhxo7rJp9YU58AzQTRlN7QmCIkObAFMjNgzTM73/yBbDccDvv31eHKBBn+/6kJ4suQ9bLJYgRjxt6/jD5GPxccTVVrBll7nQYxTwAAP77aDUKtMmiB05R984zF/giTgl1z38kQ1seey7YI/qpVq9vZKmIWdzA8fwnF8D3ntm8LXpU/hV5ILVyc04wg/FsBgPaw7r8xRoQaw7+y6TxHIFhuD29c7A6+UJYYMdOH7U+hQUF0ETxbYWy8umjsMGBeGkzjc7WwkILdAmcp/Vaw1TpgYhB7kATLFtMf4QZ8vp3wqTaobnrePu8Q6HqsAyuLYaqibnzMtIsH17qGaNLt8V5YNi/9ktm59S5Ea+thw4mJn6vAKiY9Lo93Tdrusdlm2bm6CbAlx/YMGe3LfelHRex/dDP4DonrqGUoM3lmLdJ5nIRnYKvg6NLmp2uaK+S0/9nYvFEy9nJxxADJUz5IxJY8FZrI2OS7otTqlrB87jhTeSZ8Du/FOWsrtD6aZdSZsK5b7ZXlYDApDa5CYSBfJSvRdxbcPmSWvjacewsJESn1yCLoB9My3owtfejEqor7kon8TIe5fPbQ0LJnVP7ij5PZUFEOYeWmy78N/GUkpq+Pp/9Sg9LngdD3bS17tOgw4kb1tDGvOPCJABsYIt2K6rGKxyqSn8skaS4dG/bjz8vw8qs6gdxOCLPrIF9yK5bJt2OJPJEV6Cx5pAy6wp22nawd8CWx/ziuw5OfGOS5DtdEdnIQKRO7aQWSZ3ANf4fstu1oaQsnp0tFIauE7HKtEzaFl4tMcW6MK/k6TNiwvt6D3610ppksBnbwpBl7TimJ079vXpVe4ab46dMafP3duoxcxfiTRWL9JEA8WUO6+pg5qba55oqO4C8NFUCx4f5PaDYYJWat1+6koZd9PMQl/K6EmSSYAb4n3xBrl1MtUpwRopvuPp677t3FNQV8Qd2/2pKzIAgvWxODBn3Ji8vMExdTo4wOHRdANhMARMOM5SPkgOhhJhZnuNhBJh9JU1jxfnc6T/lZPCZQjjc99wWA0FEGKxKgjkhVI7F9bADJWlDW1ITEt7aHF9VWRhn+k5TJA306fqj8LOWwev9QhRm/1ylTR0Xs91BZxVWTBR00p0yOQ/PNuB3sDCAU78q6a3PtKDaUlMkK1GKWlsebM9nIPEps5JbXiDr4FFYfKTfmue/3Lobro0cf30CAkmWojh2qqu0Gc4sXw/b8rj5Pb33SNWc7tmmWyHaMU35+ut07sILi6l1nzVHT3hNt+Is0tY6ZOqMxlnHxN03VCSfl/7M9gYt6luK+wIXP8A7eoRC/T7YmdpcoTIWJ6i038APsQiLqDIrF6LJO2OsPm9u2Nk4Vbqbhyn407sE9y8LzfWOBYddkn7c0uKuMIH23qIeEFXWP86jYaTB2krPGrKQstMBEcB0WM/JLa6fHibrpE8XxPCEpqQyYr3G6uoPi6KTSPItqjgm+jIdy2EXF/96yeAVVCqBPeUAZrUXPn9kkWW3BvSG6EKeO1c54SiCGQKotXFReL3iPlbf54/0sWJPAjrBIPSs/VVzUX8VKJGpbBSJg4nSMEpejXQCf9BKH5T4lUQhK3uSSK08X9qrvUkxFH6Q2dEiwee3eEQu0zxogN0/IwcZGQd7kKc7x+4aUpO76KCbUD+DolRKDf89RZBDXSp4gLc7tdxAeqvfNAaAAA==" alt="" className="size-12 shrink-0 rounded-xl object-cover" />
       <div className="min-w-0 flex-1">
@@ -133,5 +143,23 @@ export default function PwaRegister() {
         <X className="size-4" />
       </button>
     </div>
-  ) : null;
+    ) : null}
+    {showIosInstructions ? (
+      <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/45 p-3 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="ios-install-title">
+        <div className="w-full max-w-md rounded-3xl bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-2xl dark:bg-[#1B2633]">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 id="ios-install-title" className="text-lg font-semibold text-[#26364A] dark:text-[#E6ECF3]">Установка на iPhone</h2>
+            <button type="button" onClick={() => setShowIosInstructions(false)} aria-label="Закрыть инструкцию" className="rounded-full p-2 text-[#748195] hover:bg-[#F1F3F6] dark:hover:bg-[#2B3949]"><X className="size-5" /></button>
+          </div>
+          <ol className="space-y-3 text-sm leading-relaxed text-[#26364A] dark:text-[#E6ECF3]">
+            <li><span className="mr-2 font-semibold text-[#E83C35]">1.</span>Нажмите «Поделиться» - значок квадрата со стрелкой вверх в браузере.</li>
+            <li><span className="mr-2 font-semibold text-[#E83C35]">2.</span>В меню выберите «На экран Домой». Если пункта нет, откройте «Ещё».</li>
+            <li><span className="mr-2 font-semibold text-[#E83C35]">3.</span>Нажмите «Добавить» в правом верхнем углу.</li>
+          </ol>
+          <button type="button" onClick={() => setShowIosInstructions(false)} className="mt-5 w-full rounded-full bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white">Понятно</button>
+        </div>
+      </div>
+    ) : null}
+    </>
+  );
 }
