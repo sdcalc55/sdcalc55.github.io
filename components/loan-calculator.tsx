@@ -146,7 +146,7 @@ export function LoanCalculator() {
   const copyResults = async () => {
     if (!result || changed || error) {
       toast.error("Сначала выполните корректный расчёт");
-      return;
+      return false;
     }
     const lines = [
       `Ежемесячный платёж: ${amount(result.monthlyPayment)}`,
@@ -159,8 +159,10 @@ export function LoanCalculator() {
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
       toast.success("Скопировано в буфер обмена");
+      return true;
     } catch {
       toast.error("Не удалось скопировать результаты");
+      return false;
     }
   };
   const save = () => {
