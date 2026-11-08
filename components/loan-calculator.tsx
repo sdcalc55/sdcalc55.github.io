@@ -196,16 +196,16 @@ export function LoanCalculator() {
           <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
             <div className="relative">
               <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" enterKeyHint="next" autoComplete="new-password" onKeyDown={dismissKeyboard} value={term} onChange={event => {
-                const raw = event.target.value.replace(/[^\\d]/g, "").slice(0, 3);
+                const raw = event.target.value.replace(/[^\d]/g, "").slice(0, 3);
                 edit({ term: raw });
-              }} placeholder="Введите срок" className={`${inputStyle} pr-11`} />
+              }} placeholder="Введите срок" className="${inputStyle} pr-11" />
               {term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
             </div>
             <Select value={unit} onValueChange={nextUnit => {
               if (nextUnit === unit) return;
               const numericTerm = term.trim() ? parse(term) : NaN;
               const converted = Number.isFinite(numericTerm)
-                ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\\.0+$|(?<=\\.[0-9])0$/, "").replace(/\\.$/, "") : String(Math.round(numericTerm * 12))
+                ? nextUnit === "years" ? (numericTerm / 12).toFixed(2).replace(/\.0+$|(?<=\.[0-9])0$/, "").replace(/\.$/, "") : String(Math.round(numericTerm * 12))
                 : "";
               edit({ unit: nextUnit, term: converted });
             }}>
@@ -219,7 +219,7 @@ export function LoanCalculator() {
             </Select>
           </div>
           {term !== "" && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}
-        </div> && Number.isFinite(Number(term)) && Number(term) > (unit === "years" ? 30 : 360) && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{unit === "years" ? "30 лет - наш предел. На более долгий срок кредит пока не выдают 😄" : "360 месяцев - наш предел. Укажите меньший срок кредита."}</p>}</div>
+        </div>
         <div><label htmlFor="loan-rate" className="mb-3 block text-sm font-semibold">Процентная ставка</label><div className="relative"><input name="sd-calc-loan-rate" id="loan-rate" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" enterKeyHint="done" autoComplete="new-password" onKeyDown={dismissKeyboard} value={rate} onChange={event => {
           const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
           const parts = raw.split(".");
