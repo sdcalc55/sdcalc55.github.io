@@ -27,8 +27,17 @@ export function CalculatorResultActions({ onCopy, onSave, isSaved, copyKey, disa
       const source = (event as CustomEvent<{ source?: string }>).detail?.source;
       if (source !== instanceId) setCopied(false);
     };
+    const resetOnLeave = () => {
+      if (document.visibilityState !== "visible") setCopied(false);
+    };
     window.addEventListener(COPY_EVENT, handleOtherCopy);
-    return () => window.removeEventListener(COPY_EVENT, handleOtherCopy);
+    document.addEventListener("visibilitychange", resetOnLeave);
+    window.addEventListener("focus", resetOnLeave);
+    return () => {
+      window.removeEventListener(COPY_EVENT, handleOtherCopy);
+      document.removeEventListener("visibilitychange", resetOnLeave);
+      window.removeEventListener("focus", resetOnLeave);
+    };
   }, [instanceId]);
 
   const handleCopy = async () => {
