@@ -71,13 +71,15 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
   useEffect(() => {
     try {
       const isRefresh = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)?.type === "reload" && window.sessionStorage.getItem("sd-current-screen") === "commission";
-      const activeOperation = window.sessionStorage.getItem("sd-commission-operation") === "purchase" ? "purchase" : "sale";
-      const saved = window.sessionStorage.getItem("sd-commission-drafts");
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<Record<Operation, Draft>>;
-        if (isRefresh) delete parsed[activeOperation];
-        setDrafts(previous => ({ sale: { ...previous.sale, ...(parsed.sale ?? {}) }, purchase: { ...previous.purchase, ...(parsed.purchase ?? {}) } }));
-        if (isRefresh) window.sessionStorage.setItem("sd-commission-drafts", JSON.stringify(parsed));
+      if (isRefresh) {
+        // A reload clears the whole currently open section, including both sale and purchase forms.
+        window.sessionStorage.removeItem("sd-commission-drafts");
+      } else {
+        const saved = window.sessionStorage.getItem("sd-commission-drafts");
+        if (saved) {
+          const parsed = JSON.parse(saved) as Partial<Record<Operation, Draft>>;
+          setDrafts(previous => ({ sale: { ...previous.sale, ...(parsed.sale ?? {}) }, purchase: { ...previous.purchase, ...(parsed.purchase ?? {}) } }));
+        }
       }
     } catch {}
     setDraftsRestored(true);
