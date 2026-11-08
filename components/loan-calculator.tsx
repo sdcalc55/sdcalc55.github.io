@@ -17,7 +17,7 @@ const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
 };
-const exceedsAmountLimit = (value: string) => Number(value.replace(/\D/g, "")) > 999999999;
+const exceedsAmountLimit = (value: string) => parse(value) > 999999999;
 
 const dismissKeyboard = (event: KeyboardEvent<HTMLInputElement>) => {
   if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
