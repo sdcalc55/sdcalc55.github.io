@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v6";
+const CACHE_NAME = "sd-calculator-pwa-v7";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
