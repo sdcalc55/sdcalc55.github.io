@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Bookmark, ChartNoAxesCombined, Copy, House, Wallet, X } from "lucide-react";
+import { ChartNoAxesCombined, House, Wallet, X } from "lucide-react";
 import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
