@@ -36,7 +36,7 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
   const input = useRef<HTMLInputElement>(null);
   const invalid = value !== "" && parseMoney(value) === null;
   return <div>
-    <label htmlFor={id} className="mb-3 block text-sm font-semibold">{label}</label>
+    <label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label>
     <div className={`sd-commission-money-field relative rounded-xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
       <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid || Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
@@ -206,7 +206,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
             <div><h2 id="form-title" className="text-xl font-semibold leading-snug tracking-tight">Рассчитать комиссию при {sale ? "продаже" : "покупке"}</h2><p className="mt-2 select-none text-sm leading-relaxed text-[#748195] dark:text-[#B8C4D2]">Выберите тип недвижимости и укажите её стоимость</p></div>
           </div>
           <div>
-            <label htmlFor="category" className="mb-3 block text-sm font-semibold">Что {sale ? "продаём" : "покупаем"}?</label>
+            <label htmlFor="category" className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">Что {sale ? "продаём" : "покупаем"}?</label>
             <Select value={category} onValueChange={(value) => { setCategory(value as Category); clear(); }}>
               <SelectTrigger id="category" className={`h-auto! min-h-[52px] w-full rounded-xl border bg-[#F7F8FA] px-4 py-3 text-sm shadow-none [&_[data-slot=select-value]]:line-clamp-none [&_[data-slot=select-value]]:text-left [&_[data-slot=select-value]]:whitespace-normal ${sale ? "focus-visible:border-[#E83C35] focus-visible:ring-[#E83C35]/15" : "focus-visible:border-[#26364A] focus-visible:ring-[#26364A]/15"}`}>
                 <SelectValue />
@@ -221,7 +221,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
             <MoneyInput id="price" label={category === "land" ? "Стоимость земельного участка, ₽" : "Стоимость объекта недвижимости, ₽"} value={price} onChange={setPrice} />
             {category === "land" && <MoneyInput id="credit" label="Сумма одобренного кредита на строительство, ₽" value={credit} onChange={setCredit} />}
             {category !== "commercial" && <div>
-              <label htmlFor="discount" className="mb-3 block text-sm font-semibold">Скидка</label>
+              <label htmlFor="discount" className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">Скидка</label>
               <Select value={discount?.id ?? "none"} onValueChange={value => { setDiscountId(value); setPairedPrice(""); }}>
                 <SelectTrigger id="discount" className="h-auto! min-h-[52px] w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 py-3 text-sm shadow-none [&_[data-slot=select-value]]:line-clamp-none [&_[data-slot=select-value]]:whitespace-normal [&_[data-slot=select-value]]:text-left"><SelectValue /></SelectTrigger>
                 <SelectContent position="popper" className="max-h-80 w-[var(--radix-select-trigger-width)] min-w-0 rounded-xl dark:border-[#405064] dark:bg-[#253241] dark:text-[#E6EDF5]">
@@ -251,7 +251,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                   {sale && clientReceives !== null && <div data-testid="client-receives" className="mt-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-xl border border-[#E8B8B4] px-4 py-3 dark:border-[#754743]"><span className="text-sm font-semibold text-[#596779] dark:text-[#C2CCD8]">Продавцу на руки:</span><span className="text-lg font-bold tabular-nums text-[#C93630] dark:text-[#FF7770]">{money(clientReceives)}</span></div>}
                    {motivationOpen && discounted && <div id="motivation-panel" className="mt-4 rounded-2xl border border-white/80 bg-white/75 p-4 sm:p-5">
                     <div className="mb-4 flex items-center gap-2 text-sm font-semibold"><Wallet aria-hidden="true" className="size-4 text-[#647184]" />Агентское вознаграждение</div>
-                    <label htmlFor="motivation-percent" className="mb-2 block text-sm font-semibold">Ваш партнерский процент</label>
+                    <label htmlFor="motivation-percent" className="mb-2 block text-sm font-semibold dark:text-[#D5DEE8]">Ваш партнерский процент</label>
                     <div className="relative max-w-48"><input id="motivation-percent" name="sd-calc-motivation" autoFocus onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="done" autoComplete="off" placeholder="Например, 43.5" value={motivationPercent} onChange={event => {
                        const raw = event.target.value.replace(",", ".").replace(/[^\d.]/g, "");
                        const parts = raw.split(".");
@@ -261,7 +261,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                        update("motivationPercent", candidate);
                      }} onKeyDown={event => { if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault(); if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.blur(); } }} aria-invalid={motivation > 99} aria-describedby={motivation > 99 ? "motivation-hint" : undefined} className="h-12 w-full rounded-xl border border-[#E4E8ED] bg-white px-4 pr-10 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" /><span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#748195]">%</span></div>
                     {motivation > 99 && <p id="motivation-hint" className="mt-2 text-xs leading-relaxed text-[#BD302A]">Больше 99%? Кажется, с партнёрством что-то пошло не так! 😉</p>}
-                    <div className="mt-4 border-t border-[#26364A]/10 pt-4"><p className="text-xs text-[#647184]">От итоговой комиссии с учётом скидки</p><p data-testid="motivation-amount" className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-[#26364A]">{motivationAmount === null ? "-" : money(motivationAmount)}</p>{motivationAmount !== null && <p className="mt-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C4D2]"><span className="whitespace-nowrap">{money(discounted.total)}</span> × {motivationPercent}%</p>}</div>
+                    <div className="mt-4 border-t border-[#26364A]/10 pt-4"><p className="text-xs text-[#647184] dark:text-[#B8C4D2]">От итоговой комиссии с учётом скидки</p><p data-testid="motivation-amount" className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-[#26364A]">{motivationAmount === null ? "-" : money(motivationAmount)}</p>{motivationAmount !== null && <p className="mt-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C4D2]"><span className="whitespace-nowrap">{money(discounted.total)}</span> × {motivationPercent}%</p>}</div>
                   </div>}
                   {discount && !discount.paired && <div data-testid="discount-applied" className="mt-4 space-y-2 rounded-xl bg-white/65 p-4 text-sm leading-relaxed">
                     <p className="font-semibold text-[#A94442]">Применена скидка: {discount.name} - {discount.percent}%</p>
@@ -329,5 +329,5 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
 }
 
 function Row({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-start justify-between gap-5"><dt className="shrink-0 text-[#6E7886]">{label}</dt><dd className="max-w-[65%] text-right font-medium leading-relaxed tabular-nums">{value}</dd></div>;
+  return <div className="flex items-start justify-between gap-5"><dt className="shrink-0 text-[#6E7886] dark:text-[#D5DEE8]">{label}</dt><dd className="max-w-[65%] text-right font-medium leading-relaxed tabular-nums">{value}</dd></div>;
 }
