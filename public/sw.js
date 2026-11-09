@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
       await cache.put("/", response.clone());
 
       const html = await response.text();
-      const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+      const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)]
         .map((match) => new URL(match[1], self.location.origin).pathname);
       await Promise.all([...new Set(assets)].map((url) => fetchIntoCache(cache, url, true)));
 
@@ -59,7 +59,7 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request, { cache: "no-store" });
         if (!response.ok) return;
         const html = await response.clone().text();
-        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)]
           .map((match) => new URL(match[1], self.location.origin).pathname);
         await Promise.all([...new Set(assets)].map(async (assetUrl) => {
           try {
@@ -85,7 +85,7 @@ self.addEventListener("fetch", (event) => {
   }
   const isAppAsset = url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") || url.pathname.startsWith("/fonts/") ||
-    /\\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
+    /\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
   if (isAppAsset) event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request, { ignoreSearch: true });
