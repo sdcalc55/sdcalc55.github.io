@@ -1,0 +1,52 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { normalizeNumericInput } from "../lib/numeric-input.ts";
+
+test("rejects hostile and malformed input instead of converting it into a different number", () => {
+  for (const value of [
+    "-100", "−100", "–100", "+100", "1e6", "1E6", "NaN", "Infinity",
+    "100abc", "abc100", "1/2", "1;2", "1|2", "1,2.3", "1.2,3", "1,,2",
+  ]) {
+    assert.equal(normalizeNumericInput(value), null, value);
+  }
+});
+
+test("accepts digits and one decimal separator, normalizing comma to dot", () => {
+  assert.equal(normalizeNumericInput("12345"), "12345");
+  assert.equal(normalizeNumericInput("12,34"), "12.34");
+  assert.equal(normalizeNumericInput("12.34"), "12.34");
+  assert.equal(normalizeNumericInput(".5"), "0.5");
+  assert.equal(normalizeNumericInput(",5"), "0.5");
+  assert.equal(normalizeNumericInput("12."), "12.");
+  assert.equal(normalizeNumericInput(""), "");
+});
+
+test("accepts grouping spaces but removes them before calculation", () => {
+  assert.equal(normalizeNumericInput("1 234 567"), "1234567");
+  assert.equal(normalizeNumericInput("1\u00a0234\u202f567"), "1234567");
+});
+
+test("enforces integer and fractional digit limits without truncating the user's value", () => {
+  assert.equal(normalizeNumericInput("999999999", { maxIntegerDigits: 9 }), "999999999");
+  assert.equal(normalizeNumericInput("1000000000", { maxIntegerDigits: 9 }), null);
+  assert.equal(normalizeNumericInput("30.00", { maxIntegerDigits: 2, maxFractionDigits: 2, maxValue: 30 }), "30.00");
+  assert.equal(normalizeNumericInput("30.01", { maxIntegerDigits: 2, maxFractionDigits: 2, maxValue: 30 }), null);
+  assert.equal(normalizeNumericInput("1.234", { maxFractionDigits: 2 }), null);
+});
+
+test("does not silently change a negative pasted amount into a positive amount", () => {
+  const pasted = "-450000";
+  const accepted = normalizeNumericInput(pasted, { maxIntegerDigits: 9 });
+  assert.equal(accepted, null);
+  assert.notEqual(accepted, "450000");
+});
+
+test("active early repayment input uses strict normalization and keeps clear/backspace controls", async () => {
+  const source = await readFile(new URL("../components/prepayment-calculator.tsx", import.meta.url), "utf8");
+  assert.match(source, /normalizeNumericInput\(e\.target\.value/);
+  assert.match(source, /if\(candidate===null\)return/);
+  assert.match(source, /handleFormattedBackspace\(e,onChange\)/);
+  assert.match(source, /aria-label="Очистить поле"/);
+  assert.doesNotMatch(source, /replace\(\/\[\^\\d\.,\]\/g,""\)/);
+});
