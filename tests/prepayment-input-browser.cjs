@@ -16,7 +16,7 @@ const assert = require('node:assert/strict');
 
     const field = label => page.getByLabel(label, { exact: true });
     const balance = field('Остаток основного долга');
-    const rate = field('Процентная ставка');
+    const rate = field('Процентная ставка').last();
     const payment = field('Текущий ежемесячный платёж');
     const monthlyExtra = field('Ежемесячный досрочный платёж');
     const lump = field('Разовый досрочный платёж');
@@ -114,6 +114,19 @@ const assert = require('node:assert/strict');
     await lump.fill('4500001');
     assert.equal(await lump.inputValue(), '4 500 001');
     await page.getByText('Разовый взнос не может превышать остаток долга.', { exact: true }).waitFor();
+
+    // Monthly-only, lump-only and combined inputs each produce valid results.
+    await lump.fill('0');
+    await monthlyExtra.fill('4500001');
+    await page.getByText('Ежемесячный досрочный платёж не может превышать остаток долга.', { exact: true }).waitFor();
+    await monthlyExtra.fill('0');
+    await lump.fill('5000');
+    await page.getByText('Сокращение срока', { exact: true }).waitFor();
+    await lump.fill('0');
+    await monthlyExtra.fill('5000');
+    await page.getByText('Сокращение срока', { exact: true }).waitFor();
+    await lump.fill('1000');
+    await page.getByText('Сокращение срока', { exact: true }).waitFor();
 
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     console.log('PASS: prepayment input typing, paste, clear, selection, cursor, validation and live result recalculation.');
