@@ -280,7 +280,8 @@ export function LoanCalculator() {
 <CalculatorResultActions onCopy={copyResults} onSave={save} isSaved={isSaved} copyKey={result && !changed && !error ? [`Ежемесячный платёж: ${amount(result.monthlyPayment)}`, `Сумма кредита: ${amount(result.principal)}`, `Срок кредита: ${result.months} мес.`, `Годовая ставка: ${result.annualRate}%`].join("\n") : ""} disabled={changed || !!error} /><details className="mt-4 border-t border-[#26364A]/10 pt-4 text-xs leading-relaxed text-[#596779] dark:border-[#607084] dark:text-[#C2CCD8]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><div className="mt-3 space-y-2 text-justify">
             <p>{reverse ? result.annualRate === 0 ? "S = A × n" : "S = A × (1 − (1 + i)⁻ⁿ) / i" : result.annualRate === 0 ? "A = S / n" : "A = S × i × (1 + i)ⁿ / ((1 + i)ⁿ − 1)"}</p>
             <p>A - ежемесячный платёж; S - сумма кредита; i - годовая ставка / 12 / 100; n - срок в месяцах.</p>
-            <p>Предварительный расчёт без учёта страховок и дополнительных расходов. Не является одобрением банка. {reverse ? "Сумма кредита округляется вниз до копеек, чтобы рассчитанный платёж не превышал указанный." : "Ежемесячный платёж рассчитывается без промежуточного округления."} Суммы отображаются с точностью до копеек.</p>
+            <p>{reverse ? "Сумма кредита округлена вниз до копеек, чтобы платёж не превышал указанный. Итоги рассчитаны для этой суммы кредита." : "Ежемесячный платёж рассчитывается без промежуточного округления. Суммы отображаются с точностью до копеек."}</p>
+            <p>Предварительный расчёт без учёта страховок и дополнительных расходов. Не является одобрением банка.</p>
           </div></details>
         </section>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
