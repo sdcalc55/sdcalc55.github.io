@@ -45,6 +45,12 @@ const assert = require('node:assert/strict');
     await balance.press('Control+V');
     assert.equal(await balance.inputValue(), '7 654 321');
 
+    await page.evaluate(() => navigator.clipboard.writeText('1 23'));
+    await balance.focus();
+    await balance.press('Control+A');
+    await balance.press('Control+V');
+    assert.equal(await balance.inputValue(), '7 654 321');
+
     await page.evaluate(() => navigator.clipboard.writeText('1 234 567'));
     await balance.focus();
     await balance.press('Control+A');
@@ -76,7 +82,8 @@ const assert = require('node:assert/strict');
 
     // Lump sum boundary: greater than outstanding balance is rejected.
     await lump.fill('4500001');
-    assert.equal(await lump.inputValue(), '0');
+    assert.equal(await lump.inputValue(), '4 500 001');
+    await page.getByText('Разовый взнос не может превышать остаток долга.', { exact: true }).waitFor();
 
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     console.log('PASS: prepayment input typing, paste, clear, selection, cursor, validation and live result recalculation.');
