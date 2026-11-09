@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [reduce-supabase-traffic, prepayment-advisor]
+    branches: [reduce-supabase-traffic, prepayment-advisor, realtor-mortgage-assistant]
 
 permissions:
   contents: read
