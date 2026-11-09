@@ -2,6 +2,7 @@ export type NumericInputRules = {
   maxIntegerDigits?: number;
   maxFractionDigits?: number;
   maxValue?: number;
+  strictGrouping?: boolean;
 };
 
 /**
@@ -19,7 +20,7 @@ export function normalizeNumericInput(raw: string, rules: NumericInputRules = {}
   const groupingSpaces = /[\s\u00a0\u202f]/;
   if (groupingSpaces.test(fractionPart)) return null;
 
-  if (groupingSpaces.test(integerPart)) {
+  if (rules.strictGrouping !== false && groupingSpaces.test(integerPart)) {
     const groups = integerPart.split(/[\s\u00a0\u202f]/);
     if (!/^\d{1,3}$/.test(groups[0]) || groups.slice(1).some(group => !/^\d{3}$/.test(group))) return null;
   }
