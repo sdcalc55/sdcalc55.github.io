@@ -38,6 +38,13 @@ const assert = require('node:assert/strict');
     await balance.pressSequentially('7654321');
     assert.equal(await balance.inputValue(), '7 654 321');
 
+    // Cursor remains at the logical digit position when grouping separators move.
+    await balance.fill('1234567');
+    await balance.evaluate(input => input.setSelectionRange(1, 1));
+    await balance.pressSequentially('9');
+    assert.equal(await balance.inputValue(), '19 234 567');
+    assert.equal(await balance.evaluate(input => input.selectionStart), 2);
+
     // Invalid pasted content must be rejected as a whole, not stripped into a valid amount.
     await page.evaluate(() => navigator.clipboard.writeText('-450000'));
     await balance.focus();
