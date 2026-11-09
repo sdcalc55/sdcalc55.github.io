@@ -59,7 +59,7 @@ function InputField({label,value,onChange,type="text",hint,className,money=true,
   const numeric=type==="text";
   return <div className="min-w-0"><label className="mb-2 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label><div className="relative">
     <input ref={ref} type={type} value={value} inputMode={numeric?"decimal":undefined} autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={e=>scrollFocusedInputIntoView(e.currentTarget)} onClick={e=>scrollFocusedInputIntoView(e.currentTarget)} onKeyDown={e=>{if(money&&handleFormattedBackspace(e,onChange))return;if(e.key==="-"||e.key==="−"||e.key==="Subtract")e.preventDefault();if(e.key==="Enter"&&!e.nativeEvent.isComposing){e.preventDefault();focusNextCalculatorInput(e.currentTarget);}}} onChange={e=>{
-      if(!numeric){if(label==="Дата оформления кредита"){const digits=e.target.value.replace(/\D/g,"").slice(0,6);const formatted=digits.length>=2?digits.slice(0,2)+"."+digits.slice(2):digits;cursor.current=formatted.length;onChange(formatted);render(n=>n+1);}else onChange(e.target.value);return;}
+      if(!numeric){onChange(e.target.value);return;}
       const raw=e.target.value.replace(/[^\d.,]/g,"").replace(/([.,].*)[.,]/g,"$1");
       const digits=raw.replace(/[\s\u00a0\u202f]/g,"").split(/[.,]/)[0].replace(/^0+/,"");
       if(money&&digits.length>(maxDigits??10))return;
