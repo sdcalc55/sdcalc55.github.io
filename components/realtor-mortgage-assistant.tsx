@@ -170,7 +170,7 @@ export function RealtorMortgageAssistant() {
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#168A83] dark:text-[#83C9C2]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа.</p></div></div>
+        <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#168A83] dark:text-[#83C9C2]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
@@ -198,7 +198,7 @@ export function RealtorMortgageAssistant() {
             <p className="mt-3 text-sm text-[#596779] dark:text-[#D5DEE8]">{plans.paymentPlan ? <>Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</> : <>Чтобы рассчитать этот вариант, заполните поле «Оставшийся срок по графику» по данным банковского графика. Тогда появится расчёт нового обязательного платежа и экономии на процентах.</>}</p>
           </div>
           <p className="text-xs text-[#748195] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
-        </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта.</p>}
+        </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p>}
       </div>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#26364A] dark:text-[#E6ECF3]">
