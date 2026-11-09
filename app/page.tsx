@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
-import { ArrowLeft, ChevronRight, ArrowDownLeft, ArrowUpRight, HousePlus, KeyRound, WalletCards, Calculator, House, Instagram, Sparkles, History, Settings, Trash2, Copy, Check, ChevronDown, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ChevronRight, ArrowDownLeft, ArrowUpRight, HousePlus, KeyRound, WalletCards, HandCoins, Calculator, House, Instagram, Sparkles, History, Settings, Trash2, Copy, Check, ChevronDown, type LucideIcon } from "lucide-react";
 import { CommissionCalculator } from "@/components/commission-calculator";
 import { MortgageCalculators } from "@/components/mortgage-calculators";
 import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
@@ -20,7 +20,7 @@ const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 type Screen = "home" | "commission" | "mortgage" | "mortgage-tools" | "history" | "settings";
 type ThemeMode = "light" | "dark" | "system";
-const titles = { commission: "Комиссия", mortgage: "Ипотека", "mortgage-tools": "Стратегия погашения", history: "История расчётов", settings: "Настройки" };
+const titles = { commission: "Комиссия", mortgage: "Ипотека", "mortgage-tools": "Досрочное погашение", history: "История расчётов", settings: "Настройки" };
 
 const historyFieldLabels: Record<string, string> = {
   mode: "Тип расчёта",
@@ -121,9 +121,9 @@ function historyValue(key: string, value: string) {
   return value;
 }
 
-function NavigationRow({ title, icon: Icon, red, onClick }: { title: string; icon: LucideIcon; red?: boolean; onClick: () => void }) {
+function NavigationRow({ title, icon: Icon, red, teal, onClick }: { title: string; icon: LucideIcon; red?: boolean; teal?: boolean; onClick: () => void }) {
   return <button type="button" onClick={onClick} className={`group flex min-h-16 w-full min-w-0 cursor-pointer items-center gap-3 px-4 py-2 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-[-2px] sm:min-h-[84px] sm:gap-4 sm:px-4 sm:py-5 max-sm:[@media(max-height:650px)]:min-h-14 max-sm:[@media(max-height:650px)]:gap-2 max-sm:[@media(max-height:650px)]:px-3 max-sm:[@media(max-height:650px)]:py-1.5 ${red ? "bg-white hover:bg-[#FFF7F6] focus-visible:outline-[#A72A25] dark:!bg-[#111820] dark:hover:!bg-[#253241]" : "bg-white hover:bg-[#F5F7FA] focus-visible:outline-[#26364A] dark:!bg-[#111820] dark:hover:!bg-[#253241]"} text-[#26364A] dark:text-[#E6ECF3]`}>
-    <span className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] border transition-colors sm:size-12 max-sm:[@media(max-height:650px)]:size-9 ${red ? "border-transparent bg-[#FCEBEA] text-[#E83C35] group-hover:bg-[#F9DFDD]" : "border-transparent bg-[#EEF1F5] text-[#26364A] group-hover:bg-[#E4E9F0]"}`}><Icon aria-hidden="true" className="size-[23px] sm:size-6" strokeWidth={1.7} /></span>
+    <span className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] border transition-colors sm:size-12 max-sm:[@media(max-height:650px)]:size-9 ${red ? "border-transparent bg-[#FCEBEA] text-[#E83C35] group-hover:bg-[#F9DFDD]" : teal ? "border-transparent bg-[#E6F4F2] text-[#168A83] group-hover:bg-[#D7EEEB] dark:bg-[#203B3A] dark:text-[#83C9C2] dark:group-hover:bg-[#294A48]" : "border-transparent bg-[#EEF1F5] text-[#26364A] group-hover:bg-[#E4E9F0]"}`}><Icon aria-hidden="true" className="size-[23px] sm:size-6" strokeWidth={1.7} /></span>
     <span className="min-w-0 flex-1 text-sm font-medium leading-5 tracking-normal sm:text-base sm:leading-relaxed max-sm:[@media(max-height:650px)]:text-[13px] max-sm:[@media(max-height:650px)]:leading-[18px]">{title}</span>
     <span className={`flex size-7 shrink-0 items-center justify-center rounded-full transition-colors max-sm:[@media(max-height:650px)]:size-5 text-[#8993A2] group-hover:bg-white group-hover:text-[#26364A]`}><ChevronRight aria-hidden="true" className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5" /></span>
   </button>;
@@ -315,7 +315,7 @@ export default function Home() {
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
             <NavigationRow title="Кредитный калькулятор" icon={Calculator} onClick={() => navigate("mortgage", "loan")} />
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
-            <NavigationRow title="Стратегия погашения" icon={WalletCards} red onClick={() => navigate("mortgage-tools")} />
+            <NavigationRow title="Досрочное погашение" icon={HandCoins} teal onClick={() => navigate("mortgage-tools")} />
           </div>
         </section>
       </div>}
