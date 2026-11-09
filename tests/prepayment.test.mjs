@@ -307,3 +307,61 @@ test("recalculated payment preserves the original schedule when no early payment
   assert.equal(plan.months, 154);
   assert.ok(Math.abs(plan.interest - 1961056.72) < 0.01);
 });
+
+
+// Independent oracle: intentionally does not import or call production simulation helpers.
+function referenceFixedSchedule(balance, annualRate, payment, firstPeriodExtra = 0) {
+  const monthlyRate = annualRate / 1200;
+  let interest = 0, totalPaid = 0, months = 0, finalPayment = 0;
+  while (balance > 0.005 && months < 600) {
+    const accrued = balance * monthlyRate;
+    const due = balance + accrued;
+    const regular = Math.min(due, payment);
+    if (regular <= accrued + 1e-9) throw new Error("Reference case does not amortize");
+    interest += accrued;
+    balance = Math.max(0, due - regular);
+    const extra = months === 0 ? Math.min(balance, firstPeriodExtra) : 0;
+    balance = Math.max(0, balance - extra);
+    finalPayment = regular + extra;
+    totalPaid += finalPayment;
+    months++;
+  }
+  if (balance > 0.005) throw new Error("Reference case exceeds 600 months");
+  return {
+    months,
+    interest: Math.round((interest + Number.EPSILON) * 100) / 100,
+    totalPaid: Math.round((totalPaid + Number.EPSILON) * 100) / 100,
+    finalPayment: Math.round((finalPayment + Number.EPSILON) * 100) / 100,
+  };
+}
+
+test("matches independent monthly-recurrence oracle across adversarial principal, rate and payment combinations", () => {
+  const cases = [
+    { balance: 1, monthlyPayment: 2, annualRate: 0, extraPayment: 0 },
+    { balance: 999999999, monthlyPayment: 50000000, annualRate: 30, extraPayment: 1000000 },
+    { balance: 999999.99, monthlyPayment: 10000, annualRate: 0.01, extraPayment: 0.01 },
+    { balance: 1000000, monthlyPayment: 100000, annualRate: 12, extraPayment: 50000 },
+    { balance: 4500000, monthlyPayment: 42000, annualRate: 6, extraPayment: 100000 },
+    { balance: 250000, monthlyPayment: 8000, annualRate: 29.99, extraPayment: 249999 },
+    { balance: 1234567.89, monthlyPayment: 23456.78, annualRate: 17.45, extraPayment: 7654.32 },
+    { balance: 500000, monthlyPayment: 500000, annualRate: 30, extraPayment: 500000 },
+  ];
+  for (const input of cases) {
+    const result = calculatePrepayment(input);
+    const expectedBase = referenceFixedSchedule(input.balance, input.annualRate, input.monthlyPayment);
+    const firstDue = input.balance * (1 + input.annualRate / 1200);
+    const afterRegular = Math.max(0, firstDue - Math.min(input.monthlyPayment, firstDue));
+    const appliedExtra = Math.min(input.extraPayment, afterRegular);
+    const expectedShorten = referenceFixedSchedule(input.balance, input.annualRate, input.monthlyPayment, appliedExtra);
+    for (const [actual, expected, scenario] of [
+      [result.baseline, expectedBase, "baseline"],
+      [result.shorten, expectedShorten, "shorten"],
+    ]) {
+      assert.equal(actual.months, expected.months, JSON.stringify({ input, scenario }));
+      assert.ok(Math.abs(actual.interest - expected.interest) <= 0.01, JSON.stringify({ input, scenario, field: "interest", actual: actual.interest, expected: expected.interest }));
+      assert.ok(Math.abs(actual.totalPaid - expected.totalPaid) <= 0.01, JSON.stringify({ input, scenario, field: "totalPaid", actual: actual.totalPaid, expected: expected.totalPaid }));
+      assert.ok(Math.abs(actual.finalPayment - expected.finalPayment) <= 0.01, JSON.stringify({ input, scenario, field: "finalPayment", actual: actual.finalPayment, expected: expected.finalPayment }));
+      assert.ok(Math.abs(actual.totalPaid - (input.balance + actual.interest)) <= 0.02, JSON.stringify({ input, scenario, field: "accounting identity" }));
+    }
+  }
+});
