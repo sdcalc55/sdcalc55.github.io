@@ -70,7 +70,8 @@ function GoalPicker({value,onChange,className}:{value:PlannerGoal;onChange:(v:Pl
  const selected=options.find(([v])=>v===value)?.[1]??options[0][1];
  return <div className="relative"><span className="mb-2 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">Желаемый результат</span><button type="button" aria-haspopup="listbox" aria-expanded={open} onClick={()=>setOpen(v=>!v)} className={`${className} flex items-center justify-between gap-3 text-left`}><span>{selected}</span><span className="text-[#7B8797]">⌄</span></button>{open&&<div role="listbox" aria-label="Желаемый результат" className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-[#DCE2E9] bg-white p-1 shadow-xl dark:border-[#405064] dark:bg-[#1B2632]">{options.map(([v,label])=><button key={v} type="button" role="option" aria-selected={value===v} onClick={()=>{onChange(v);setOpen(false);}} className={`block w-full rounded-lg px-3 py-3 text-left text-sm ${value===v?"bg-[#FCEBEA] font-semibold text-[#C8322B] dark:bg-[#352322] dark:text-[#FF9B94]":"text-[#26364A] hover:bg-[#F5F7FA] dark:text-[#E6ECF3] dark:hover:bg-[#253241]"}`}>{label}</button>)}</div>}</div>;
 }
-\nfunction InputField({label,value,onChange,type="text",hint,className,money=true,maxValue,placeholder}:{label:string;value:string;onChange:(v:string)=>void;type?:"text"|"date"|"month";hint?:string;className:string;money?:boolean;maxValue?:number;placeholder?:string}){
+
+function InputField({label,value,onChange,type="text",hint,className,money=true,maxValue,placeholder}:{label:string;value:string;onChange:(v:string)=>void;type?:"text"|"date"|"month";hint?:string;className:string;money?:boolean;maxValue?:number;placeholder?:string}){
   const ref=useRef<HTMLInputElement>(null);
   const cursor=useRef<number|null>(null);
   const [,render]=useState(0);
