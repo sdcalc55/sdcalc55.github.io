@@ -8,7 +8,7 @@ import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
 const num = (value: string) => Math.max(0, Number(value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) || 0);
-function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecimal = false, maxIntegerDigits = 9, maxDecimalDigits = 0, maxValue, validateValue }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; hint?: string; error?: string; allowDecimal?: boolean; maxIntegerDigits?: number; maxDecimalDigits?: number; maxValue?: number; validateValue?: (value: string) => boolean }) {
+function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecimal = false, maxIntegerDigits = 9, maxDecimalDigits = 0, maxValue, validateValue, className = "" }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; hint?: string; error?: string; allowDecimal?: boolean; maxIntegerDigits?: number; maxDecimalDigits?: number; maxValue?: number; validateValue?: (value: string) => boolean; className?: string }) {
   const id = useId();
   const errorId = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -32,18 +32,22 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={event => {
-          let raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
-          const separatorIndex = raw.search(/[.,]/);
-          let integerPart = (separatorIndex < 0 ? raw : raw.slice(0, separatorIndex)).slice(0, maxIntegerDigits);
-          let fractionPart = separatorIndex < 0 || !decimal ? "" : raw.slice(separatorIndex + 1).replace(/[.,]/g, "").slice(0, maxDecimalDigits);
-          let normalized = decimal && separatorIndex >= 0 ? `${integerPart}.${fractionPart}` : integerPart;
-          if (maxValue !== undefined && Number(normalized) > maxValue) return;
+          const raw = event.target.value.replace(/[^\\d.,]/g, "");
+          const separatorIndex = decimal ? raw.search(/[.,]/) : -1;
+          const integerRaw = separatorIndex < 0 ? raw : raw.slice(0, separatorIndex);
+          const integerPart = integerRaw.slice(0, maxIntegerDigits);
+          const fractionPart = separatorIndex < 0 ? "" : raw.slice(separatorIndex + 1).replace(/[.,]/g, "").slice(0, maxDecimalDigits);
+          const normalized = separatorIndex >= 0 ? `${integerPart}.${fractionPart}` : integerPart;
+          if (maxValue !== undefined && normalized !== "" && Number(normalized) > maxValue) return;
           if (validateValue && !validateValue(normalized)) return;
           const position = event.target.selectionStart ?? raw.length;
-          const significant = raw.slice(0, position).replace(/[\s\u00a0\u202f]/g, "").length;
+          const significant = raw.slice(0, position).length;
           const next = formatInput(normalized);
           let index = 0, count = 0;
-          while (index < next.length && count < significant) { if (!/[\s\u00a0\u202f]/.test(next[index])) count++; index++; }
+          while (index < next.length && count < significant) {
+            if (!/[\\s\\u00a0\\u202f]/.test(next[index])) count++;
+            index++;
+          }
           cursor.current = index;
           onChange(normalized);
         }}
@@ -185,7 +189,7 @@ export function RealtorMortgageAssistant() {
             <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
-            <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]"><span className="block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="block">Дополнительные суммы вносятся сверх него.</span></p>
+            <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]">Текущий платёж {money(num(payment))} сохраняется. Досрочные взносы вносятся сверх него.</p>
           </div>
           <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
@@ -193,10 +197,10 @@ export function RealtorMortgageAssistant() {
             {plans.paymentPlan && plans.paymentSaving !== null ? <>
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
               <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
-              <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]"><span className="block">Расчётный срок погашения: {duration(plans.termMonths!)}.</span><span className="block">Ежемесячная досрочная сумма вносится сверх нового обязательного платежа.</span></p>
+              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]">Расчётный срок: {duration(plans.termMonths!)}. Досрочный взнос вносится сверх нового обязательного платежа.</p>
             </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
-              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">"Не удалось определить срок погашения в пределах 50 лет. Проверьте остаток долга, ставку и текущий платёж."</p>
+              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Не удалось определить срок погашения в пределах 50 лет. Проверьте остаток долга, ставку и текущий платёж.</p>
               
             </div>}
           </div>
