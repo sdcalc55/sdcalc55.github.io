@@ -1,0 +1,38 @@
+name: Verify Windows PWA single-window prototype
+
+on:
+  push:
+    branches: [windows-single-instance-prototype]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Verify exported app and manifest
+        run: |
+          test -f out/index.html
+          test -f out/manifest.webmanifest
+          node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('./out/manifest.webmanifest','utf8')); if(m.launch_handler?.client_mode!=='focus-existing') process.exit(1)"
