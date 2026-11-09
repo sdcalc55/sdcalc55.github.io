@@ -10,7 +10,6 @@ import { CommissionCalculator } from "@/components/commission-calculator";
 import { MortgageCalculators } from "@/components/mortgage-calculators";
 import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
 import { LoanCalculator } from "@/components/loan-calculator";
-import { PrepaymentCalculator } from "@/components/prepayment-calculator";
 import { RealtorMortgageAssistant } from "@/components/realtor-mortgage-assistant";
 import type { Operation } from "@/lib/calculator";
 import { discounts } from "@/lib/discounts";
@@ -157,7 +156,6 @@ export default function Home() {
   const [screenReady, setScreenReady] = useState(false);
   const [operation, setOperation] = useState<Operation>("sale");
   const [mortgageTab, setMortgageTab] = useState<"downpayment" | "loan">("downpayment");
-  const [mortgageToolsTab, setMortgageToolsTab] = useState<"prepayment" | "realtor">("prepayment");
   const [historyItems, setHistoryItems] = useState<CalculationRecord[]>([]);
   const [historyMode, setHistoryModeState] = useState<HistoryMode>("manual");
   const [themeMode, setThemeMode] = useState<ThemeMode>("system");
