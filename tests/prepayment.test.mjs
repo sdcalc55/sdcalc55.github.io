@@ -284,5 +284,5 @@ test("zero-rate boundary has exact principal-only repayment", () => {
   assert.equal(result.baseline.totalPaid, 120000);
   assert.equal(result.shorten.months, 10);
   assert.equal(result.shorten.interest, 0);
-  assert.equal(result.shorten.totalPaid, 100000);
+  assert.equal(result.shorten.totalPaid, 120000);
 });
