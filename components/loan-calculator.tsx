@@ -12,7 +12,8 @@ import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
 const currency = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const amount = (value: number) => `${currency.format(value)}\u00a0₽`;\nconst formatLoanTerm = (months: number) => { const years=Math.floor(months/12), mod=years%10, last=years%100; const word=last>=11&&last<=14?"лет":mod===1?"год":mod>=2&&mod<=4?"года":"лет"; return years?`${years} ${word} (${months} мес.)`:`${months} мес.`; };
+const amount = (value: number) => `${currency.format(value)}\u00a0₽`;
+const formatLoanTerm = (months: number) => { const years=Math.floor(months/12), mod=years%10, last=years%100; const word=last>=11&&last<=14?"лет":mod===1?"год":mod>=2&&mod<=4?"года":"лет"; return years?`${years} ${word} (${months} мес.)`:`${months} мес.`; };
 const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
