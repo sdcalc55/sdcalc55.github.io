@@ -222,20 +222,31 @@ export function RealtorMortgageAssistant() {
           <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       </div>
-      {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#26364A] dark:text-[#E6ECF3]">
-          <span>Подробности расчёта</span><span className="text-[#8993A2] transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+      {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm dark:border-[#405064] dark:bg-[#1B2632]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-[#EEF2F6] px-4 py-3 text-[#26364A] transition-colors hover:bg-[#E8EDF3] dark:bg-[#263443] dark:text-[#E6ECF3] dark:hover:bg-[#2D3D4E]">
+          <span>
+            <span className="block font-semibold">Подробности расчёта</span>
+            <span className="mt-0.5 block text-xs font-normal text-[#748195] dark:text-[#B8C5D3]">Методика и этапы расчёта</span>
+          </span>
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-lg text-[#596779] shadow-sm transition-transform group-open:rotate-180 dark:bg-[#17212C] dark:text-[#D5DEE8]" aria-hidden="true">⌄</span>
         </summary>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
-          <p>Расчёт выполнен методом помесячного моделирования кредитного обязательства с последовательным пересчётом остатка основного долга и процентных начислений.</p>
-          <ol className="list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#E83C35]">
-            <li>Рассчитан базовый график погашения без досрочных взносов.</li>
-            <li>Для каждого расчётного периода определена сумма начисленных процентов.</li>
-            <li>Учтены обязательный платёж и дополнительные взносы.</li>
-            <li>Последовательно смоделировано изменение остатка основного долга.</li>
-            <li>Рассчитана дата полного погашения и общая сумма процентов.</li>
-            <li>Результат сопоставлен с базовым сценарием.</li>
+        <div className="px-1 pb-1 pt-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
+          <p>Расчёт выполняется методом помесячного моделирования кредитного обязательства с учётом начисления процентов, обязательных платежей и досрочных взносов.</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#748195] dark:marker:text-[#B8C5D3]">
+            <li>Рассчитывается базовый график погашения без досрочных взносов.</li>
+            <li>Определяется сумма процентов, начисляемых за каждый расчётный месяц.</li>
+            <li>Учитывается погашение основного долга обязательным платежом и досрочными взносами.</li>
+            <li>Моделируется изменение остатка задолженности и пересчитываются параметры платежей в зависимости от выбранного сценария.</li>
+            <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
+            <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
+          <div className="mt-4 rounded-xl border border-[#DCE3EA] bg-white p-3 dark:border-[#405064] dark:bg-[#17212C]">
+            <div className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Почему для вариантов нужны разные данные?</div>
+            <div className="mt-2 space-y-2">
+              <p><span className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Сокращение срока.</span> Текущий обязательный платёж сохраняется, досрочные взносы направляются на уменьшение основного долга. Поэтому расчёт можно выполнить без указания оставшегося срока по графику.</p>
+              <p><span className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Уменьшение платежа.</span> Обязательный платёж пересчитывается с учётом оставшегося срока кредита. Поэтому для расчёта необходим срок по графику, иначе невозможно корректно определить новый платёж и экономию на процентах.</p>
+            </div>
+          </div>
         </div>
       </details>}
     </div>
