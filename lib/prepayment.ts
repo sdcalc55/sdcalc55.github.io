@@ -65,8 +65,17 @@ export function calculatePlanOptions(input: { balance: number; monthlyPayment: n
   const lumpReduceFuture = afterLump > 0 ? schedule(afterLump, reducedRequired, rate) : emptyScenario();
   const lumpReduce = { monthlyPayment: reducedRequired, months: 1 + lumpReduceFuture.months, interest: firstInterest + lumpReduceFuture.interest, totalPaid: firstRegularPayment + appliedLump + lumpReduceFuture.totalPaid, finalPayment: lumpReduceFuture.months ? lumpReduceFuture.finalPayment : firstRegularPayment + appliedLump };
   const recurring = schedule(balance, monthlyPayment, rate, monthlyExtra);
-  const combinedFuture = afterLump > 0 ? schedule(afterLump, monthlyPayment, rate, monthlyExtra) : emptyScenario();
-  const combined = { monthlyPayment, months: 1 + combinedFuture.months, interest: firstInterest + combinedFuture.interest, totalPaid: firstRegularPayment + appliedLump + combinedFuture.totalPaid, finalPayment: combinedFuture.months ? combinedFuture.finalPayment : firstRegularPayment + appliedLump };
+  // Apply both extra contributions in the first period, after the regular payment.
+  const appliedMonthlyExtraFirst = Math.min(monthlyExtra, afterLump);
+  const afterCombinedFirst = Math.max(0, afterLump - appliedMonthlyExtraFirst);
+  const combinedFuture = afterCombinedFirst > 0 ? schedule(afterCombinedFirst, monthlyPayment, rate, monthlyExtra) : emptyScenario();
+  const combined = {
+    monthlyPayment,
+    months: 1 + combinedFuture.months,
+    interest: firstInterest + combinedFuture.interest,
+    totalPaid: firstRegularPayment + appliedLump + appliedMonthlyExtraFirst + combinedFuture.totalPaid,
+    finalPayment: combinedFuture.months ? combinedFuture.finalPayment : firstRegularPayment + appliedLump + appliedMonthlyExtraFirst,
+  };
   const candidates: { key: PlanOptions["recommendation"]; scenario: PrepaymentScenario; required: number; extra: number }[] = [
     { key: "lumpShorten" as const, scenario: lumpShort, required: monthlyPayment, extra: 0 },
     { key: "lumpReduce" as const, scenario: lumpReduce, required: reducedRequired, extra: 0 },
