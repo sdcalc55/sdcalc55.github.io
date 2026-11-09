@@ -32,12 +32,20 @@ export default function PwaRegister() {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if ((!isAndroid && !isIOS) || isStandalone) return;
 
-    // На Android предлагаем системную установку, на iPhone показываем
-    // инструкцию добавления сайта на экран «Домой».
+    // Если приложение запущено с иконки, запоминаем факт установки.
+    // Это позволяет не показывать предложение при следующем открытии сайта в браузере.
+    if (isStandalone) {
+      try { localStorage.setItem("sd-app-installed", "1"); } catch {}
+      return;
+    }
+    if (!isAndroid && !isIOS) return;
+
     try {
-      if (sessionStorage.getItem("sd-install-banner-dismissed") !== "1") {
+      if (
+        localStorage.getItem("sd-app-installed") !== "1" &&
+        sessionStorage.getItem("sd-install-banner-dismissed") !== "1"
+      ) {
         setShowInstallBanner(true);
       }
     } catch {
@@ -51,6 +59,7 @@ export default function PwaRegister() {
     const handleInstalled = () => {
       setShowInstallBanner(false);
       setInstallPrompt(null);
+      try { localStorage.setItem("sd-app-installed", "1"); } catch {}
     };
 
     if (isAndroid) window.addEventListener("beforeinstallprompt", handleInstallAvailable);
