@@ -7,7 +7,7 @@ import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
-const num = (value: string) => Math.max(0, Number(value.replace(/[\\s\\u00a0\\u202f]/g, "").replace(",", ".")) || 0);
+const num = (value: string) => Math.max(0, Number(value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) || 0);
 function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, error }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string; error?: string }) {
   const id = useId();
   const errorId = useId();
