@@ -8,15 +8,6 @@ import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
 const num = (value: string) => Math.max(0, Number(value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) || 0);
-function parseTermMonths(value: string) {
-  const clean = value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".");
-  if (!clean) return null;
-  const match = clean.match(/^(\d+)(?:\.(\d{1,2}))?$/);
-  if (!match) return null;
-  const years = Number(match[1]), months = match[2] ? Number(match[2]) : 0;
-  if (months > 11) return null;
-  return years * 12 + months;
-}
 function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecimal = false, maxIntegerDigits = 9, maxDecimalDigits = 0, maxValue, validateValue }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; hint?: string; error?: string; allowDecimal?: boolean; maxIntegerDigits?: number; maxDecimalDigits?: number; maxValue?: number; validateValue?: (value: string) => boolean }) {
   const id = useId();
   const errorId = useId();
@@ -128,19 +119,16 @@ function duration(months: number) {
 }
 export function RealtorMortgageAssistant() {
   const [rate, setRate] = useState("6");
-  const [remainingYears, setRemainingYears] = useState("");
   const [balance, setBalance] = useState("4500000");
   const [payment, setPayment] = useState("42000");
   const [extraMonthly, setExtraMonthly] = useState("");
   const [lump, setLump] = useState("");
-  const parsedTermMonths = parseTermMonths(remainingYears);
   const errors = {
     balance: num(balance) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
     payment: num(payment) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
     extraMonthly: num(extraMonthly) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
     lump: num(lump) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
     rate: num(rate) > 30 ? "Максимальная ставка - 30%." : "",
-    term: remainingYears !== "" && (parsedTermMonths === null || parsedTermMonths < 1 || parsedTermMonths > MAX_MONTHS) ? "Укажите срок в формате годы.месяцы, например 12.5. Месяцы - от 0 до 11." : "",
   };
   const principal = num(balance);
   const monthlyRate = num(rate) / 1200;
@@ -158,14 +146,8 @@ export function RealtorMortgageAssistant() {
     const oneTime = num(lump);
     const base = simulateFixedPayment(principal, num(rate), regularPayment, 0, 0);
     const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
-    const termMonths = parsedTermMonths;
-    const termTolerance = Math.max(3, Math.round(base.months * 0.05));
-    // The entered schedule term is only usable when the current payment can actually amortize
-    // the entered balance at the entered rate within that term. Never compare unlike horizons.
-    const termMismatch = termMonths !== null && (
-      !base.completed || Math.abs(termMonths - base.months) > termTolerance
-    );
-    const paymentPlan = termMonths !== null && termMonths > 0 && termMonths <= MAX_MONTHS && base.completed && !termMismatch
+    const termMonths = base.completed ? base.months : null;
+    const paymentPlan = termMonths !== null && termMonths > 0
       ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime)
       : null;
     const hasExtra = extra > 0 || oneTime > 0;
@@ -174,14 +156,13 @@ export function RealtorMortgageAssistant() {
       term,
       paymentPlan,
       termMonths,
-      termMismatch,
       estimatedTermMonths: base.months,
       hasExtra,
       termSaving: base.completed && term.completed ? Math.max(0, base.interest - term.interest) : null,
       paymentSaving: base.completed && paymentPlan?.completed ? Math.max(0, base.interest - paymentPlan.interest) : null,
       monthsSaved: base.completed && term.completed ? Math.max(0, base.months - term.months) : null,
     };
-  }, [balance, rate, payment, remainingYears, extraMonthly, lump, isValid, parsedTermMonths]);
+  }, [balance, rate, payment, extraMonthly, lump, isValid]);
   const termScenarioHasHigherSavings = plans?.termSaving !== null && plans?.termSaving !== undefined &&
     (plans.paymentSaving === null || plans.paymentSaving === undefined || plans.termSaving >= plans.paymentSaving);
   return <section className="space-y-5">
@@ -192,7 +173,6 @@ export function RealtorMortgageAssistant() {
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
-          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} validateValue={value => { const [years, months = ""] = value.split("."); return Number(years || 0) * 12 + Number(months || 0) <= MAX_MONTHS && Number(months || 0) <= 11; }} hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
           <Field label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
@@ -213,16 +193,12 @@ export function RealtorMortgageAssistant() {
             {plans.paymentPlan && plans.paymentSaving !== null ? <>
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
               <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
-              <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]"><span className="block">Срок по графику: {duration(plans.termMonths!)}.</span><span className="block">Ежемесячная досрочная сумма вносится сверх нового обязательного платежа.</span></p>
+              <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]"><span className="block">Расчётный срок погашения: {duration(plans.termMonths!)}.</span><span className="block">Ежемесячная досрочная сумма вносится сверх нового обязательного платежа.</span></p>
             </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
-              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">{plans.termMismatch ? "Срок по графику не совпадает с расчётным. Проверьте остаток долга, ставку, платёж и срок по графику." : "Заполните оставшийся срок по графику"}</p>
-              {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">При остатке долга, ставке и текущем платеже {money(num(payment))} модельный срок составляет {duration(plans.estimatedTermMonths)}. Указанный срок не согласуется с этими данными. Проверьте срок и параметры кредита: расчёт уменьшения платежа остановлен, чтобы не сравнивать разные периоды.</p>}
+              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">"Не удалось определить срок погашения в пределах 50 лет. Проверьте остаток долга, ставку и текущий платёж."</p>
+              
             </div>}
-          </div>
-          <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
-            <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Зачем указывать оставшийся срок кредита?</div>
-            <p className="mt-2">При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
           </div>
           <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
@@ -245,10 +221,6 @@ export function RealtorMortgageAssistant() {
             <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
             <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
-          <div className="mt-4 rounded-xl p-3">
-            <div className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Зачем указывать оставшийся срок кредита?</div>
-            <p className="mt-2">При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
-          </div>
         </div>
       </details>}
     </div>
