@@ -158,6 +158,7 @@ export function RealtorMortgageAssistant() {
             </div>}
           </div>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
+      <p className="mt-4 flex items-start gap-2 rounded-xl border border-[#E2E7ED] bg-white/70 p-3 text-xs leading-relaxed text-[#748195] [user-select:none] [-webkit-user-select:none] dark:border-[#405064] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm dark:border-[#405064] dark:bg-[#1B2632]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-[#26364A] transition-colors dark:text-[#E6ECF3]">
           <span>
@@ -176,7 +177,7 @@ export function RealtorMortgageAssistant() {
             <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
             <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
-          <p className="mt-4 flex items-start gap-2 rounded-xl border border-[#E2E7ED] bg-white/70 p-3 text-xs leading-relaxed text-[#748195] [user-select:none] [-webkit-user-select:none] dark:border-[#405064] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>
+          
         </div>
       </details>}
     </div>
