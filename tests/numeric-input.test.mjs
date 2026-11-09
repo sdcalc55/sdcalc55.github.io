@@ -43,17 +43,17 @@ test("does not silently change a negative pasted amount into a positive amount",
 });
 
 test("active early repayment input uses strict normalization and keeps clear/backspace controls", async () => {
-  const source = await readFile(new URL("../components/prepayment-calculator.tsx", import.meta.url), "utf8");
+  const source = await readFile(new URL("../components/realtor-mortgage-assistant.tsx", import.meta.url), "utf8");
   assert.match(source, /normalizeNumericInput\(e\.target\.value/);
   assert.match(source, /if\(candidate===null\)return/);
   assert.match(source, /handleFormattedBackspace\(e,onChange\)/);
-  assert.match(source, /aria-label="Очистить поле"/);
+  assert.match(source, /aria-label=\{`Очистить поле: \$\{label\}`}\s+title="Очистить"/);
   assert.doesNotMatch(source, /replace\(\/\[\^\\d\.,\]\/g,""\)/);
 });
 
 test("the deployed navigation mounts the updated calculator and does not reintroduce loan date or term fields", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const component = await readFile(new URL("../components/prepayment-calculator.tsx", import.meta.url), "utf8");
+  const component = await readFile(new URL("../components/realtor-mortgage-assistant.tsx", import.meta.url), "utf8");
   assert.match(page, /import \{ PrepaymentCalculator \} from "@\/components\/prepayment-calculator"/);
   assert.match(page, /screen === "mortgage-tools" && <PrepaymentCalculator \/>/);
   assert.doesNotMatch(component, /Дата оформления кредита|Первоначальная сумма кредита|Срок кредита|startDate/);
