@@ -1,15 +1,16 @@
-# SD | Калькулятор - Windows launcher prototype
+# SD | Калькулятор - single-window PWA experiment
 
-This experimental branch contains a separate Windows portable launcher. It does not change the website, PWA, Android/iOS builds, or service worker.
+This branch tests the Chromium Web App Manifest `launch_handler` setting:
 
-## Behavior
-- Prefers Google Chrome; falls back to Microsoft Edge.
-- Opens the calculator as a standalone browser app window.
-- Uses a per-Windows-session mutex so a second launcher start activates the existing calculator window instead of creating another one.
-- The launcher exits after the app window is closed.
+```json
+"launch_handler": {
+  "client_mode": "navigate-existing"
+}
+```
 
-## Build
-GitHub Actions builds a native Windows executable and uploads it as the artifact `SD-Calculator-Windows-Portable`. The executable is not published to the website.
+When the installed PWA is launched again, Chromium should reuse an existing app window rather than opening another one. Chrome and Edge both use Chromium, and no external launcher or extra browser process is added by this project.
+
+The production branch and mobile installations are unchanged until this change is deliberately merged.
 
 ## Rollback
-Delete this experimental branch. The production branch remains unchanged.
+Revert the manifest change or discard this experimental branch.
