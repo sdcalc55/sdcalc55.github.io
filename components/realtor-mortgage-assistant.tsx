@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useState as useLocalState } from "react";
 import { Calculator, RefreshCw, TrendingDown, Wallet, BadgeCheck } from "lucide-react";
 import { PrepaymentCalculator } from "@/components/prepayment-calculator";
 
