@@ -121,11 +121,11 @@ export function RealtorMortgageAssistant() {
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195] dark:text-[#B8C5D3]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          <Field className="lg:col-span-2" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field className="" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field className="lg:col-span-2" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field className="lg:col-span-2" label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
-          <Field className="lg:col-span-3" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
+          <Field className="md:col-span-2" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field className="lg:col-span-3" label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
         <div className="mt-5 flex justify-end border-t border-[#EBEEF2] pt-3 dark:border-[#354354]">
@@ -138,7 +138,7 @@ export function RealtorMortgageAssistant() {
             <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Переплата уменьшится на</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
-            <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="lg:block">Досрочные взносы вносятся сверх него.</span></p>
+            <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="mt-1 block">Досрочные взносы вносятся сверх него.</span></p>
           </div>
           <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
