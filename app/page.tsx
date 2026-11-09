@@ -20,7 +20,7 @@ const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 type Screen = "home" | "commission" | "mortgage" | "mortgage-tools" | "history" | "settings";
 type ThemeMode = "light" | "dark" | "system";
-const titles = { commission: "Комиссия", mortgage: "Ипотека", "mortgage-tools": "Дополнительные ипотечные инструменты", history: "История расчётов", settings: "Настройки" };
+const titles = { commission: "Комиссия", mortgage: "Ипотека", "mortgage-tools": "Стратегия погашения", history: "История расчётов", settings: "Настройки" };
 
 const historyFieldLabels: Record<string, string> = {
   mode: "Тип расчёта",
@@ -315,7 +315,7 @@ export default function Home() {
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
             <NavigationRow title="Кредитный калькулятор" icon={Calculator} onClick={() => navigate("mortgage", "loan")} />
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
-            <NavigationRow title="Досрочное погашение и помощник риелтора" icon={WalletCards} red onClick={() => navigate("mortgage-tools")} />
+            <NavigationRow title="Стратегия погашения" icon={WalletCards} red onClick={() => navigate("mortgage-tools")} />
           </div>
         </section>
       </div>}
