@@ -43,6 +43,24 @@ test("compares lump-sum, monthly and combined repayment plans", async () => {
   assert.ok(result.combined.months <= result.lumpShorten.months);
 });
 
+test("combined plan applies the monthly extra from the first payment period", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const result = calculatePlanOptions({
+    balance: 100000,
+    monthlyPayment: 10000,
+    annualRate: 12,
+    lumpSum: 5000,
+    monthlyExtra: 1000,
+  });
+
+  // First month: 1,000 interest, 10,000 regular payment, 5,000 lump sum,
+  // and 1,000 recurring extra. The remaining balance is then amortized.
+  assert.equal(result.combined.months, 10);
+  assert.ok(Math.abs(result.combined.interest - 4909.4482253736855) < 0.01);
+  assert.ok(Math.abs(result.combined.totalPaid - 104909.44822537368) < 0.01);
+  assert.ok(result.combined.interest < result.lumpShorten.interest);
+});
+
 test("uses the entered current balance even when original loan data is also present", () => {
   // Current balance is the source of truth after previous early repayments.
   const result = calculatePrepayment({ balance: 859074.34, monthlyPayment: 16596.52, annualRate: 6, extraPayment: 100000 });
