@@ -12,7 +12,7 @@ import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
 const currency = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const amount = (value: number) => `${currency.format(value)}\u00a0₽`;
+const amount = (value: number) => `${currency.format(value)}\u00a0₽`;\nconst formatLoanTerm = (months: number) => { const years=Math.floor(months/12), mod=years%10, last=years%100; const word=last>=11&&last<=14?"лет":mod===1?"год":mod>=2&&mod<=4?"года":"лет"; return years?`${years} ${word} (${months} мес.)`:`${months} мес.`; };
 const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
@@ -184,7 +184,7 @@ export function LoanCalculator() {
     }
     const lines = [
       `Ежемесячный платёж: ${amount(result.monthlyPayment)}`,
-      `Срок: ${result.months} мес.`,
+      `Срок: ${formatLoanTerm(result.months)}`,
       `Ставка: ${result.annualRate}%`,
       `Сумма кредита: ${amount(result.principal)}`,
     ];
@@ -273,12 +273,12 @@ export function LoanCalculator() {
           <p className="mb-2 mt-6 text-sm text-[#596779] dark:text-[#B8C4D2]">{reverse ? "Сумма кредита" : "Ежемесячный платёж"}</p><p data-testid={reverse ? "loan-available-principal" : "loan-monthly"} className="text-[clamp(1.8rem,6vw,2.4rem)] font-bold leading-tight tracking-tight text-[#D93630] tabular-nums dark:text-[#FF665F]">{amount(reverse ? result.principal : result.monthlyPayment)}</p>
           <dl className="mt-6 space-y-4 border-t border-[#26364A]/10 pt-5 text-sm dark:border-[#607084]">
             {reverse ? <ResultRow label="Ежемесячный платёж" value={amount(result.monthlyPayment)} /> : <ResultRow label="Основной долг" value={amount(result.principal)} />}
-            <ResultRow label="Срок кредита" value={`${result.months} мес.`} />
+            <ResultRow label="Срок кредита" value={formatLoanTerm(result.months)} />
             <ResultRow label="Процентная ставка" value={`${result.annualRate}%`} />
           </dl>
           <svg role="img" aria-label={`Основной долг ${amount(result.principal)}, проценты ${amount(result.interest)}`} viewBox="0 0 100 12" preserveAspectRatio="none" className="mt-6 h-3 w-full overflow-hidden rounded-full"><rect width="100" height="12" className="fill-[#26364A]" /><rect width={result.principal / result.totalPayment * 100} height="12" className="fill-[#E83C35]" /></svg>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#596779] dark:text-[#D5DEE8]"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#E83C35]" />Основной долг</span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#26364A]" />Проценты</span></div>
-<CalculatorResultActions onCopy={copyResults} onSave={save} isSaved={isSaved} copyKey={result && !changed && !error ? [`Ежемесячный платёж: ${amount(result.monthlyPayment)}`, `Срок: ${result.months} мес.`, `Ставка: ${result.annualRate}%`, `Сумма кредита: ${amount(result.principal)}`].join("\n") : ""} disabled={changed || !!error} /><details className="mt-4 border-t border-[#26364A]/10 pt-4 text-xs leading-relaxed text-[#596779] dark:border-[#607084] dark:text-[#C2CCD8]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><div className="mt-3 space-y-2 text-justify">
+<CalculatorResultActions onCopy={copyResults} onSave={save} isSaved={isSaved} copyKey={result && !changed && !error ? [`Ежемесячный платёж: ${amount(result.monthlyPayment)}`, `Срок: ${formatLoanTerm(result.months)}`, `Ставка: ${result.annualRate}%`, `Сумма кредита: ${amount(result.principal)}`].join("\n") : ""} disabled={changed || !!error} /><details className="mt-4 border-t border-[#26364A]/10 pt-4 text-xs leading-relaxed text-[#596779] dark:border-[#607084] dark:text-[#C2CCD8]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><div className="mt-3 space-y-2 text-justify">
             <p>{reverse ? result.annualRate === 0 ? "S = A × n" : "S = A × (1 − (1 + i)⁻ⁿ) / i" : result.annualRate === 0 ? "A = S / n" : "A = S × i × (1 + i)ⁿ / ((1 + i)ⁿ − 1)"}</p>
             <p>A - ежемесячный платёж; S - сумма кредита; i - годовая ставка / 12 / 100; n - срок в месяцах.</p>
             <p>{reverse ? "Сумма кредита округлена вниз до копеек, чтобы платёж не превышал указанный. Итоги рассчитаны для этой суммы кредита." : "Ежемесячный платёж рассчитывается без промежуточного округления. Суммы отображаются с точностью до копеек."}</p>
