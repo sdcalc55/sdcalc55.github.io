@@ -51,6 +51,9 @@ const assert = require('node:assert/strict');
     assert.equal(await balance.inputValue(), '19 234 567');
     assert.equal(await balance.evaluate(input => input.selectionStart), 2);
 
+    // Reset the field after the cursor-position case before checking paste rejection.
+    await balance.fill('7654321');
+
     // Invalid pasted content must be rejected as a whole, not stripped into a valid amount.
     for (const invalid of ['-450000', 'NaN', 'Infinity', '1e6', '1,2.3', '12%']) {
       await page.evaluate(value => navigator.clipboard.writeText(value), invalid);
