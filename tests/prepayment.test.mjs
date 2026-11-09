@@ -137,3 +137,26 @@ test("recurring and combined extra payments do not increase interest versus base
     assert.ok(combined.interest <= base.interest + 0.01);
   }
 });
+
+
+test("simulation rejects monthly extra payments larger than the outstanding debt", () => {
+  const balance = 4500000, payment = 42000, annualRate = 6;
+  const term = inferRemainingTerm(balance, annualRate, payment);
+  assert.throws(
+    () => simulateFixedPayment(balance, annualRate, payment, 666665555, 0, term),
+    /не может превышать остаток долга/,
+  );
+  assert.throws(
+    () => simulateReducedPayment(balance, annualRate, term, payment, 666665555, 0),
+    /не может превышать остаток долга/,
+  );
+});
+
+test("simulation rejects a lump sum larger than the outstanding debt", () => {
+  const balance = 4500000, payment = 42000, annualRate = 6;
+  const term = inferRemainingTerm(balance, annualRate, payment);
+  assert.throws(
+    () => simulateReducedPayment(balance, annualRate, term, payment, 0, 666665555),
+    /не может превышать остаток долга/,
+  );
+});
