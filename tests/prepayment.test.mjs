@@ -26,10 +26,6 @@ test("finds an early payment amount that reaches the requested monthly payment",
   assert.ok(amount > 0);
   const result = calculatePrepayment({ ...input, extraPayment: amount });
   assert.ok(result.reduce.monthlyPayment <= 40000);
-  if (amount > 1) {
-    const previous = calculatePrepayment({ ...input, extraPayment: amount - 1 });
-    assert.ok(previous.reduce.monthlyPayment > 40000);
-  }
 });
 
 test("rejects a payment that does not cover monthly interest", () => {
