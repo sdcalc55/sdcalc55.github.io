@@ -204,7 +204,7 @@ export function RealtorMortgageAssistant() {
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       </div>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm dark:border-[#405064] dark:bg-[#1B2632]">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-[#EEF2F6] px-4 py-3 text-[#26364A] transition-colors hover:bg-[#E8EDF3] dark:bg-[#263443] dark:text-[#E6ECF3] dark:hover:bg-[#2D3D4E]">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-[#26364A] transition-colors dark:text-[#E6ECF3]">
           <span>
             <span className="block font-semibold">Подробности расчёта</span>
             <span className="mt-0.5 block text-xs font-normal text-[#748195] dark:text-[#B8C5D3]">Методика и этапы расчёта</span>
