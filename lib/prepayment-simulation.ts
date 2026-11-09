@@ -23,12 +23,26 @@ export function annuityPayment(balance: number, monthlyRate: number, months: num
 
 /** Infers a fractional mathematical term from balance, rate and current payment. */
 export function inferRemainingTerm(balance: number, annualRate: number, payment: number): number {
+  if (!Number.isFinite(balance) || balance <= 0 || balance > 999999999) {
+    throw new Error("Проверьте остаток основного долга.");
+  }
+  if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) {
+    throw new Error("Процентная ставка должна быть от 0 до 30%.");
+  }
+  if (!Number.isFinite(payment) || payment <= 0) {
+    throw new Error("Ежемесячный платёж должен быть больше нуля.");
+  }
   const rate = annualRate / 1200;
-  if (balance <= 0 || payment <= 0 || payment <= balance * rate) {
+  if (payment <= balance * rate) {
     throw new Error("Платёж должен быть больше начисляемых процентов.");
   }
-  if (rate === 0) return balance / payment;
-  return -Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate);
+  const term = rate === 0
+    ? balance / payment
+    : -Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate);
+  if (!Number.isFinite(term) || term <= 0 || term > MAX_MONTHS) {
+    throw new Error("Расчётный срок превышает 50 лет. Увеличьте ежемесячный платёж.");
+  }
+  return term;
 }
 
 function periodInterest(balance: number, rate: number, period: number): number {
