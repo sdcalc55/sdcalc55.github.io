@@ -48,3 +48,10 @@ test("uses the entered current balance even when original loan data is also pres
   const result = calculatePrepayment({ balance: 859074.34, monthlyPayment: 16596.52, annualRate: 6, extraPayment: 100000 });
   assert.ok(result.shorten.interest < result.baseline.interest);
 });
+
+
+test("does not recommend a strategy when no additional payments are entered", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const result = calculatePlanOptions({ balance: 1200000, monthlyPayment: 30000, annualRate: 12, lumpSum: 0, monthlyExtra: 0 });
+  assert.equal(result.recommendation, null);
+});
