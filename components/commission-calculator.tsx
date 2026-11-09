@@ -286,7 +286,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                   <div className="mt-7 border-t border-[#26364A]/10 pt-5">
                     <dl className="space-y-3 text-sm">
                       <Row label="Операция" value={sale ? "Продажа" : "Покупка"} />
-                      <Row label="Тип недвижимости" value={titles[category]} />
+                      <Row label="Тип недвижимости" value={category === "apartment" ? "Квартира" : titles[category]} />
                       <Row label={category === "land" ? "Стоимость участка" : "Стоимость объекта"} value={money(parseMoney(price)!)} />
                       {category === "land" && <><Row label="Одобренный кредит" value={money(parseMoney(credit)!)} /><Row label="Общая база" value={money(result.base)} /></>}
                       <div className="border-t border-[#26364A]/10" />
