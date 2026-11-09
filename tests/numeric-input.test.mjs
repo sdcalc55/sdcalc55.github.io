@@ -50,3 +50,11 @@ test("active early repayment input uses strict normalization and keeps clear/bac
   assert.match(source, /aria-label="Очистить поле"/);
   assert.doesNotMatch(source, /replace\(\/\[\^\\d\.,\]\/g,""\)/);
 });
+
+test("the deployed navigation mounts the updated calculator and does not reintroduce loan date or term fields", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const component = await readFile(new URL("../components/prepayment-calculator.tsx", import.meta.url), "utf8");
+  assert.match(page, /import \{ PrepaymentCalculator \} from "@\/components\/prepayment-calculator"/);
+  assert.match(page, /screen === "mortgage-tools" && <PrepaymentCalculator \/>/);
+  assert.doesNotMatch(component, /Дата оформления кредита|Первоначальная сумма кредита|Срок кредита|startDate/);
+});
