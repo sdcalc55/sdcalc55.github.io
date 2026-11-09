@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v14";
+const CACHE_NAME = "sd-calculator-pwa-v15";
 const APP_SHELL = [
   "/", "/manifest.webmanifest",
   "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-180.png", "/icons/SD-192.png", "/icons/sd-512.png",
@@ -7,24 +7,37 @@ const APP_SHELL = [
   "/fonts/InterVariable.woff2"
 ];
 
+async function fetchIntoCache(cache, url, required = false) {
+  const response = await fetch(url, { cache: "reload" });
+  if (!response.ok) {
+    if (required) throw new Error(`Failed to cache app resource: ${url} (${response.status})`);
+    return;
+  }
+  await cache.put(url, response);
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
+      // Download the new app shell completely before allowing this worker to activate.
       const response = await fetch("/", { cache: "reload" });
-      if (response.ok) {
-        await cache.put("/", response.clone());
-        const html = await response.text();
-        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)].map((match) => new URL(match[1], self.location.origin).pathname);
-        await Promise.all([...new Set(assets)].map(async (url) => {
-          try { const asset = await fetch(url, { cache: "reload" }); if (asset.ok) await cache.put(url, asset); } catch {}
-        }));
-      }
-    } catch {}
-    await Promise.all(APP_SHELL.filter((url) => url !== "/").map(async (url) => {
-      try { const response = await fetch(url, { cache: "reload" }); if (response.ok) await cache.put(url, response); } catch {}
-    }));
-    await self.skipWaiting();
+      if (!response.ok) throw new Error(`Failed to download app shell (${response.status})`);
+      await cache.put("/", response.clone());
+
+      const html = await response.text();
+      const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+        .map((match) => new URL(match[1], self.location.origin).pathname);
+      await Promise.all([...new Set(assets)].map((url) => fetchIntoCache(cache, url, true)));
+
+      // Supporting icons and fonts are cached best-effort; the core HTML and
+      // its versioned Next.js assets above are the required offline app shell.
+      await Promise.all(APP_SHELL.filter((url) => url !== "/").map((url) => fetchIntoCache(cache, url)));
+      await self.skipWaiting();
+    } catch (error) {
+      await caches.delete(CACHE_NAME);
+      throw error;
+    }
   })());
 });
 
@@ -46,33 +59,40 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request, { cache: "no-store" });
         if (!response.ok) return;
         const html = await response.clone().text();
-        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)].map((match) => new URL(match[1], self.location.origin).pathname);
+        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\\/_next\\/static\\/[^"']+)["']/g)]
+          .map((match) => new URL(match[1], self.location.origin).pathname);
         await Promise.all([...new Set(assets)].map(async (assetUrl) => {
-          try { const asset = await fetch(assetUrl, { cache: "no-store" }); if (asset.ok) await cache.put(assetUrl, asset); } catch {}
+          try {
+            const asset = await fetch(assetUrl, { cache: "no-store" });
+            if (asset.ok) await cache.put(assetUrl, asset);
+          } catch {}
         }));
         await cache.put("/", response);
       };
-      if (cached) { event.waitUntil(refreshAppShell().catch(() => {})); return cached; }
-      try { const response = await fetch(request); if (response.ok) await cache.put("/", response.clone()); return response; }
-      catch { return Response.error(); }
+      if (cached) {
+        event.waitUntil(refreshAppShell().catch(() => {}));
+        return cached;
+      }
+      try {
+        const response = await fetch(request);
+        if (response.ok) await cache.put("/", response.clone());
+        return response;
+      } catch {
+        return Response.error();
+      }
     })());
     return;
   }
   const isAppAsset = url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") || url.pathname.startsWith("/fonts/") ||
-    /\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
+    /\\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
   if (isAppAsset) event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // Ignore cache-busting query strings so an already downloaded asset is
-    // available offline even when the page requests a newer URL variant.
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
     try {
       const response = await fetch(request);
-      if (response.ok) {
-        const copy = response.clone();
-        await cache.put(url.pathname, copy);
-      }
+      if (response.ok) await cache.put(url.pathname, response.clone());
       return response;
     } catch {
       return Response.error();
