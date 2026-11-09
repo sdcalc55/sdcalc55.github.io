@@ -2,7 +2,7 @@ export type PrepaymentInput = { balance: number; monthlyPayment: number; annualR
 export type PrepaymentScenario = { monthlyPayment: number; months: number; interest: number; totalPaid: number; finalPayment: number };
 export type PrepaymentResult = { baseline: PrepaymentScenario; shorten: PrepaymentScenario; reduce: PrepaymentScenario; appliedExtra: number; balanceAfterFirstPayment: number };
 export type PlanScenario = PrepaymentScenario & { requiredPayment: number; monthlyExtra: number; totalMonthlyOutflow: number };
-export type PlanOptions = { baseline: PrepaymentScenario; lumpShorten: PlanScenario; lumpReduce: PlanScenario; recurringShorten: PlanScenario; combined: PlanScenario; recommendation: "lumpShorten" | "lumpReduce" | "recurringShorten" | "combined"; };
+export type PlanOptions = { baseline: PrepaymentScenario; lumpShorten: PlanScenario; lumpReduce: PlanScenario; recurringShorten: PlanScenario; combined: PlanScenario; recommendation: "lumpShorten" | "lumpReduce" | "recurringShorten" | "combined" | null; };
 const MAX_MONTHS = 600;
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
 function paymentFor(balance: number, rate: number, months: number) {
@@ -72,7 +72,7 @@ export function calculatePlanOptions(input: { balance: number; monthlyPayment: n
     { key: "recurringShorten" as const, scenario: recurring, required: monthlyPayment, extra: monthlyExtra },
     { key: "combined" as const, scenario: combined, required: monthlyPayment, extra: monthlyExtra },
   ].filter(x => x.scenario.months > 0 && (x.key === "lumpShorten" || x.key === "lumpReduce" ? appliedLump > 0 : monthlyExtra > 0 || (x.key === "combined" && appliedLump > 0)));
-  const recommendation = candidates.length ? candidates.reduce((best, item) => item.scenario.interest < best.scenario.interest ? item : best).key : "lumpShorten";
+  const recommendation = candidates.length ? candidates.reduce((best, item) => item.scenario.interest < best.scenario.interest ? item : best).key : null;
   return {
     baseline,
     lumpShorten: planScenario(lumpShort, monthlyPayment, 0),
