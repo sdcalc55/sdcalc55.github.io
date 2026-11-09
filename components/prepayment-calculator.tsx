@@ -7,7 +7,8 @@ import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { Calculator, Target, RotateCcw } from "lucide-react";
 import { calculatePrepayment, estimateRemainingBalance, findPrepaymentAmount, type PlannerGoal, type PrepaymentResult } from "@/lib/prepayment";
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
-const rub = (v: number) => `${money.format(v)} ₽`;\nconst term = (months:number) => `${Math.floor(months/12)} лет (${months} мес.)`;
+const rub = (v: number) => `${money.format(v)} ₽`;
+const term = (months:number) => { const years=Math.floor(months/12), mod=years%10, last=years%100; const word=last>=11&&last<=14?"лет":mod===1?"год":mod>=2&&mod<=4?"года":"лет"; return years?`${years} ${word} (${months} мес.)`:`${months} мес.`; };
 const parse = (v: string) => { const n = v.replace(/[\s\u00a0\u202f]/g, "").replace(",", "."); return /^\d+(?:\.\d+)?$/.test(n) ? Number(n) : NaN; };
 type Mode = "quick" | "planner";
 export function PrepaymentCalculator() {
