@@ -365,3 +365,123 @@ test("matches independent monthly-recurrence oracle across adversarial principal
     }
   }
 });
+
+
+// Independent reduced-payment oracle: the regular installment is recalculated
+// after the regular payment and the additional amount is then accounted for
+// separately. It intentionally does not call production annuity/simulation code.
+function referenceAnnuityPayment(balance, monthlyRate, periods) {
+  if (monthlyRate === 0) return balance / periods;
+  return balance * monthlyRate / (1 - Math.pow(1 + monthlyRate, -periods));
+}
+
+function referenceSchedule({ balance, annualRate, monthlyPayment, monthlyExtra = 0, lump = 0, reduced = false }) {
+  const rate = annualRate / 1200;
+  const exactTerm = rate === 0
+    ? balance / monthlyPayment
+    : -Math.log(1 - balance * rate / monthlyPayment) / Math.log(1 + rate);
+  const periods = Math.ceil(exactTerm - 1e-10);
+  let remaining = balance, scheduled = monthlyPayment, interest = 0, totalPaid = 0, months = 0, finalPayment = 0;
+  let firstRecalculatedPayment = monthlyPayment;
+  while (remaining > 0.005 && months < periods) {
+    const accrued = remaining * rate;
+    const mandatory = Math.min(remaining + accrued, scheduled);
+    if (mandatory <= accrued) throw new Error("Reference schedule does not amortize");
+    interest += accrued;
+    remaining = Math.max(0, remaining + accrued - mandatory);
+    const extra = Math.min(remaining, monthlyExtra + (months === 0 ? lump : 0));
+    remaining = Math.max(0, remaining - extra);
+    finalPayment = mandatory + extra;
+    totalPaid += finalPayment;
+    months++;
+    if (remaining <= 0.005) {
+      if (months === 1 && reduced) firstRecalculatedPayment = 0;
+      break;
+    }
+    if (reduced) {
+      const left = periods - months;
+      scheduled = left > 0 ? referenceAnnuityPayment(remaining, rate, left) : 0;
+      if (months === 1) firstRecalculatedPayment = scheduled;
+    }
+  }
+  assert.ok(remaining <= 0.005, "independent schedule must close within the 50-year horizon");
+  return {
+    months,
+    interest: Math.round(interest * 100) / 100,
+    totalPaid: Math.round(totalPaid * 100) / 100,
+    finalPayment: Math.round(finalPayment * 100) / 100,
+    firstPayment: firstRecalculatedPayment,
+  };
+}
+
+test("all active repayment scenarios match an independent monthly oracle", () => {
+  const cases = [
+    { balance: 1000000, monthlyPayment: 100000, annualRate: 12, monthlyExtra: 5000, lump: 50000 },
+    { balance: 4500000, monthlyPayment: 42000, annualRate: 6, monthlyExtra: 5000, lump: 100000 },
+    { balance: 120000, monthlyPayment: 10000, annualRate: 0, monthlyExtra: 1000, lump: 5000 },
+    { balance: 250000, monthlyPayment: 8000, annualRate: 29.99, monthlyExtra: 1000, lump: 10000 },
+    { balance: 999999999, monthlyPayment: 50000000, annualRate: 30, monthlyExtra: 1000000, lump: 1000000 },
+  ];
+  for (const input of cases) {
+    const term = inferRemainingTerm(input.balance, input.annualRate, input.monthlyPayment);
+    const baseline = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 0, 0, term);
+    const shorten = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, input.monthlyExtra, input.lump, term);
+    const reduce = simulateReducedPayment(input.balance, input.annualRate, term, input.monthlyPayment, input.monthlyExtra, input.lump);
+    const expectedBase = referenceSchedule(input);
+    const expectedShorten = referenceSchedule({ ...input });
+    const expectedReduce = referenceSchedule({ ...input, reduced: true });
+    for (const [actual, expected, name] of [
+      [baseline, expectedBase, "baseline"],
+      [shorten, expectedShorten, "shorten"],
+      [reduce, expectedReduce, "reduce"],
+    ]) {
+      assert.equal(actual.completed, true, name);
+      assert.equal(actual.months, expected.months, name + " months");
+      assert.ok(Math.abs(actual.interest - expected.interest) <= 0.01, name + " interest");
+      assert.ok(Math.abs(actual.totalPaid - expected.totalPaid) <= 0.01, name + " totalPaid");
+      assert.ok(Math.abs(actual.finalPayment - expected.finalPayment) <= 0.01, name + " finalPayment");
+      assert.ok(Math.abs(actual.totalPaid - (input.balance + actual.interest)) <= 0.02, name + " accounting identity");
+    }
+    assert.ok(shorten.interest <= baseline.interest + 0.01, "shorten scenario cannot increase interest");
+    assert.ok(reduce.interest <= baseline.interest + 0.01, "reduce scenario cannot increase interest");
+    assert.ok(shorten.totalPaid >= input.balance, "mandatory and extra payments cannot underpay principal");
+  }
+});
+
+test("one-kopeck balance, exact final-month payoff and maximum principal boundaries", () => {
+  const oneKopeck = simulateFixedPayment(0.01, 0, 1, 0, 0, 1);
+  assert.equal(oneKopeck.completed, true);
+  assert.equal(oneKopeck.months, 1);
+  assert.equal(oneKopeck.totalPaid, 0.01);
+
+  const exactLastMonth = simulateFixedPayment(1200, 0, 400, 0, 0, 3);
+  assert.equal(exactLastMonth.completed, true);
+  assert.equal(exactLastMonth.months, 3);
+  assert.equal(exactLastMonth.totalPaid, 1200);
+  assert.equal(exactLastMonth.finalPayment, 400);
+
+  const maxPrincipal = simulateFixedPayment(999999999, 0, 50000000, 0, 0, 20);
+  assert.equal(maxPrincipal.completed, true);
+  assert.equal(maxPrincipal.totalPaid, 999999999);
+  assert.equal(maxPrincipal.interest, 0);
+});
+
+test("additional payments remain separate from the mandatory installment", () => {
+  const balance = 1000000, payment = 100000, annualRate = 12, extra = 50000;
+  const term = inferRemainingTerm(balance, annualRate, payment);
+  const plan = simulateFixedPayment(balance, annualRate, payment, extra, 0, term);
+  const firstInterest = balance * annualRate / 1200;
+  assert.equal(plan.firstPayment, payment);
+  assert.ok(plan.totalPaid > payment);
+  assert.ok(plan.finalPayment >= payment);
+  assert.ok(firstInterest < payment);
+});
+
+test("contradictory direct simulation inputs are rejected", () => {
+  assert.throws(() => simulateFixedPayment(100000, 12, 100, 0, 0), /не покрывает проценты/);
+  assert.throws(() => simulateFixedPayment(100000, 12, 10000, 100001, 0), /не может превышать остаток долга/);
+  assert.throws(() => simulateFixedPayment(100000, 12, 10000, 0, 100001), /не может превышать остаток долга/);
+  assert.throws(() => simulateFixedPayment(0, 12, 10000, 0, 0), /остаток основного долга/);
+  assert.throws(() => simulateFixedPayment(100000, 30.01, 10000, 0, 0), /от 0 до 30/);
+  assert.throws(() => simulateFixedPayment(999999999, 0, 100000, 0, 0, 601), /не превышать 600 месяцев/);
+});
