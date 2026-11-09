@@ -43,6 +43,21 @@ test("compares lump-sum, monthly and combined repayment plans", async () => {
   assert.ok(result.combined.months <= result.lumpShorten.months);
 });
 
+test("active calculator uses the detailed simulation for all repayment scenarios", async () => {
+  const { calculatePlanOptions, calculatePrepayment } = await import("../lib/prepayment.ts");
+  const input = { balance: 100000, monthlyPayment: 10000, annualRate: 12 };
+  const oneOff = calculatePrepayment({ ...input, extraPayment: 20000 });
+  const plans = calculatePlanOptions({ ...input, lumpSum: 5000, monthlyExtra: 1000 });
+
+  assert.ok(oneOff.shorten.months < oneOff.baseline.months);
+  assert.equal(oneOff.reduce.months, oneOff.baseline.months);
+  assert.ok(oneOff.reduce.monthlyPayment < input.monthlyPayment);
+  assert.ok(plans.recurringShorten.months < plans.baseline.months);
+  assert.ok(plans.combined.months <= plans.lumpShorten.months);
+  assert.ok(plans.combined.interest < plans.lumpShorten.interest);
+  assert.ok(Math.abs(plans.combined.totalPaid - (input.balance + plans.combined.interest)) < 0.02);
+});
+
 test("uses the entered current balance even when original loan data is also present", () => {
   // Current balance is the source of truth after previous early repayments.
   const result = calculatePrepayment({ balance: 859074.34, monthlyPayment: 16596.52, annualRate: 6, extraPayment: 100000 });
