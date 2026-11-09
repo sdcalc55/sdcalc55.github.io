@@ -155,8 +155,14 @@ export function RealtorMortgageAssistant() {
     const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
     const termMonths = parsedTermMonths;
     const termTolerance = Math.max(3, Math.round(base.months * 0.05));
-    const termMismatch = termMonths !== null && base.completed && Math.abs(termMonths - base.months) > termTolerance;
-    const paymentPlan = termMonths !== null && termMonths > 0 && termMonths <= MAX_MONTHS && !termMismatch ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime) : null;
+    // The entered schedule term is only usable when the current payment can actually amortize
+    // the entered balance at the entered rate within that term. Never compare unlike horizons.
+    const termMismatch = termMonths !== null && (
+      !base.completed || Math.abs(termMonths - base.months) > termTolerance
+    );
+    const paymentPlan = termMonths !== null && termMonths > 0 && termMonths <= MAX_MONTHS && base.completed && !termMismatch
+      ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime)
+      : null;
     const hasExtra = extra > 0 || oneTime > 0;
     return {
       base,
@@ -206,7 +212,7 @@ export function RealtorMortgageAssistant() {
             </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/75 px-4 py-5 text-center dark:bg-[#263648]">
               <Wallet className="size-6 text-[#6685A5] dark:text-[#9CB8D4]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">{plans.termMismatch ? "Срок по графику не совпадает с расчётным. Проверьте остаток долга, ставку, платёж и срок по графику." : "Заполните оставшийся срок по графику"}</p>
-              {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">По введённым остатку долга, ставке и текущему платежу модельный срок составляет {duration(plans.estimatedTermMonths)}. Это ориентир, а не банковский график. Проверьте введённые данные: пока срок заметно расходится с расчётным, результат уменьшения платежа не показываем.</p>}
+              {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">При остатке долга, ставке и текущем платеже {money(num(payment))} модельный срок составляет {duration(plans.estimatedTermMonths)}. Указанный срок не согласуется с этими данными. Проверьте срок и параметры кредита: расчёт уменьшения платежа остановлен, чтобы не сравнивать разные периоды.</p>}
             </div>}
           </div>
           <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
