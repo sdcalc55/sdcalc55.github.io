@@ -36,7 +36,7 @@ export function PrepaymentCalculator() {
     <section className="rounded-3xl border border-[#E1E6ED] bg-white p-5 shadow-[0_4px_20px_#26364A05] dark:border-[#405064] dark:bg-[#1B2632] sm:p-7">
       <div className="mb-5"><h2 className="text-lg font-semibold text-[#26364A] dark:text-[#F1F5F9]">Параметры ипотеки</h2><p className="mt-1 text-sm text-[#748195]">Заполните известные данные - калькулятор сам выберет доступный вариант расчёта.</p></div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <InputField className={inputClass} label="Остаток долга, ₽" maxDigits={10} value={balance} onChange={v=>{setBalance(v);setResult(null);}}/>
+        <InputField className={inputClass} label="Остаток долга, ₽" maxDigits={9} value={balance} onChange={v=>{setBalance(v);setResult(null);}}/>
         <InputField className={inputClass} label="Ежемесячный платёж, ₽" maxDigits={7} value={payment} onChange={v=>{setPayment(v);setResult(null);}}/>
         <div className="sm:col-span-2 lg:col-span-1"><InputField money={false} maxValue={30} maxIntegerDigits={2} maxFractionDigits={2} className={inputClass} label="Ставка, %" value={rate} onChange={v=>{setRate(v);setResult(null);}}/></div>
       </div>
