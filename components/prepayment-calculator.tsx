@@ -50,13 +50,13 @@ export function PrepaymentCalculator() {
     <section className="rounded-3xl border border-[#E1E6ED] bg-white p-5 shadow-[0_4px_20px_#26364A05] dark:border-[#405064] dark:bg-[#1B2632] sm:p-7">
       <div className="mb-5"><h2 className="text-lg font-semibold text-[#26364A] dark:text-[#F1F5F9]">Параметры ипотеки</h2><p className="mt-1 text-sm text-[#748195]">Заполните известные данные - калькулятор сам выберет доступный вариант расчёта.</p></div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <InputField className={inputClass} label="Текущий остаток долга, ₽" value={balance} onChange={v=>{setBalance(v);setResult(null);}} hint="Для быстрого расчёта. Если неизвестен - заполните данные ниже."/>
-        <InputField money={false} maxValue={30} className={inputClass} label="Процентная ставка, % годовых" value={rate} onChange={v=>{setRate(v);setResult(null);}}/>
-        <InputField className={inputClass} label="Ежемесячный платёж, ₽" value={payment} onChange={v=>{setPayment(v);setResult(null);}}/>
-        <InputField className={inputClass} label="Первоначальная сумма кредита, ₽" value={principal} onChange={v=>{setPrincipal(v);setResult(null);}} hint="Дополнительные данные для подробного расчёта."/>
+        <InputField className={inputClass} label="Текущий остаток долга, ₽" maxDigits={10} value={balance} onChange={v=>{setBalance(v);setResult(null);}} hint="Для быстрого расчёта. Если неизвестен - заполните данные ниже."/>
+        <InputField money={false} maxValue={30} maxIntegerDigits={2} maxFractionDigits={2} className={inputClass} label="Процентная ставка, % годовых" value={rate} onChange={v=>{setRate(v);setResult(null);}}/>
+        <InputField className={inputClass} label="Ежемесячный платёж, ₽" maxDigits={7} value={payment} onChange={v=>{setPayment(v);setResult(null);}}/>
+        <InputField className={inputClass} label="Первоначальная сумма кредита, ₽" maxDigits={10} value={principal} onChange={v=>{setPrincipal(v);setResult(null);}} hint="Дополнительные данные для подробного расчёта."/>
         <InputField money={false} className={inputClass} label="Дата оформления кредита" value={startDate} onChange={v=>{setStartDate(v);setResult(null);}} placeholder="ММ.ГГГГ" hint="Введите месяц и год, например 02.2024. Точка добавится автоматически."/>
       </div>
-      {mode!=="planner"?<><div className="mt-4"><InputField className={inputClass} label="Разовый досрочный взнос, ₽" value={extra} onChange={setExtra} hint="Например, 100 000 ₽ сейчас."/><InputField className={inputClass} label="Дополнительно каждый месяц, ₽" value={monthlyExtra} onChange={setMonthlyExtra} hint="Необязательно. Например, 5 000 ₽ ежемесячно."/></div><div className="mt-4"><button type="button" onClick={()=>setShowDetails(v=>!v)} className="text-sm font-semibold text-[#647184] dark:text-[#C5D0DC]">{showDetails?"Скрыть дополнительные параметры":"Дополнительные параметры расчёта"}</button>{showDetails&&<p className="mt-3 rounded-xl bg-[#F5F7FA] p-3 text-xs leading-relaxed text-[#647184] dark:bg-[#111820] dark:text-[#B8C4D2]">Для сравнения используется месячная ставка (годовая / 12). Сначала учитывается обычный платёж, затем досрочный взнос. Банк может рассчитывать проценты по фактическим дням между платежами.</p>}</div></>:<div className="mt-4"><InputField className={inputClass} label="Сумма досрочного погашения, ₽" value={manualExtra} onChange={v=>{setManualExtra(v);setResult(null);}} hint="Введите сумму, которую клиент готов внести. Покажем, на сколько сократится ипотека и сколько процентов удастся сэкономить."/></div>}
+      {mode!=="planner"?<><div className="mt-4"><InputField className={inputClass} label="Разовый досрочный взнос, ₽" maxDigits={7} value={extra} onChange={setExtra} hint="Например, 100 000 ₽ сейчас."/><InputField className={inputClass} label="Дополнительно каждый месяц, ₽" maxDigits={7} value={monthlyExtra} onChange={setMonthlyExtra} hint="Необязательно. Например, 5 000 ₽ ежемесячно."/></div><div className="mt-4"><button type="button" onClick={()=>setShowDetails(v=>!v)} className="text-sm font-semibold text-[#647184] dark:text-[#C5D0DC]">{showDetails?"Скрыть дополнительные параметры":"Дополнительные параметры расчёта"}</button>{showDetails&&<p className="mt-3 rounded-xl bg-[#F5F7FA] p-3 text-xs leading-relaxed text-[#647184] dark:bg-[#111820] dark:text-[#B8C4D2]">Для сравнения используется месячная ставка (годовая / 12). Сначала учитывается обычный платёж, затем досрочный взнос. Банк может рассчитывать проценты по фактическим дням между платежами.</p>}</div></>:<div className="mt-4"><InputField className={inputClass} label="Сумма досрочного погашения, ₽" maxDigits={7} value={manualExtra} onChange={v=>{setManualExtra(v);setResult(null);}} hint="Введите сумму, которую клиент готов внести. Покажем, на сколько сократится ипотека и сколько процентов удастся сэкономить."/></div>}
       {!balance.trim()&&principal.trim()&&startDate.trim()&&<p className="mt-3 rounded-xl bg-[#FFF7E8] p-3 text-xs leading-relaxed text-[#80642C] dark:bg-[#332D20] dark:text-[#E5D3A5]">Расчёт по первоначальной сумме предполагает, что раньше досрочных погашений не было. Если они были, укажите текущий остаток долга из банковского приложения - иначе оценка будет неточной.</p>}
       {error&&<p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
       <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={calculate} className="min-h-12 flex-1 rounded-xl bg-[#E83C35] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#D9342E]">Рассчитать</button><button type="button" onClick={reset} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#DCE2E9] px-4 py-3 text-sm font-semibold text-[#647184] hover:bg-[#F5F7FA] dark:border-[#405064] dark:text-[#D5DEE8]"><RotateCcw className="size-4"/>Сбросить</button></div>
@@ -66,7 +66,7 @@ export function PrepaymentCalculator() {
   </div>;
 }
 
-function InputField({label,value,onChange,type="text",hint,className,money=true,maxValue,placeholder}:{label:string;value:string;onChange:(v:string)=>void;type?:"text"|"date"|"month";hint?:string;className:string;money?:boolean;maxValue?:number;placeholder?:string}){
+function InputField({label,value,onChange,type="text",hint,className,money=true,maxValue,maxDigits,maxIntegerDigits,maxFractionDigits,placeholder}:{label:string;value:string;onChange:(v:string)=>void;type?:"text"|"date"|"month";hint?:string;className:string;money?:boolean;maxValue?:number;maxDigits?:number;maxIntegerDigits?:number;maxFractionDigits?:number;placeholder?:string}){
   const ref=useRef<HTMLInputElement>(null);
   const cursor=useRef<number|null>(null);
   const [,render]=useState(0);
@@ -77,12 +77,16 @@ function InputField({label,value,onChange,type="text",hint,className,money=true,
       if(!numeric){if(label==="Дата оформления кредита"){const digits=e.target.value.replace(/\D/g,"").slice(0,6);const formatted=digits.length>=2?digits.slice(0,2)+"."+digits.slice(2):digits;cursor.current=formatted.length;onChange(formatted);render(n=>n+1);}else onChange(e.target.value);return;}
       const raw=e.target.value.replace(/[^\d.,]/g,"").replace(/([.,].*)[.,]/g,"$1");
       const digits=raw.replace(/[\s\u00a0\u202f]/g,"").split(/[.,]/)[0].replace(/^0+/,"");
-      if(money&&digits.length>10)return;
+      if(money&&digits.length>(maxDigits??10))return;
       const position=e.target.selectionStart??raw.length;
       const significant=raw.slice(0,position).replace(/[\s\u00a0\u202f]/g,"").length;
       const normalized=raw.replace(",",".");
       const candidateParts=normalized.split(".");
       const candidate=candidateParts.length>2?candidateParts[0]+"."+candidateParts.slice(1).join(""):normalized;
+      const integerDigits=(candidateParts[0]??"").replace(/\D/g,"").replace(/^0+/,"");
+      const fractionDigits=candidateParts[1]??"";
+      if(!money&&maxIntegerDigits!==undefined&&integerDigits.length>maxIntegerDigits)return;
+      if(!money&&maxFractionDigits!==undefined&&fractionDigits.length>maxFractionDigits)return;
       const number=Number(candidate);
       if(!money&&candidate!==""&&Number.isFinite(number)&&maxValue!==undefined&&number>maxValue)return;
       const next=money?formatInput(raw):candidate;
