@@ -152,7 +152,7 @@ export function RealtorMortgageAssistant() {
             
             <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Переплата уменьшится на</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Остаток срока после досрочного погашения</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.term.completed ? duration(plans.term.months) : "Не удалось определить"}</div><div className="mt-2 text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
             <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="mt-1 block">Досрочные взносы вносятся сверх него.</span></p>
           </div>
           <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
@@ -165,7 +165,7 @@ export function RealtorMortgageAssistant() {
                 <div className="mt-1 text-xs text-[#748195] dark:text-[#B8C5D3]">Вместо {money(num(payment))}</div>
               </div>
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Переплата уменьшится на</div><div className="mt-1 text-lg font-semibold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
-              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Расчётный срок: {duration(plans.termMonths!)}.</span><span className="lg:block">Досрочный взнос вносится сверх нового обязательного платежа.</span></p>
+              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Остаток срока: {duration(plans.termMonths!)}.</span><span className="lg:block">Досрочный взнос вносится сверх нового обязательного платежа.</span></p>
             </> : plans.paymentPlan?.completed ? <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Досрочные взносы полностью погашают кредит в первом расчётном периоде. Новый обязательный платёж не требуется.</p>
@@ -182,14 +182,14 @@ export function RealtorMortgageAssistant() {
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-lg text-[#596779] shadow-sm transition-transform group-open:rotate-180 dark:bg-[#17212C] dark:text-[#D5DEE8]" aria-hidden="true">⌄</span>
         </summary>
         <div className="px-1 pb-1 pt-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
-          <p>Расчёт выполняется методом помесячного моделирования кредитного обязательства с учётом начисления процентов, обязательных платежей и досрочных взносов. Поскольку срок кредита отдельно не вводится, расчётный срок определяется по остатку основного долга, процентной ставке и текущему ежемесячному платежу. Проценты начисляются ежемесячно на остаток долга по ставке, равной годовой ставке, делённой на 12 и на 100.</p>
+          <p>Расчёт выполняется методом помесячного моделирования кредитного обязательства с учётом начисления процентов, обязательных платежей и досрочных взносов.</p>
           <ol className="mt-3 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#748195] dark:marker:text-[#B8C5D3]">
-            <li>По введённым данным определяется расчётный срок и строится базовый график без досрочных взносов.</li>
-            <li>Рассчитываются проценты каждого месяца на фактический остаток основного долга.</li>
-            <li>Учитываются обязательный ежемесячный платёж и досрочные взносы. Досрочные взносы вносятся сверх обязательного платежа и не заменяют его.</li>
-            <li>Моделируется изменение остатка долга: при сокращении срока обязательный платёж сохраняется, при уменьшении платежа он пересчитывается на оставшийся расчётный срок.</li>
-            <li>Определяются срок полного погашения и общая сумма уплаченных процентов для каждого сценария.</li>
-            <li>Результаты сравниваются с базовым графиком, чтобы определить экономию по процентам и изменение срока или обязательного платежа.</li>
+            <li>Рассчитывается базовый график погашения без досрочных взносов.</li>
+            <li>Определяется сумма процентов, начисляемых за каждый расчётный месяц.</li>
+            <li>Учитывается погашение основного долга обязательным платежом и досрочными взносами.</li>
+            <li>Моделируется изменение остатка задолженности и пересчитываются параметры платежей в зависимости от выбранного сценария.</li>
+            <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
+            <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
           
         </div>
