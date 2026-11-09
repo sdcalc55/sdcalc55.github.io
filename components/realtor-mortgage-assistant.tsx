@@ -215,7 +215,7 @@ export function RealtorMortgageAssistant() {
               {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">При остатке долга, ставке и текущем платеже {money(num(payment))} модельный срок составляет {duration(plans.estimatedTermMonths)}. Указанный срок не согласуется с этими данными. Проверьте срок и параметры кредита: расчёт уменьшения платежа остановлен, чтобы не сравнивать разные периоды.</p>}
             </div>}
           </div>
-          <div className="rounded-xl p-3 text-sm text-[#536273] dark:text-[#C5D0DC] sm:col-span-2">
+          <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
             <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Зачем указывать оставшийся срок кредита?</div>
             <p className="mt-2">При сокращении срока текущий обязательный платёж сохраняется, поэтому можно смоделировать погашение без указания срока по графику. При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
           </div>
