@@ -1,7 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { focusNextCalculatorInput } from "@/lib/calculator-input";
+import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { Calculator, Wallet, RotateCcw } from "lucide-react";
@@ -73,7 +73,7 @@ function InputField({label,value,onChange,type="text",hint,className,money=true,
   useLayoutEffect(()=>{if(cursor.current!==null){ref.current?.setSelectionRange(cursor.current,cursor.current);cursor.current=null;}});
   const numeric=type==="text";
   return <div className="min-w-0"><label className="mb-2 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label><div className="relative">
-    <input ref={ref} type={type} value={value} inputMode={numeric?"decimal":undefined} autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={e=>scrollFocusedInputIntoView(e.currentTarget)} onClick={e=>scrollFocusedInputIntoView(e.currentTarget)} onKeyDown={e=>{if(e.key==="-"||e.key==="−"||e.key==="Subtract")e.preventDefault();if(e.key==="Enter"&&!e.nativeEvent.isComposing){e.preventDefault();focusNextCalculatorInput(e.currentTarget);}}} onChange={e=>{
+    <input ref={ref} type={type} value={value} inputMode={numeric?"decimal":undefined} autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={e=>scrollFocusedInputIntoView(e.currentTarget)} onClick={e=>scrollFocusedInputIntoView(e.currentTarget)} onKeyDown={e=>{if(money&&handleFormattedBackspace(e,onChange))return;if(e.key==="-"||e.key==="−"||e.key==="Subtract")e.preventDefault();if(e.key==="Enter"&&!e.nativeEvent.isComposing){e.preventDefault();focusNextCalculatorInput(e.currentTarget);}}} onChange={e=>{
       if(!numeric){if(label==="Дата оформления кредита"){const digits=e.target.value.replace(/\D/g,"").slice(0,6);const formatted=digits.length>=2?digits.slice(0,2)+"."+digits.slice(2):digits;cursor.current=formatted.length;onChange(formatted);render(n=>n+1);}else onChange(e.target.value);return;}
       const raw=e.target.value.replace(/[^\d.,]/g,"").replace(/([.,].*)[.,]/g,"$1");
       const digits=raw.replace(/[\s\u00a0\u202f]/g,"").split(/[.,]/)[0].replace(/^0+/,"");
