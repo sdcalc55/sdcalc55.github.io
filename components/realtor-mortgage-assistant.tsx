@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { Calculator, RefreshCw, TrendingDown, Wallet, BadgeCheck } from "lucide-react";
+import { formatInput } from "@/lib/calculator";
 import { PrepaymentCalculator } from "@/components/prepayment-calculator";
 
 type Mode = "sale" | "strategy";
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
-const num = (value: string) => Math.max(0, Number(value) || 0);
+const num = (value: string) => Math.max(0, Number(value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) || 0);
 function Field({ label, value, onChange, suffix = "₽", step = 10000, hint }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string }) {
-  return <label className="block min-w-0"><span className="mb-1.5 block text-sm font-medium text-[#647184] dark:text-[#AAB6C5]">{label}</span><span className="flex items-center rounded-xl border border-[#DCE2E9] bg-white px-3 dark:border-[#405064] dark:bg-[#111820]"><input type="number" min="0" step={step} value={value} onChange={event => onChange(event.target.value)} className="min-w-0 w-full bg-transparent py-3 text-base font-semibold tabular-nums text-[#26364A] outline-none dark:text-[#E6ECF3]" /><span className="pl-2 text-sm text-[#8993A2]">{suffix}</span></span>{hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}</label>;
+  const decimal = suffix === "%";
+  return <label className="block min-w-0"><span className="mb-1.5 block text-sm font-medium text-[#647184] dark:text-[#AAB6C5]">{label}</span><span className="flex items-center rounded-xl border border-[#DCE2E9] bg-white px-3 dark:border-[#405064] dark:bg-[#111820]"><input type="text" inputMode="decimal" value={formatInput(value)} onChange={event => { const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1"); const normalized = decimal ? raw : raw.replace(/[.,].*$/, ""); onChange(normalized); }} className="min-w-0 w-full bg-transparent py-3 text-base font-semibold tabular-nums text-[#26364A] outline-none dark:text-[#E6ECF3]" /><span className="pl-2 text-sm text-[#8993A2]">{suffix}</span></span>{hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}</label>;
 }
 function Result({ label, value, primary = false, detail }: { label: string; value: string; primary?: boolean; detail?: string }) {
   return <div className={`rounded-xl p-3 ${primary ? "bg-[#FCEBEA] dark:bg-[#352322]" : "bg-[#F3F5F8] dark:bg-[#111820]"}`}><div className="text-xs text-[#748195]">{label}</div><div className={`mt-1 text-lg font-bold tabular-nums ${primary ? "text-[#B8322D] dark:text-[#F09A94]" : "text-[#26364A] dark:text-[#E6ECF3]"}`}>{value}</div>{detail && <div className="mt-1 text-xs text-[#748195]">{detail}</div>}</div>;
