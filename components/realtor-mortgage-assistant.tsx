@@ -30,7 +30,7 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
   });
   const decimal = suffix === "%";
   return <div className="min-w-0">
-    <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-[#647184] dark:text-[#AAB6C5]">{label}</label>
+    <label htmlFor={id} className="mb-3 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label>
     <div className="relative">
       <input ref={input} id={id} name={`sd-calc-${id}`} type="text" inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoComplete="off" enterKeyHint="next" placeholder="0"
         value={formatInput(value)}
@@ -51,7 +51,7 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
           cursor.current = index;
           onChange(normalized);
         }}
-        className="h-14 w-full rounded-xl border border-[#DCE2E9] bg-[#F7F8FA] px-3 pr-20 text-base font-semibold tabular-nums text-[#26364A] outline-none transition focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]"
+        className="h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 pr-20 text-lg font-medium tabular-nums text-[#26364A] outline-none transition placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]"
       />
       {value !== "" && <button type="button" tabIndex={-1} aria-label={`Очистить поле: ${label}`} title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
       <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#8993A2]">{suffix}</span>
@@ -183,18 +183,18 @@ export function RealtorMortgageAssistant() {
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35]" /><h3 className="font-semibold">Два варианта для клиента</h3></div>
         {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-[#FCEBEA] p-3 dark:bg-[#352322]">
+          <div className="rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
-            <div className="mt-1 text-lg font-bold text-[#B8322D] dark:text-[#F09A94]">Сокращение срока</div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Срок сокращён на</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
+            <div className="mt-1 text-lg font-bold text-[#C93630] dark:text-[#FF7770]">Сокращение срока</div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
             <p className="mt-3 text-xs text-[#748195]">Текущий платёж {money(num(payment))} сохраняется. Дополнительные суммы вносятся сверх него.</p>
           </div>
-          <div className="rounded-xl border border-[#DCE2E9] bg-[#F7F8FA] p-3 dark:border-[#405064] dark:bg-[#111820]">
+          <div className="rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
-            <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#E6ECF3]">Уменьшение платежа</div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan === null ? "Укажите оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan ? money(plans.paymentPlan.firstPayment) : "Укажите срок по графику"}</div></div>
+            <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#F1F5F9]">Уменьшение платежа</div>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.paymentPlan === null ? "Укажите оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan ? money(plans.paymentPlan.firstPayment) : "Укажите срок по графику"}</div></div>
             <p className="mt-3 text-xs text-[#748195]">Срок по графику: {plans.termMonths ? duration(plans.termMonths) : "не указан"}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</p>
           </div>
           <p className="text-xs text-[#748195] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
