@@ -54,9 +54,9 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
         className="h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 pr-20 text-lg font-medium tabular-nums text-[#26364A] outline-none transition placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]"
       />
       {value !== "" && <button type="button" tabIndex={-1} aria-label={`Очистить поле: ${label}`} title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
-      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#8993A2]">{suffix}</span>
+      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#8993A2] dark:text-[#B8C5D3]">{suffix}</span>
     </div>
-    {error ? <span id={errorId} role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">{error}</span> : hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}
+    {error ? <span id={errorId} role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">{error}</span> : hint && <span className="mt-1 block text-xs text-[#8993A2] dark:text-[#B8C5D3]">{hint}</span>}
   </div>;
 }
 type Plan = { months: number; interest: number; firstPayment: number; completed: boolean };
@@ -170,7 +170,7 @@ export function RealtorMortgageAssistant() {
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#168A83] dark:text-[#83C9C2]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
+        <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#168A83] dark:text-[#83C9C2]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195] dark:text-[#B8C5D3]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
@@ -188,23 +188,23 @@ export function RealtorMortgageAssistant() {
             <div className="mt-1 text-lg font-bold text-[#C93630] dark:text-[#FF7770]">Сокращение срока</div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
-            <p className="mt-3 text-xs text-[#748195]">Текущий платёж {money(num(payment))} сохраняется. Дополнительные суммы вносятся сверх него.</p>
+            <p className="mt-3 text-xs text-[#748195] dark:text-[#B8C5D3]">Текущий платёж {money(num(payment))} сохраняется. Дополнительные суммы вносятся сверх него.</p>
           </div>
           <div className="rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
             <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#F1F5F9]">Уменьшение платежа</div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.paymentPlan === null ? "Заполните оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.paymentPlan === null ? "Заполните оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan ? money(plans.paymentPlan.firstPayment) : "После заполнения срока появится расчёт"}</div></div>
             <p className="mt-3 text-sm text-[#596779] dark:text-[#D5DEE8]">{plans.paymentPlan ? <>Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</> : <>Укажите срок для расчёта по снижению платежа.</>}</p>
           </div>
-          <p className="text-xs text-[#748195] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
+          <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#83C9C2]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       </div>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#26364A] dark:text-[#E6ECF3]">
           <span>Подробности расчёта</span><span className="text-[#8993A2] transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
         </summary>
-        <div className="mt-4 space-y-4 text-sm text-[#647184] dark:text-[#AAB6C5]">
+        <div className="mt-4 space-y-4 text-sm text-[#B8C5D3] dark:text-[#B8C5D3]">
           <section><h4 className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">1. Базовый график погашения</h4>
             <p className="mt-1">Расчёт без досрочных взносов при текущем ежемесячном платеже.</p>
             <ul className="mt-2 space-y-1"><li>Срок: <strong>{plans.base.completed ? duration(plans.base.months) : "более 50 лет"}</strong></li><li>Проценты за весь срок: <strong>{money(plans.base.interest)}</strong></li><li>Расчётных периодов: <strong>{plans.base.months}</strong></li></ul>
@@ -229,6 +229,6 @@ export function RealtorMortgageAssistant() {
         </div>
       </details>}
     </div>
-    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</div>
+    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0" />Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</div>
   </section>;
 }
