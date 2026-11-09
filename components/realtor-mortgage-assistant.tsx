@@ -185,7 +185,6 @@ export function RealtorMortgageAssistant() {
         </div>
       </div>
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35] dark:text-[#FF7770]" /><h3 className="font-semibold">Сравнение сценариев</h3></div>
         {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="flex h-full flex-col rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
@@ -231,9 +230,10 @@ export function RealtorMortgageAssistant() {
             <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
             <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-[#E2E7ED] bg-white/70 p-3 text-xs leading-relaxed text-[#748195] [user-select:none] [-webkit-user-select:none] dark:border-[#405064] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>
         </div>
       </details>}
     </div>
-    {isValid && plans?.hasExtra && <p className="flex items-start gap-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>}
+
   </section>;
 }
