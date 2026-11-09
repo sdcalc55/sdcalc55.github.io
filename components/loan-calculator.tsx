@@ -186,7 +186,7 @@ export function LoanCalculator() {
       `Ежемесячный платёж: ${amount(result.monthlyPayment)}`,
       `Сумма кредита: ${amount(result.principal)}`,
       `Срок кредита: ${result.months} мес.`,
-      `Годовая ставка: ${result.annualRate}%`,
+      `Процентная ставка: ${result.annualRate}%`,
     ];
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
@@ -274,6 +274,7 @@ export function LoanCalculator() {
           <dl className="mt-6 space-y-4 border-t border-[#26364A]/10 pt-5 text-sm dark:border-[#607084]">
             {reverse ? <ResultRow label="Ежемесячный платёж" value={amount(result.monthlyPayment)} /> : <ResultRow label="Основной долг" value={amount(result.principal)} />}
             <ResultRow label="Срок кредита" value={`${result.months} мес.`} />
+            <ResultRow label="Процентная ставка" value={`${result.annualRate}%`} />
           </dl>
           <svg role="img" aria-label={`Основной долг ${amount(result.principal)}, проценты ${amount(result.interest)}`} viewBox="0 0 100 12" preserveAspectRatio="none" className="mt-6 h-3 w-full overflow-hidden rounded-full"><rect width="100" height="12" className="fill-[#26364A]" /><rect width={result.principal / result.totalPayment * 100} height="12" className="fill-[#E83C35]" /></svg>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#596779] dark:text-[#C2CCD8]"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#E83C35]" />Основной долг</span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#26364A]" />Проценты</span></div>
