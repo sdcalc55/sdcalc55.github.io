@@ -77,7 +77,7 @@ export function RealtorMortgageAssistant() {
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-start gap-2"><Calculator className="mt-0.5 size-5 shrink-0 text-[#E83C35]" /><div><h2 className="font-semibold">Как быстрее закрыть ипотеку</h2><p className="mt-1 text-sm text-[#748195]">Введите параметры действующего кредита и дополнительные суммы, которые клиент готов направлять на досрочное погашение.</p></div></div>
+        <div className="flex items-start gap-2"><Calculator className="mt-0.5 size-5 shrink-0 text-[#E83C35]" /><div><h2 className="font-semibold">Стратегия погашения</h2><p className="mt-1 text-sm text-[#748195]">Введите параметры действующего кредита и дополнительные суммы, которые клиент готов направлять на досрочное погашение.</p></div></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} />
