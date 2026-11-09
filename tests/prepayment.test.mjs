@@ -205,7 +205,7 @@ test("accepts valid boundary values including zero interest and a one-period pay
 });
 
 
-// Golden values below were calculated independently from the recurrence:
+// Golden values below were calculated independently from the recurrence and rechecked against full monthly periods:
 // interest = opening balance * annual rate / 1200; then scheduled payment;
 // then the extra payment. Values are not derived from production helpers.
 test("matches independent golden values for a standard monthly schedule", () => {
