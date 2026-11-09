@@ -8,7 +8,8 @@ import { Calculator, Target, RotateCcw } from "lucide-react";
 import { calculatePlanOptions, calculatePrepayment, estimateRemainingBalance, findPrepaymentAmount, type PlannerGoal, type PrepaymentResult, type PlanOptions } from "@/lib/prepayment";
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 const rub = (v: number) => `${money.format(v)}\u00a0₽`;
-const plural = (n:number,one:string,few:string,many:string) => { const n10=n%10,n100=n%100; return n100>=11&&n100<=14?many:n10===1?one:n10>=2&&n10<=4?few:many; };\nconst term = (months:number) => { const years=Math.floor(months/12), rest=months%12; return years?`${months} ${plural(months,"месяц","месяца","месяцев")} (${years} ${plural(years,"год","года","лет")}${rest?` ${rest} ${plural(rest,"месяц","месяца","месяцев")}`:""})`:`${months} ${plural(months,"месяц","месяца","месяцев")}`; };
+const plural = (n:number,one:string,few:string,many:string) => { const n10=n%10,n100=n%100; return n100>=11&&n100<=14?many:n10===1?one:n10>=2&&n10<=4?few:many; };
+const term = (months:number) => { const years=Math.floor(months/12), rest=months%12; return years?`${months} ${plural(months,"месяц","месяца","месяцев")} (${years} ${plural(years,"год","года","лет")}${rest?` ${rest} ${plural(rest,"месяц","месяца","месяцев")}`:""})`:`${months} ${plural(months,"месяц","месяца","месяцев")}`; };
 const parse = (v: string) => { const n = v.replace(/[\s\u00a0\u202f]/g, "").replace(",", "."); return /^\d+(?:\.\d+)?$/.test(n) ? Number(n) : NaN; };
 type Mode = "quick" | "planner";
 export function PrepaymentCalculator() {
