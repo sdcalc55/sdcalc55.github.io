@@ -54,7 +54,9 @@ jobs:
           curl --fail http://127.0.0.1:3000/ >/dev/null
 
       - name: Run browser interaction tests
-        run: node tests/result-actions-browser.cjs
+        run: |
+          node tests/result-actions-browser.cjs
+          node tests/prepayment-input-browser.cjs
 
       - name: Package static site
         run: |
