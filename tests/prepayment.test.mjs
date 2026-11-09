@@ -31,3 +31,20 @@ test("finds an early payment amount that reaches the requested monthly payment",
 test("rejects a payment that does not cover monthly interest", () => {
   assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 1000, annualRate: 20, extraPayment: 10000 }), /не покрывает проценты/);
 });
+
+
+test("compares lump-sum, monthly and combined repayment plans", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const result = calculatePlanOptions({ balance: 1200000, monthlyPayment: 30000, annualRate: 12, lumpSum: 100000, monthlyExtra: 5000 });
+  assert.ok(result.lumpShorten.interest < result.baseline.interest);
+  assert.ok(result.lumpReduce.interest < result.baseline.interest);
+  assert.ok(result.recurringShorten.interest < result.baseline.interest);
+  assert.ok(result.combined.interest < result.baseline.interest);
+  assert.ok(result.combined.months <= result.lumpShorten.months);
+});
+
+test("uses the entered current balance even when original loan data is also present", () => {
+  // Current balance is the source of truth after previous early repayments.
+  const result = calculatePrepayment({ balance: 859074.34, monthlyPayment: 16596.52, annualRate: 6, extraPayment: 100000 });
+  assert.ok(result.shorten.interest < result.baseline.interest);
+});
