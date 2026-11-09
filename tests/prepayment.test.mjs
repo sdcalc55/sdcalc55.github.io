@@ -477,6 +477,29 @@ test("additional payments remain separate from the mandatory installment", () =>
   assert.ok(firstInterest < payment);
 });
 
+// Golden values copied from the supplied RUR workbook example and independently
+// recomputed from its row-10 daily-interest formula plus the monthly amortization recurrence.
+test("matches the workbook's initial daily-interest period and recurring early repayments", () => {
+  const principal = 1999750;
+  const annualRate = 17.45;
+  const monthlyPayment = 30018.593345599038;
+  const monthlyExtra = 3000;
+  const initialPeriodDays = 16;
+  const term = inferRemainingTerm(principal, annualRate, monthlyPayment);
+  assert.ok(Math.abs(term - 240) < 1e-8);
+  const plan = simulateFixedPayment(principal, annualRate, monthlyPayment, monthlyExtra, 0, term, initialPeriodDays);
+  assert.equal(plan.months, 148);
+  assert.ok(Math.abs(plan.interest - 2878335.587699058) < 0.02);
+  assert.ok(Math.abs(plan.totalPaid - 4878085.587699065) < 0.02);
+  assert.ok(Math.abs(plan.interest - (2863038.8698908486 + principal * 0.1745 * 16 / 365)) < 0.02);
+});
+
+test("rejects impossible initial calendar-period lengths", () => {
+  const term = inferRemainingTerm(100000, 12, 10000);
+  assert.throws(() => simulateFixedPayment(100000, 12, 10000, 0, 0, term, -1), /от 0 до 366/);
+  assert.throws(() => simulateReducedPayment(100000, 12, term, 10000, 0, 0, 1.5), /от 0 до 366/);
+});
+
 test("contradictory direct simulation inputs are rejected", () => {
   assert.throws(() => simulateFixedPayment(100000, 12, 100, 0, 0), /не покрывает проценты/);
   assert.throws(() => simulateFixedPayment(100000, 12, 10000, 100001, 0), /не может превышать остаток долга/);
