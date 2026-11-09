@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatInput } from "@/lib/calculator";
+import { handleFormattedBackspace } from "@/lib/calculator-input";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/loan";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
@@ -218,7 +219,7 @@ export function LoanCalculator() {
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-5"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
-        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={value} onChange={event => {
+        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={event => { if (handleFormattedBackspace(event, next => edit({ value: next }))) return; dismissKeyboard(event); }} autoComplete="off" value={value} onChange={event => {
           const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.replace(/\s/g, "").split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
