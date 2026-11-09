@@ -34,11 +34,18 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
+        onPaste={event => {
+          const pasted = event.clipboardData.getData("text");
+          if (normalizeNumericInput(pasted, { maxIntegerDigits, maxFractionDigits: decimal ? maxDecimalDigits : 0, maxValue }) === null) {
+            event.preventDefault();
+          }
+        }}
         onChange={event => {
           const normalized = normalizeNumericInput(event.target.value, {
             maxIntegerDigits,
             maxFractionDigits: decimal ? maxDecimalDigits : 0,
             maxValue,
+            strictGrouping: false,
           });
           if (normalized === null) return;
           if (validateValue && !validateValue(normalized)) return;
