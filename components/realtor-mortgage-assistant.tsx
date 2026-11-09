@@ -50,29 +50,51 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
     {error ? <span id={errorId} role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">{error}</span> : hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}
   </div>;
 }
-type Plan = { months: number; interest: number; firstPayment: number };
+type Plan = { months: number; interest: number; firstPayment: number; completed: boolean };
+const MAX_MONTHS = 600;
 function annuity(balance: number, monthlyRate: number, months: number) {
   if (months <= 0 || balance <= 0) return 0;
   if (monthlyRate === 0) return balance / months;
-  return balance * monthlyRate / (1 - Math.pow(1 + monthlyRate, -months));
+  const factor = Math.pow(1 + monthlyRate, months);
+  return balance * monthlyRate * factor / (factor - 1);
 }
-function simulate(balanceStart: number, rateYear: number, payment: number, monthsLimit: number, extraMonthly: number, lump: number, strategy: "term" | "payment"): Plan {
+function simulateFixedPayment(balanceStart: number, rateYear: number, payment: number, extraMonthly: number, lump: number): Plan {
   let balance = Math.max(0, balanceStart - lump);
   let interest = 0;
   let months = 0;
   const monthlyRate = rateYear / 1200;
-  const firstPayment = strategy === "payment" ? annuity(balance, monthlyRate, monthsLimit) : payment;
-  for (let i = 0; i < Math.min(600, monthsLimit || 600) && balance > 0.01; i++) {
-    const regular = strategy === "payment" ? annuity(balance, monthlyRate, Math.max(1, monthsLimit - i)) : payment;
+  const firstPayment = payment;
+  if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
+  for (let i = 0; i < MAX_MONTHS && balance > 0.01; i++) {
     const monthInterest = balance * monthlyRate;
-    interest += monthInterest;
+    if (payment + extraMonthly <= monthInterest + 0.000001) {
+      return { months, interest, firstPayment, completed: false };
+    }
     const due = balance + monthInterest;
-    const paid = Math.min(due, regular + extraMonthly);
-    if (paid <= 0) break;
+    const paid = Math.min(due, payment + extraMonthly);
+    interest += monthInterest;
     balance = Math.max(0, due - paid);
     months++;
   }
-  return { months, interest, firstPayment };
+  return { months, interest, firstPayment, completed: balance <= 0.01 };
+}
+function simulateReducedPayment(balanceStart: number, rateYear: number, termMonths: number, extraMonthly: number, lump: number): Plan {
+  let balance = Math.max(0, balanceStart - lump);
+  let interest = 0;
+  let months = 0;
+  const monthlyRate = rateYear / 1200;
+  const firstPayment = annuity(balance, monthlyRate, termMonths);
+  if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
+  for (let i = 0; i < termMonths && balance > 0.01; i++) {
+    const scheduledPayment = annuity(balance, monthlyRate, termMonths - i);
+    const monthInterest = balance * monthlyRate;
+    const due = balance + monthInterest;
+    const paid = Math.min(due, scheduledPayment + extraMonthly);
+    interest += monthInterest;
+    balance = Math.max(0, due - paid);
+    months++;
+  }
+  return { months, interest, firstPayment, completed: balance <= 0.01 };
 }
 function duration(months: number) {
   const years = Math.floor(months / 12), rest = months % 12;
@@ -94,43 +116,41 @@ export function RealtorMortgageAssistant() {
     lump: num(lump) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
     rate: num(rate) > 30 ? "Максимальная ставка - 30%." : "",
   };
-  const isValid = !Object.values(errors).some(Boolean);
+  const principal = num(balance);
+  const monthlyRate = num(rate) / 1200;
+  if (!errors.payment && principal > 0 && num(payment) <= principal * monthlyRate) {
+    errors.payment = "Платёж должен быть больше ежемесячно начисляемых процентов.";
+  }
+  if (!errors.lump && num(lump) > principal && principal > 0) {
+    errors.lump = "Разовый взнос не может превышать остаток долга.";
+  }
+  const isValid = !Object.values(errors).some(Boolean) && principal > 0 && num(payment) > 0;
   const plans = useMemo(() => {
-    if (!isValid) return { base: { months: 0, interest: 0, firstPayment: 0 }, term: { months: 0, interest: 0, firstPayment: 0 }, paymentPlan: { months: 0, interest: 0, firstPayment: 0 }, recommended: "term" as const, selected: { months: 0, interest: 0, firstPayment: 0 }, saving: 0, paymentReduction: 0, monthsSaved: 0, hasExtra: false, estimated: !remainingYears.trim() };
-    const principal = num(balance);
-    const monthlyRate = num(rate) / 1200;
+    if (!isValid) return null;
     const regularPayment = num(payment);
-    let estimatedMonths = 600;
-    if (principal > 0 && regularPayment > 0) {
-      if (monthlyRate === 0) estimatedMonths = Math.ceil(principal / regularPayment);
-      else if (regularPayment > principal * monthlyRate) {
-        estimatedMonths = Math.ceil(-Math.log(1 - principal * monthlyRate / regularPayment) / Math.log(1 + monthlyRate));
-      }
-    }
-    const monthsLimit = Math.max(1, Math.min(600, Math.round(num(remainingYears) * 12) || estimatedMonths));
-    const base = simulate(principal, num(rate), regularPayment, monthsLimit, 0, 0, "term");
-    const term = simulate(principal, num(rate), regularPayment, monthsLimit, num(extraMonthly), num(lump), "term");
-    const paymentPlan = simulate(principal, num(rate), regularPayment, monthsLimit, num(extraMonthly), num(lump), "payment");
-    const hasExtra = num(extraMonthly) > 0 || num(lump) > 0;
-    const recommended = term.interest <= paymentPlan.interest ? "term" : "payment";
-    const selected = recommended === "term" ? term : paymentPlan;
+    const extra = num(extraMonthly);
+    const oneTime = num(lump);
+    const base = simulateFixedPayment(principal, num(rate), regularPayment, 0, 0);
+    const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
+    const estimatedTerm = base.completed ? base.months : MAX_MONTHS;
+    const termMonths = Math.max(1, Math.min(MAX_MONTHS, Math.round(num(remainingYears) * 12) || estimatedTerm));
+    const paymentPlan = simulateReducedPayment(principal, num(rate), termMonths, extra, oneTime);
+    const hasExtra = extra > 0 || oneTime > 0;
     return {
       base,
       term,
       paymentPlan,
-      recommended,
-      selected,
-      saving: Math.max(0, base.interest - selected.interest),
-      paymentReduction: Math.max(0, regularPayment - paymentPlan.firstPayment),
-      monthsSaved: Math.max(0, base.months - selected.months),
+      termMonths,
       hasExtra,
-      estimated: !remainingYears.trim(),
+      termSaving: base.completed && term.completed ? Math.max(0, base.interest - term.interest) : null,
+      paymentSaving: base.completed && paymentPlan.completed ? Math.max(0, base.interest - paymentPlan.interest) : null,
+      monthsSaved: base.completed && term.completed ? Math.max(0, base.months - term.months) : null,
     };
   }, [balance, rate, payment, remainingYears, extraMonthly, lump, isValid]);
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-start gap-2"><Calculator className="mt-0.5 size-5 shrink-0 text-[#E83C35]" /><div><h2 className="font-semibold">Стратегия погашения</h2><p className="mt-1 text-sm text-[#748195]">Введите параметры действующего кредита и дополнительные суммы для досрочного погашения.</p></div></div>
+        <div className="flex items-start gap-2"><Calculator className="mt-0.5 size-5 shrink-0 text-[#E83C35]" /><div><h2 className="font-semibold">Стратегия погашения</h2><p className="mt-1 text-sm text-[#748195]">Введите параметры кредита и дополнительные суммы. Калькулятор покажет результат по двум вариантам.</p></div></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
@@ -141,18 +161,26 @@ export function RealtorMortgageAssistant() {
         </div>
       </div>
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35]" /><h3 className="font-semibold">Что выгоднее выбрать клиенту</h3></div>
-        {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Исправьте значения в отмеченных полях, чтобы выполнить расчёт.</p> : plans.hasExtra ? <div className="mt-3 rounded-xl bg-[#FCEBEA] p-3 dark:bg-[#352322]">
-          <div className="text-xs font-semibold text-[#9B302B] dark:text-[#F09A94]">Рекомендуемая стратегия</div>
-          <div className="mt-1 text-xl font-bold text-[#B8322D] dark:text-[#F09A94]">{plans.recommended === "term" ? "Сокращение срока" : "Уменьшение ежемесячного платежа"}</div>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.saving)}</div></div>
-            <div><div className="text-xs text-[#748195]">Срок погашения</div><div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#E6ECF3]">{duration(plans.selected.months)}</div></div>
-            {plans.recommended === "term" ? <div className="col-span-2"><div className="text-xs text-[#748195]">На сколько раньше закроется ипотека</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{duration(plans.monthsSaved)}</div></div> : <div className="col-span-2"><div className="text-xs text-[#748195]">Новый ежемесячный платёж после перерасчёта</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div><div className="mt-1 text-xs text-[#748195]">Снижение относительно текущего платежа: {money(plans.paymentReduction)}</div></div>}
+        <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35]" /><h3 className="font-semibold">Два варианта для клиента</h3></div>
+        {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl bg-[#FCEBEA] p-3 dark:bg-[#352322]">
+            <div className="text-xs font-semibold text-[#9B302B] dark:text-[#F09A94]">Если сохранять текущий платёж</div>
+            <div className="mt-1 text-lg font-bold text-[#B8322D] dark:text-[#F09A94]">Сокращение срока</div>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Новый срок</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.term.completed ? duration(plans.term.months) : "Долг не погашается за 50 лет"}</div></div>
+            <p className="mt-3 text-xs text-[#748195]">Платёж остаётся {money(num(payment))} + досрочная доплата {money(num(extraMonthly))} в месяц.</p>
           </div>
-        </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить стратегии.</p>}
+          <div className="rounded-xl border border-[#DCE2E9] bg-[#F7F8FA] p-3 dark:border-[#405064] dark:bg-[#111820]">
+            <div className="text-xs font-semibold text-[#647184] dark:text-[#AAB6C5]">Если уменьшать обязательный платёж</div>
+            <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#E6ECF3]">Уменьшение платежа</div>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
+            <p className="mt-3 text-xs text-[#748195]">Срок сохраняется: {duration(plans.termMonths)}. Доплата {money(num(extraMonthly))} в месяц остаётся сверх обязательного платежа.</p>
+          </div>
+          <p className="text-xs text-[#748195] sm:col-span-2">В обоих вариантах разовый взнос сразу уменьшает долг. При уменьшении платежа он пересчитывается после каждого ежемесячного досрочного взноса.</p>
+        </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта.</p>}
       </div>
     </div>
-    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Расчёт предварительный и может отличаться из-за даты досрочного взноса и правил перерасчёта.</div>
+    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Модель: аннуитетный кредит, проценты начисляются ежемесячно на остаток долга. Досрочные взносы считаются в конце расчётного месяца; разовый взнос - до первого месяца. Условия банка и даты платежей могут изменить результат.</div>
   </section>;
 }
