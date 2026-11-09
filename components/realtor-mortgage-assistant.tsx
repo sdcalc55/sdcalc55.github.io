@@ -83,6 +83,7 @@ function simulateReducedPayment(balanceStart: number, rateYear: number, termMont
   let months = 0;
   let scheduledPayment = initialPayment;
   let nextPayment = initialPayment;
+  let firstPaymentAfterPrepayment = 0;
   const monthlyRate = rateYear / 1200;
   if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
   for (let i = 0; i < termMonths && balance > 0.01; i++) {
@@ -100,9 +101,10 @@ function simulateReducedPayment(balanceStart: number, rateYear: number, termMont
     }
     const remainingMonths = termMonths - months;
     nextPayment = remainingMonths > 0 ? annuity(balance, monthlyRate, remainingMonths) : 0;
+    if (months === 1) firstPaymentAfterPrepayment = nextPayment;
     scheduledPayment = nextPayment;
   }
-  return { months, interest, firstPayment: nextPayment, completed: balance <= 0.01 };
+  return { months, interest, firstPayment: firstPaymentAfterPrepayment, completed: balance <= 0.01 };
 }
 function duration(months: number) {
   const years = Math.floor(months / 12), rest = months % 12;
