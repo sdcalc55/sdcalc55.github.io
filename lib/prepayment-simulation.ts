@@ -20,7 +20,7 @@ export function annuityPayment(balance: number, monthlyRate: number, months: num
   return balance * monthlyRate / denominator;
 }
 
-/** Returns a whole number of monthly payment periods. No fractional interest periods are simulated. */
+/** Returns the exact mathematical annuity term; simulation still accrues interest in full monthly periods. No fractional interest periods are simulated. */
 export function inferRemainingTerm(balance: number, annualRate: number, payment: number): number {
   if (!Number.isFinite(balance) || balance <= 0 || balance > MAX_AMOUNT) throw new Error("Проверьте остаток основного долга.");
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Процентная ставка должна быть от 0 до 30%.");
@@ -38,7 +38,7 @@ function accrueMonthlyInterest(balance: number, monthlyRate: number): number {
 
 function validateTerm(termMonths: number) {
   if (!Number.isFinite(termMonths) || termMonths <= 0 || termMonths > MAX_MONTHS) {
-    throw new Error("Срок расчёта должен составлять от 1 до 600 полных месяцев.");
+    throw new Error("Расчётный срок должен быть больше 0 и не превышать 600 месяцев.");
   }
 }
 
