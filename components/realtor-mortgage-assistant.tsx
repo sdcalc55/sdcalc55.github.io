@@ -175,7 +175,7 @@ export function RealtorMortgageAssistant() {
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" step={0.1} error={errors.rate} />
-          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" error={errors.term} />
+          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" hint={!remainingYears ? "Укажите срок из банковского графика, чтобы рассчитать вариант с уменьшением платежа." : undefined} error={errors.term} />
           <Field label="Дополнительно каждый месяц" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field label="Разовый досрочный взнос" value={lump} onChange={setLump} error={errors.lump} />
         </div>
@@ -193,9 +193,9 @@ export function RealtorMortgageAssistant() {
           <div className="rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
             <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#F1F5F9]">Уменьшение платежа</div>
-            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.paymentPlan === null ? "Укажите оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan ? money(plans.paymentPlan.firstPayment) : "Укажите срок по графику"}</div></div>
-            <p className="mt-3 text-xs text-[#748195]">Срок по графику: {plans.termMonths ? duration(plans.termMonths) : "не указан"}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</p>
+            <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.paymentPlan === null ? "Заполните оставшийся срок по графику" : plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentPlan ? money(plans.paymentPlan.firstPayment) : "После заполнения срока появится расчёт"}</div></div>
+            <p className="mt-3 text-sm text-[#596779] dark:text-[#D5DEE8]">{plans.paymentPlan ? <>Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</> : <>Чтобы рассчитать этот вариант, заполните поле «Оставшийся срок по графику» по данным банковского графика. Тогда появится расчёт нового обязательного платежа и экономии на процентах.</>}</p>
           </div>
           <p className="text-xs text-[#748195] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта.</p>}
