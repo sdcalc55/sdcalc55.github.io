@@ -5,7 +5,7 @@ import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { Calculator, Target, RotateCcw } from "lucide-react";
-import { calculatePrepayment, estimateRemainingBalance, findPrepaymentAmount, type PlannerGoal, type PrepaymentResult } from "@/lib/prepayment";
+import { calculatePlanOptions, calculatePrepayment, estimateRemainingBalance, findPrepaymentAmount, type PlannerGoal, type PrepaymentResult, type PlanOptions } from "@/lib/prepayment";
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 const rub = (v: number) => `${money.format(v)}\u00a0₽`;
 const term = (months:number) => { const years=Math.floor(months/12), mod=years%10, last=years%100; const word=last>=11&&last<=14?"лет":mod===1?"год":mod>=2&&mod<=4?"года":"лет"; return years?`${years} ${word} (${months} мес.)`:`${months} мес.`; };
@@ -15,9 +15,9 @@ export function PrepaymentCalculator() {
   const [mode,setMode]=useState<Mode>("quick");
   const [balance,setBalance]=useState(""), [principal,setPrincipal]=useState(""), [startDate,setStartDate]=useState("");
   const [estimateInfo,setEstimateInfo]=useState<{balance:number;monthsPaid:number}|null>(null);
-  const [rate,setRate]=useState(""), [payment,setPayment]=useState(""), [extra,setExtra]=useState("");
+  const [rate,setRate]=useState(""), [payment,setPayment]=useState(""), [extra,setExtra]=useState(""), [monthlyExtra,setMonthlyExtra]=useState("");
   const [goal,setGoal]=useState<PlannerGoal>("payment"), [target,setTarget]=useState("");
-  const [result,setResult]=useState<PrepaymentResult|null>(null), [picked,setPicked]=useState<number|null>(null), [error,setError]=useState(""), [showDetails,setShowDetails]=useState(false);
+  const [result,setResult]=useState<PrepaymentResult|null>(null), [planOptions,setPlanOptions]=useState<PlanOptions|null>(null), [picked,setPicked]=useState<number|null>(null), [error,setError]=useState(""), [showDetails,setShowDetails]=useState(false);
   const inputClass="mt-2 h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 text-base font-medium tabular-nums text-[#26364A] outline-none transition placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]";
 
   const calculate=()=>{try{
