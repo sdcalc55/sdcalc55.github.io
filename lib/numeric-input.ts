@@ -13,7 +13,8 @@ export function normalizeNumericInput(raw: string, rules: NumericInputRules = {}
   if (typeof raw !== "string" || !/^[\d\s\u00a0\u202f.,]*$/.test(raw)) return null;
   const compact = raw.replace(/[\s\u00a0\u202f]/g, "");
   if ((compact.match(/[.,]/g) ?? []).length > 1) return null;
-  const normalized = compact.replace(",", ".");
+  const separatorNormalized = compact.replace(",", ".");
+  const normalized = separatorNormalized.startsWith(".") ? `0${separatorNormalized}` : separatorNormalized;
   const [integer = "", fraction] = normalized.split(".");
   const integerDigits = integer.replace(/^0+(?=\d)/, "");
   if (rules.maxIntegerDigits !== undefined && integerDigits.length > rules.maxIntegerDigits) return null;
