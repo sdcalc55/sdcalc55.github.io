@@ -73,5 +73,5 @@ test("rejects malformed grouping, whitespace injection and oversized pasted valu
 });
 
 test("rejects numeric values that overflow finite JavaScript numbers", () => {
-  assert.equal(normalizeNumericInput("9".repeat(128)), null);
+  assert.equal(normalizeNumericInput("9".repeat(128), { maxIntegerDigits: 9 }), null);
 });
