@@ -29,7 +29,7 @@ export function inferRemainingTerm(balance: number, annualRate: number, payment:
   if (payment <= balance * rate + 1e-9) throw new Error("Ежемесячный платёж не покрывает проценты по кредиту: он должен быть больше начисляемых процентов.");
   const exact = rate === 0 ? balance / payment : -Math.log1p(-(balance * rate) / payment) / Math.log1p(rate);
   if (!Number.isFinite(exact) || exact <= 0 || exact > MAX_MONTHS) throw new Error("Расчётный срок превышает 50 лет. Увеличьте ежемесячный платёж.");
-  return Math.max(1, Math.ceil(exact - 1e-10));
+  return exact;
 }
 
 function accrueMonthlyInterest(balance: number, monthlyRate: number): number {
@@ -37,7 +37,7 @@ function accrueMonthlyInterest(balance: number, monthlyRate: number): number {
 }
 
 function validateTerm(termMonths: number) {
-  if (!Number.isInteger(termMonths) || termMonths < 1 || termMonths > MAX_MONTHS) {
+  if (!Number.isFinite(termMonths) || termMonths <= 0 || termMonths > MAX_MONTHS) {
     throw new Error("Срок расчёта должен составлять от 1 до 600 полных месяцев.");
   }
 }
@@ -55,7 +55,7 @@ export function simulateFixedPayment(
   validateTerm(termMonths);
   let balance = balanceStart, interest = 0, totalPaid = 0, finalPayment = 0, months = 0;
   const rate = annualRate / 1200;
-  for (let i = 0; i < termMonths && balance > EPSILON; i++) {
+  for (let i = 0; i < Math.ceil(termMonths - 1e-10) && balance > EPSILON; i++) {
     const accrued = accrueMonthlyInterest(balance, rate);
     const due = balance + accrued;
     const regular = Math.min(due, payment);
@@ -82,6 +82,10 @@ export function simulateReducedPayment(
 ): RepaymentPlan {
   validateSimulationInputs(balanceStart, annualRate, initialPayment, extraMonthly, lump);
   validateTerm(termMonths);
+  if (extraMonthly === 0 && lump === 0) {
+    const unchanged = simulateFixedPayment(balanceStart, annualRate, initialPayment, 0, 0, termMonths);
+    return { ...unchanged, firstPayment: initialPayment };
+  }
   let balance = balanceStart, interest = 0, totalPaid = 0, months = 0, finalPayment = 0;
   let scheduledPayment = initialPayment, firstPayment = initialPayment;
   const rate = annualRate / 1200;
