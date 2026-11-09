@@ -26,7 +26,7 @@ export function normalizeNumericInput(raw: string, rules: NumericInputRules = {}
 
   const compact = raw.replace(/[\s\u00a0\u202f]/g, "");
   const separatorNormalized = compact.replace(",", ".");
-  const normalized = separatorNormalized.startsWith(".") ? \`0\${separatorNormalized}\` : separatorNormalized;
+  const normalized = separatorNormalized.startsWith(".") ? "0" + separatorNormalized : separatorNormalized;
   const [integer = "", fraction] = normalized.split(".");
   const integerDigits = integer.replace(/^0+(?=\d)/, "");
   if (rules.maxIntegerDigits !== undefined && integerDigits.length > rules.maxIntegerDigits) return null;
