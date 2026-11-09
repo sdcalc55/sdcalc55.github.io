@@ -105,7 +105,7 @@ export function simulateReducedPayment(
       if (months === 1) firstPayment = 0;
       break;
     }
-    const remainingPeriods = termMonths - months;
+    const remainingPeriods = Math.ceil(termMonths - months - 1e-10);
     scheduledPayment = remainingPeriods > 0 ? annuityPayment(balance, rate, remainingPeriods) : 0;
     if (months === 1) firstPayment = scheduledPayment;
   }
