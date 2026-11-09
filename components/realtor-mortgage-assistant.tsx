@@ -17,7 +17,7 @@ function parseTermMonths(value: string) {
   if (months > 11) return null;
   return years * 12 + months;
 }
-function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, error }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string; error?: string }) {
+function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecimal = false, maxIntegerDigits = 9, maxDecimalDigits = 0, maxValue, validateValue }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; hint?: string; error?: string; allowDecimal?: boolean; maxIntegerDigits?: number; maxDecimalDigits?: number; maxValue?: number; validateValue?: (value: string) => boolean }) {
   const id = useId();
   const errorId = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -28,7 +28,7 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
       cursor.current = null;
     }
   });
-  const decimal = suffix === "%";
+  const decimal = allowDecimal;
   return <div className="min-w-0">
     <label htmlFor={id} className="mb-3 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label>
     <div className="relative">
@@ -41,10 +41,15 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, err
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={event => {
-          const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          let raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const separatorIndex = raw.search(/[.,]/);
+          let integerPart = (separatorIndex < 0 ? raw : raw.slice(0, separatorIndex)).slice(0, maxIntegerDigits);
+          let fractionPart = separatorIndex < 0 || !decimal ? "" : raw.slice(separatorIndex + 1).replace(/[.,]/g, "").slice(0, maxDecimalDigits);
+          let normalized = decimal && separatorIndex >= 0 ? `${integerPart}.${fractionPart}` : integerPart;
+          if (maxValue !== undefined && Number(normalized) > maxValue) return;
+          if (validateValue && !validateValue(normalized)) return;
           const position = event.target.selectionStart ?? raw.length;
           const significant = raw.slice(0, position).replace(/[\s\u00a0\u202f]/g, "").length;
-          const normalized = decimal ? raw.replace(",", ".") : raw.replace(/[.,].*$/, "");
           const next = formatInput(normalized);
           let index = 0, count = 0;
           while (index < next.length && count < significant) { if (!/[\s\u00a0\u202f]/.test(next[index])) count++; index++; }
@@ -186,8 +191,8 @@ export function RealtorMortgageAssistant() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
-          <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" step={0.1} error={errors.rate} />
-          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
+          <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
+          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} validateValue={value => { const [years, months = ""] = value.split("."); return Number(years || 0) <= 50 && Number(months || 0) <= 11; }} hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
           <Field label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
@@ -217,7 +222,7 @@ export function RealtorMortgageAssistant() {
           </div>
           <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
             <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Зачем указывать оставшийся срок кредита?</div>
-            <p className="mt-2">При сокращении срока текущий обязательный платёж сохраняется, поэтому можно смоделировать погашение без указания срока по графику. При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
+            <p className="mt-2">При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
           </div>
           <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
@@ -242,7 +247,7 @@ export function RealtorMortgageAssistant() {
           </ol>
           <div className="mt-4 rounded-xl p-3">
             <div className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Зачем указывать оставшийся срок кредита?</div>
-            <p className="mt-2">При сокращении срока текущий платёж сохраняется, поэтому срок по графику не нужен. При уменьшении платежа новый платёж рассчитывается на оставшийся срок, поэтому срок необходим для корректного расчёта экономии.</p>
+            <p className="mt-2">При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
           </div>
         </div>
       </details>}
