@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [reduce-supabase-traffic]
+    branches: [reduce-supabase-traffic, prepayment-advisor]
 
 permissions:
   contents: read
