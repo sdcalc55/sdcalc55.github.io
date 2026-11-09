@@ -160,3 +160,31 @@ test("simulation rejects a lump sum larger than the outstanding debt", () => {
     /не может превышать остаток долга/,
   );
 });
+
+
+test("rejects non-finite and out-of-range loan inputs before simulation", () => {
+  assert.throws(() => inferRemainingTerm(Infinity, 6, 42000), /остаток основного долга/);
+  assert.throws(() => inferRemainingTerm(4500000, 31, 42000), /от 0 до 30/);
+  assert.throws(() => inferRemainingTerm(4500000, 6, NaN), /больше нуля/);
+  assert.throws(() => inferRemainingTerm(4500000, 6, 22500), /больше начисляемых процентов/);
+});
+
+test("rejects a repayment term longer than the supported 50-year horizon", () => {
+  assert.throws(
+    () => inferRemainingTerm(4500000, 6, 22501),
+    /превышает 50 лет/,
+  );
+  assert.throws(
+    () => inferRemainingTerm(999999999, 0, 1000000),
+    /превышает 50 лет/,
+  );
+});
+
+test("accepts valid boundary values including zero interest and a one-period payoff", () => {
+  assert.equal(inferRemainingTerm(100000, 0, 100000), 1);
+  assert.ok(inferRemainingTerm(4500000, 30, 200000) > 0);
+  const term = inferRemainingTerm(100000, 12, 9000);
+  const result = simulateReducedPayment(100000, 12, term, 9000, 0, 0);
+  assert.equal(result.completed, true);
+  assert.ok(result.firstPayment > 0);
+});
