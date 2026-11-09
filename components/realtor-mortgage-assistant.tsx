@@ -103,7 +103,7 @@ export function RealtorMortgageAssistant() {
       base,
       term,
       paymentPlan,
-      termMonths: inferredTerm,
+      termMonths: base.months,
       estimatedTermMonths: base.months,
       hasExtra,
       termSaving: base.completed && term.completed
