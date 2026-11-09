@@ -192,7 +192,7 @@ export function RealtorMortgageAssistant() {
           <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
-          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} validateValue={value => { const [years, months = ""] = value.split("."); return Number(years || 0) <= 50 && Number(months || 0) <= 11; }} hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
+          <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} validateValue={value => { const [years, months = ""] = value.split("."); return Number(years || 0) * 12 + Number(months || 0) <= MAX_MONTHS && Number(months || 0) <= 11; }} hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
           <Field label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
