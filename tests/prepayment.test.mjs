@@ -508,3 +508,54 @@ test("contradictory direct simulation inputs are rejected", () => {
   assert.throws(() => simulateFixedPayment(100000, 30.01, 10000, 0, 0), /от 0 до 30/);
   assert.throws(() => simulateFixedPayment(999999999, 0, 100000, 0, 0, 601), /не превышать 600 месяцев/);
 });
+
+
+test("edge cases: near-balance monthly and lump payments close the loan without overcharging", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const input = { balance: 100000, monthlyPayment: 10000, annualRate: 12 };
+  const term = inferRemainingTerm(input.balance, input.annualRate, input.monthlyPayment);
+
+  const nearMonthly = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 89999, 0, term);
+  assert.equal(nearMonthly.completed, true);
+  assert.equal(nearMonthly.months, 1);
+  assert.ok(nearMonthly.finalPayment <= input.balance * 1.01 + 0.01);
+
+  const nearLump = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 0, 89999, term);
+  assert.equal(nearLump.completed, true);
+  assert.equal(nearLump.months, 1);
+  assert.ok(nearLump.totalPaid <= input.balance + nearLump.interest + 0.01);
+
+  const lumpOnly = calculatePlanOptions({ ...input, lumpSum: 5000, monthlyExtra: 0 });
+  assert.ok(lumpOnly.lumpShorten.interest < lumpOnly.baseline.interest);
+  assert.equal(lumpOnly.recurringShorten.months, lumpOnly.baseline.months);
+
+  const monthlyOnly = calculatePlanOptions({ ...input, lumpSum: 0, monthlyExtra: 1000 });
+  assert.ok(monthlyOnly.recurringShorten.interest < monthlyOnly.baseline.interest);
+  assert.equal(monthlyOnly.lumpShorten.months, monthlyOnly.baseline.months);
+
+  const both = calculatePlanOptions({ ...input, lumpSum: 5000, monthlyExtra: 1000 });
+  assert.ok(both.combined.interest < monthlyOnly.recurringShorten.interest);
+  assert.ok(both.combined.interest < lumpOnly.lumpShorten.interest);
+  assert.ok(both.combined.months <= monthlyOnly.recurringShorten.months);
+});
+
+test("edge cases: over-balance inputs are rejected, combined inputs are safely capped at payoff", () => {
+  const balance = 100000, payment = 10000, rate = 12;
+  const term = inferRemainingTerm(balance, rate, payment);
+  assert.throws(() => simulateFixedPayment(balance, rate, payment, balance + 0.01, 0, term), /не может превышать остаток долга/);
+  assert.throws(() => simulateFixedPayment(balance, rate, payment, 0, balance + 0.01, term), /не может превышать остаток долга/);
+
+  // Each field is within the debt, but their sum exceeds the post-installment
+  // balance. The model must cap the combined extra amount and never overpay.
+  const combined = simulateFixedPayment(balance, rate, payment, 60000, 60000, term);
+  assert.equal(combined.completed, true);
+  assert.equal(combined.months, 1);
+  assert.ok(Math.abs(combined.totalPaid - (balance + combined.interest)) < 0.02);
+  assert.ok(combined.finalPayment <= payment + balance + combined.interest);
+});
+
+test("edge case: payment at or below monthly interest is rejected before either scenario runs", () => {
+  assert.throws(() => inferRemainingTerm(100000, 12, 1000), /больше начисляемых процентов/);
+  assert.throws(() => inferRemainingTerm(100000, 12, 999.99), /больше начисляемых процентов/);
+  assert.ok(inferRemainingTerm(100000, 12, 1000.01) > 0);
+});
