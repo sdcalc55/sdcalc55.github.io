@@ -1,14 +1,55 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Calculator, Wallet, BadgeCheck } from "lucide-react";
+import { useLayoutEffect, useMemo, useRef, useState, useId } from "react";
+import { Calculator, Wallet, BadgeCheck, X } from "lucide-react";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
+import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
 const num = (value: string) => Math.max(0, Number(value.replace(/[\\s\\u00a0\\u202f]/g, "").replace(",", ".")) || 0);
 function Field({ label, value, onChange, suffix = "₽", step = 10000, hint }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string }) {
+  const id = useId();
+  const input = useRef<HTMLInputElement>(null);
+  const cursor = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (cursor.current !== null) {
+      input.current?.setSelectionRange(cursor.current, cursor.current);
+      cursor.current = null;
+    }
+  });
   const decimal = suffix === "%";
-  return <label className="block min-w-0"><span className="mb-1.5 block text-sm font-medium text-[#647184] dark:text-[#AAB6C5]">{label}</span><span className="flex items-center rounded-xl border border-[#DCE2E9] bg-white px-3 dark:border-[#405064] dark:bg-[#111820]"><input type="text" inputMode="decimal" value={formatInput(value)} onChange={event => { const raw = event.target.value.replace(/[^\\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1"); const normalized = decimal ? raw : raw.replace(/[.,].*$/, ""); onChange(normalized); }} className="min-w-0 w-full bg-transparent py-3 text-base font-semibold tabular-nums text-[#26364A] outline-none dark:text-[#E6ECF3]" /><span className="pl-2 text-sm text-[#8993A2]">{suffix}</span></span>{hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}</label>;
+  return <div className="min-w-0">
+    <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-[#647184] dark:text-[#AAB6C5]">{label}</label>
+    <div className="relative">
+      <input ref={input} id={id} name={`sd-calc-${id}`} type="text" inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoComplete="off" enterKeyHint="next" placeholder="0"
+        value={formatInput(value)}
+        onFocus={event => scrollFocusedInputIntoView(event.currentTarget)}
+        onClick={event => scrollFocusedInputIntoView(event.currentTarget)}
+        onKeyDown={event => {
+          if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
+          if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
+        }}
+        onChange={event => {
+          const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const digitsBeforeDecimal = raw.replace(/[\s\u00a0\u202f]/g, "").split(/[.,]/)[0].replace(/^0+/, "");
+          if (digitsBeforeDecimal.length > 10) return;
+          const position = event.target.selectionStart ?? raw.length;
+          const significant = raw.slice(0, position).replace(/[\s\u00a0\u202f]/g, "").length;
+          const normalized = decimal ? raw.replace(",", ".") : raw.replace(/[.,].*$/, "");
+          const next = formatInput(normalized);
+          let index = 0, count = 0;
+          while (index < next.length && count < significant) { if (!/[\s\u00a0\u202f]/.test(next[index])) count++; index++; }
+          cursor.current = index;
+          onChange(normalized);
+        }}
+        className="h-14 w-full rounded-xl border border-[#DCE2E9] bg-[#F7F8FA] px-3 pr-20 text-base font-semibold tabular-nums text-[#26364A] outline-none transition focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]"
+      />
+      {value !== "" && <button type="button" tabIndex={-1} aria-label={`Очистить поле: ${label}`} title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
+      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#8993A2]">{suffix}</span>
+    </div>
+    {hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}
+  </div>;
 }
 type Plan = { months: number; interest: number; firstPayment: number };
 function annuity(balance: number, monthlyRate: number, months: number) {
