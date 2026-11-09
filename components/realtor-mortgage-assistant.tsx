@@ -131,8 +131,8 @@ export function RealtorMortgageAssistant() {
         <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195] dark:text-[#B8C5D3]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
           <Field className="" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
-          <Field className="lg:col-span-2" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field className="lg:col-span-2" label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
+          <Field className="lg:col-span-2" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field className="md:col-span-2" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
           <Field className="lg:col-span-3" label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
