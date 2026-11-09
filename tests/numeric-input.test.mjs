@@ -58,13 +58,13 @@ test("the deployed navigation mounts the updated calculator and does not reintro
   assert.match(page, /screen === "mortgage-tools" && <RealtorMortgageAssistant \/>/);
   assert.doesNotMatch(component, /Дата оформления кредита|Первоначальная сумма кредита|Срок кредита|startDate/);
   assert.match(component, /Подробности расчёта/);
-  assert.match(component, /Рассчитывается базовый график погашения без досрочных взносов/);
+  assert.match(component, /строится базовый график без досрочных взносов/);
   assert.match(component, /Результаты сравниваются с базовым графиком/);
   assert.match(component, /md:grid-cols-2/);
   assert.match(component, /className="md:col-span-2" label="Текущий ежемесячный платёж"/);
   assert.match(component, /label="Ежемесячный досрочный платёж"[\\s\\S]*?label="Разовый досрочный платёж"/);
   assert.match(component, /срок кредита отдельно не вводится/);
-  assert.match(component, /текущий обязательный платёж сохраняется/);
+  assert.match(component, /обязательный платёж сохраняется/);
   assert.match(component, /обязательный платёж пересчитывается на оставшийся расчётный срок/);
   assert.match(component, /не заменяет обязательный платёж/);
   assert.doesNotMatch(component, /Регулярные взносы|Сравнение вариантов|Моя сумма/);
