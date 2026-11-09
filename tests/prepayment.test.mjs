@@ -205,7 +205,7 @@ test("accepts valid boundary values including zero interest and a one-period pay
 });
 
 
-// Golden values below were calculated independently from the recurrence:
+// Golden values below were calculated independently from the recurrence and rechecked against full monthly periods:
 // interest = opening balance * annual rate / 1200; then scheduled payment;
 // then the extra payment. Values are not derived from production helpers.
 test("matches independent golden values for a standard monthly schedule", () => {
@@ -285,4 +285,25 @@ test("zero-rate boundary has exact principal-only repayment", () => {
   assert.equal(result.shorten.months, 10);
   assert.equal(result.shorten.interest, 0);
   assert.equal(result.shorten.totalPaid, 120000);
+});
+
+
+test("fractional inferred term never creates fractional interest accrual", () => {
+  const balance = 4500000, payment = 42000, annualRate = 6;
+  const term = inferRemainingTerm(balance, annualRate, payment);
+  assert.ok(term > 153 && term < 154);
+  const plan = simulateFixedPayment(balance, annualRate, payment, 0, 0, term);
+  assert.equal(plan.months, 154);
+  assert.ok(Math.abs(plan.interest - 1961056.72) < 0.01);
+  assert.ok(Math.abs(plan.totalPaid - 6461056.72) < 0.01);
+  assert.ok(Math.abs(plan.finalPayment - 35056.72) < 0.01);
+});
+
+test("recalculated payment preserves the original schedule when no early payment exists", () => {
+  const balance = 4500000, payment = 42000, annualRate = 6;
+  const term = inferRemainingTerm(balance, annualRate, payment);
+  const plan = simulateReducedPayment(balance, annualRate, term, payment, 0, 0);
+  assert.equal(plan.firstPayment, payment);
+  assert.equal(plan.months, 154);
+  assert.ok(Math.abs(plan.interest - 1961056.72) < 0.01);
 });
