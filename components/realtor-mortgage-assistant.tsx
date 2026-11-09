@@ -88,6 +88,13 @@ export function RealtorMortgageAssistant() {
   if (!errors.lump && num(lump) > principal && principal > 0) {
     errors.lump = "Разовый взнос не может превышать остаток долга.";
   }
+  if (!errors.payment && principal > 0 && num(payment) > 0) {
+    try {
+      inferRemainingTerm(principal, num(rate), num(payment));
+    } catch (error) {
+      errors.payment = error instanceof Error ? error.message : "Проверьте параметры кредита.";
+    }
+  }
   const isValid = !Object.values(errors).some(Boolean) && principal > 0 && num(payment) > 0;
   const plans = useMemo(() => {
     if (!isValid) return null;
@@ -143,7 +150,7 @@ export function RealtorMortgageAssistant() {
           <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
             <div className={`mt-1 text-lg font-bold ${!termScenarioHasHigherSavings && plans.paymentSaving !== null ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Уменьшение платежа</div>
-            {plans.paymentPlan && plans.paymentSaving !== null && plans.paymentPlan.firstPayment > 0 ? <>
+            {plans.paymentPlan?.completed && plans.paymentSaving !== null && plans.paymentPlan.firstPayment > 0 ? <>
               <div className="mt-3">
                 <div className="text-xs font-medium text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div>
                 <div className="mt-1 text-2xl font-bold leading-8 tabular-nums text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentPlan.firstPayment)}</div>
@@ -151,11 +158,10 @@ export function RealtorMortgageAssistant() {
               </div>
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Переплата уменьшится на</div><div className="mt-1 text-lg font-semibold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
               <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Расчётный срок: {duration(plans.termMonths!)}.</span><span className="lg:block">Досрочный взнос вносится сверх нового обязательного платежа.</span></p>
-            </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
+            </> : plans.paymentPlan?.completed ? <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Досрочные взносы полностью погашают кредит в первом расчётном периоде. Новый обязательный платёж не требуется.</p>
-              
-            </div>}
+            </div> : <div className="mt-4 rounded-xl px-4 py-5 text-sm font-semibold text-[#9A3412] dark:text-[#FDBA74]">Не удалось завершить расчёт в пределах 50 лет. Проверьте сумму платежа.</div>}
           </div>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       <p className="mt-4 flex items-start gap-2 rounded-xl border border-[#E2E7ED] bg-white/70 p-3 text-xs leading-relaxed text-[#748195] [user-select:none] [-webkit-user-select:none] dark:border-[#405064] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>
