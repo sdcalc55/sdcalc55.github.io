@@ -207,7 +207,7 @@ export function RealtorMortgageAssistant() {
         <div className="mt-4 space-y-4 text-sm text-[#647184] dark:text-[#AAB6C5]">
           <section><h4 className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">1. Базовый график погашения</h4>
             <p className="mt-1">Расчёт без досрочных взносов при текущем ежемесячном платеже.</p>
-            <ul className="mt-2 space-y-1"><li>Срок: <strong>{plans.base.completed ? duration(plans.base.months) : "более 50 лет"}</strong></li><liПроценты за весь срок: <strong>{money(plans.base.interest)}</strong></li><li>Расчётных периодов: <strong>{plans.base.months}</strong></li></ul>
+            <ul className="mt-2 space-y-1"><li>Срок: <strong>{plans.base.completed ? duration(plans.base.months) : "более 50 лет"}</strong></li><li>Проценты за весь срок: <strong>{money(plans.base.interest)}</strong></li><li>Расчётных периодов: <strong>{plans.base.months}</strong></li></ul>
           </section>
           <section><h4 className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">2. Моделирование досрочных взносов</h4>
             <p className="mt-1">В каждом периоде начисляются проценты на текущий остаток, учитывается обязательный платёж, затем применяются дополнительные суммы. Разовый взнос учитывается в первом периоде.</p>
