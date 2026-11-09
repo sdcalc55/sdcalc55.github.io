@@ -185,12 +185,11 @@ export function RealtorMortgageAssistant() {
           <button type="button" onClick={() => { setBalance("4500000"); setPayment("42000"); setRate("6"); setExtraMonthly(""); setLump(""); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-2 text-sm font-semibold text-[#647184] transition hover:bg-[#F5F7FA] hover:text-[#E83C35] dark:border-[#405064] dark:text-[#D5DEE8] dark:hover:bg-[#253241]"><RotateCcw className="size-4" />СБРОСИТЬ</button>
         </div>
       </div>
-      <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="flex h-full flex-col rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
             <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Сэкономите на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Переплата уменьшится на</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
             <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="lg:block">Досрочные взносы вносятся сверх него.</span></p>
           </div>
@@ -203,8 +202,8 @@ export function RealtorMortgageAssistant() {
                 <div className="mt-1 text-2xl font-bold leading-8 tabular-nums text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentPlan.firstPayment)}</div>
                 <div className="mt-1 text-xs text-[#748195] dark:text-[#B8C5D3]">Вместо {money(num(payment))}</div>
               </div>
-              <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Сэкономите на процентах</div><div className="mt-1 text-lg font-semibold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
-              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]">Расчётный срок: {duration(plans.termMonths!)}. Досрочный взнос вносится сверх нового обязательного платежа.</p>
+              <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Переплата уменьшится на</div><div className="mt-1 text-lg font-semibold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
+              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Расчётный срок: {duration(plans.termMonths!)}.</span><span className="lg:block">Досрочный взнос вносится сверх нового обязательного платежа.</span></p>
             </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Не удалось определить срок погашения в пределах 50 лет. Проверьте остаток долга, ставку и текущий платёж.</p>
@@ -212,7 +211,6 @@ export function RealtorMortgageAssistant() {
             </div>}
           </div>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
-      </div>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#CBD5E1] bg-[#F8FAFC] p-3 shadow-sm dark:border-[#405064] dark:bg-[#1B2632]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-[#26364A] transition-colors dark:text-[#E6ECF3]">
           <span>
