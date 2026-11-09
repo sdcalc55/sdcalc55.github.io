@@ -167,7 +167,7 @@ export function RealtorMortgageAssistant() {
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-lg text-[#596779] shadow-sm transition-transform group-open:rotate-180 dark:bg-[#17212C] dark:text-[#D5DEE8]" aria-hidden="true">⌄</span>
         </summary>
         <div className="px-1 pb-1 pt-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
-          <p>Расчёт выполняется методом помесячного моделирования кредитного обязательства с учётом начисления процентов, обязательных платежей и досрочных взносов.</p>
+          <p>Расчёт выполняется по помесячной модели: проценты начисляются по ставке, разделённой на 12. Оставшийся срок оценивается по введённым остатку долга, ставке и текущему платежу; последний период может быть неполным. Банковский график может отличаться из-за фактических дат платежей, количества дней в процентном периоде и правил банка.</p>
           <ol className="mt-3 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#748195] dark:marker:text-[#B8C5D3]">
             <li>Рассчитывается базовый график погашения без досрочных взносов.</li>
             <li>Определяется сумма процентов, начисляемых за каждый расчётный месяц.</li>
