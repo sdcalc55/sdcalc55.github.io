@@ -154,19 +154,25 @@ export function RealtorMortgageAssistant() {
     const base = simulateFixedPayment(principal, num(rate), regularPayment, 0, 0);
     const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
     const termMonths = parsedTermMonths;
-    const paymentPlan = termMonths !== null && termMonths > 0 && termMonths <= MAX_MONTHS ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime) : null;
+    const termTolerance = Math.max(3, Math.round(base.months * 0.05));
+    const termMismatch = termMonths !== null && base.completed && Math.abs(termMonths - base.months) > termTolerance;
+    const paymentPlan = termMonths !== null && termMonths > 0 && termMonths <= MAX_MONTHS && !termMismatch ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime) : null;
     const hasExtra = extra > 0 || oneTime > 0;
     return {
       base,
       term,
       paymentPlan,
       termMonths,
+      termMismatch,
+      estimatedTermMonths: base.months,
       hasExtra,
       termSaving: base.completed && term.completed ? Math.max(0, base.interest - term.interest) : null,
       paymentSaving: base.completed && paymentPlan?.completed ? Math.max(0, base.interest - paymentPlan.interest) : null,
       monthsSaved: base.completed && term.completed ? Math.max(0, base.months - term.months) : null,
     };
   }, [balance, rate, payment, remainingYears, extraMonthly, lump, isValid, parsedTermMonths]);
+  const termScenarioHasHigherSavings = plans?.termSaving !== null && plans?.termSaving !== undefined &&
+    (plans.paymentSaving === null || plans.paymentSaving === undefined || plans.termSaving >= plans.paymentSaving);
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
@@ -183,23 +189,24 @@ export function RealtorMortgageAssistant() {
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35]" /><h3 className="font-semibold">Два варианта для клиента</h3></div>
         {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
+          <div className="flex h-full flex-col rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
-            <div className="mt-1 text-lg font-bold text-[#C93630] dark:text-[#FF7770]">Сокращение срока</div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
-            <p className="mt-3 text-xs text-[#748195] dark:text-[#B8C5D3]">Текущий платёж {money(num(payment))} сохраняется. Дополнительные суммы вносятся сверх него.</p>
+            <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
+            <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]">Текущий платёж {money(num(payment))} сохраняется. Дополнительные суммы вносятся сверх него.</p>
           </div>
-          <div className="rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
+          <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
-            <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#F1F5F9]">Уменьшение платежа</div>
+            <div className={`mt-1 text-lg font-bold ${!termScenarioHasHigherSavings && plans.paymentSaving !== null ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Уменьшение платежа</div>
             {plans.paymentPlan && plans.paymentSaving !== null ? <>
-              <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
-              <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
-              <p className="mt-3 text-sm text-[#596779] dark:text-[#D5DEE8]">Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</p>
-            </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#C9D7E6] bg-[#EAF2FB]/75 px-4 py-5 text-center dark:border-[#52677D] dark:bg-[#263648]">
+              <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
+              <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
+              <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]">Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</p>
+            </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/75 px-4 py-5 text-center dark:bg-[#263648]">
               <Wallet className="size-6 text-[#6685A5] dark:text-[#9CB8D4]" />
-              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Заполните оставшийся срок по графику</p>
+              <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">{plans.termMismatch ? "Срок по графику не совпадает с расчётным. Проверьте остаток долга, ставку, платёж и срок по графику." : "Заполните оставшийся срок по графику"}</p>
+              {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">По введённым остатку долга, ставке и текущему платежу расчётный срок составляет {duration(plans.estimatedTermMonths)}. Расчёт уменьшения платежа пока не показываем, чтобы не вводить в заблуждение.</p>}
             </div>}
           </div>
           <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
