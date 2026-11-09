@@ -80,7 +80,7 @@ export function calculatePlanOptions(input: { balance: number; monthlyPayment: n
   );
 
   const candidates: { key: NonNullable<PlanOptions["recommendation"]>; scenario: PrepaymentScenario }[] = [
-    ...(appliedLump > 0 ? [{ key: "lumpShorten" as const, scenario: lumpShorten }, { key: "lumpReduce" as const, scenario: lumpReduce }] : []),
+    ...(appliedLump > 0 ? [{ key: "lumpShorten" as const, scenario: lumpShort }, { key: "lumpReduce" as const, scenario: lumpReduce }] : []),
     ...(monthlyExtra > 0 ? [{ key: "recurringShorten" as const, scenario: recurring }] : []),
     ...(appliedLump > 0 || monthlyExtra > 0 ? [{ key: "combined" as const, scenario: combined }] : []),
   ].filter(item => item.scenario.interest < baseline.interest - 0.005);
