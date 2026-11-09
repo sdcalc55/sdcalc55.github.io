@@ -315,7 +315,7 @@ export default function Home() {
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
             <NavigationRow title="Кредитный калькулятор" icon={Calculator} onClick={() => navigate("mortgage", "loan")} />
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
-            <NavigationRow title="Досрочное погашение" icon={HandCoins} teal onClick={() => navigate("mortgage-tools")} />
+            <NavigationRow title="Досрочное погашение" icon={HandCoins} onClick={() => navigate("mortgage-tools")} />
           </div>
         </section>
       </div>}
