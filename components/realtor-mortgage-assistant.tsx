@@ -104,6 +104,6 @@ export function RealtorMortgageAssistant() {
         </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить стратегии.</p>}
       </div>
     </div>
-    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Предварительный расчёт по введённым условиям кредита.</div>
+    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Расчёт предварительный и может отличаться из-за даты досрочного взноса и правил перерасчёта.</div>
   </section>;
 }
