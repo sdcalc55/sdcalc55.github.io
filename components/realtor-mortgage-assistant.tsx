@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef, useState, useId } from "react";
-import { HandCoins, Wallet, BadgeCheck, X, RotateCcw } from "lucide-react";
+import { HandCoins, Wallet, X, RotateCcw } from "lucide-react";
 import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
 import { normalizeNumericInput } from "@/lib/numeric-input";
