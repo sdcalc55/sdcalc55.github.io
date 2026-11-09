@@ -32,7 +32,7 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={event => {
-          const raw = event.target.value.replace(/[^\\d.,]/g, "");
+          const raw = event.target.value.replace(/[^\d.,]/g, "");
           const separatorIndex = decimal ? raw.search(/[.,]/) : -1;
           const integerRaw = separatorIndex < 0 ? raw : raw.slice(0, separatorIndex);
           const integerPart = integerRaw.slice(0, maxIntegerDigits);
@@ -45,7 +45,7 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           const next = formatInput(normalized);
           let index = 0, count = 0;
           while (index < next.length && count < significant) {
-            if (!/[\\s\\u00a0\\u202f]/.test(next[index])) count++;
+            if (!/[\s\u00a0\u202f]/.test(next[index])) count++;
             index++;
           }
           cursor.current = index;
