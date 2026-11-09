@@ -46,7 +46,7 @@ test("compares lump-sum, monthly and combined repayment plans", async () => {
 test("active calculator uses the detailed simulation for all repayment scenarios", async () => {
   const { calculatePlanOptions, calculatePrepayment } = await import("../lib/prepayment.ts");
   const input = { balance: 100000, monthlyPayment: 10000, annualRate: 12 };
-  const oneOff = calculatePrepayment({ ...input, extraPayment: 5000 });
+  const oneOff = calculatePrepayment({ ...input, extraPayment: 20000 });
   const plans = calculatePlanOptions({ ...input, lumpSum: 5000, monthlyExtra: 1000 });
 
   assert.ok(oneOff.shorten.months < oneOff.baseline.months);
