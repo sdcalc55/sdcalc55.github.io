@@ -1,4 +1,4 @@
-import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "@/lib/prepayment-simulation";
+import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "./prepayment-simulation.ts";
 
 export type PrepaymentInput = { balance: number; monthlyPayment: number; annualRate: number; extraPayment: number };
 export type PrepaymentScenario = { monthlyPayment: number; months: number; interest: number; totalPaid: number; finalPayment: number };
