@@ -62,7 +62,9 @@ test("the deployed navigation mounts the updated calculator and does not reintro
   assert.match(component, /Результаты сравниваются с базовым графиком/);
   assert.match(component, /md:grid-cols-2/);
   assert.match(component, /className="md:col-span-2" label="Текущий ежемесячный платёж"/);
-  assert.match(component, /label="Ежемесячный досрочный платёж"[\\s\\S]*?label="Разовый досрочный платёж"/);
+  assert.ok(component.indexOf('label="Ежемесячный досрочный платёж"') < component.indexOf('label="Разовый досрочный платёж"'));
+  assert.match(component, /isValid && plans\?\.hasExtra && <>[\s\S]*?prepayment-disclaimer/);
+  assert.match(component, /Расчёт предварительный\. Фактическая экономия зависит от даты досрочного погашения и условий банка/);
   assert.match(component, /срок кредита отдельно не вводится/);
   assert.match(component, /обязательный платёж сохраняется/);
   assert.match(component, /обязательный платёж пересчитывается на оставшийся расчётный срок/);
