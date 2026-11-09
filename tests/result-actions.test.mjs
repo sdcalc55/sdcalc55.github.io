@@ -9,7 +9,7 @@ test("all calculators use one shared result action component", () => {
   for (const file of ["../components/commission-calculator.tsx", "../components/mortgage-calculators.tsx", "../components/loan-calculator.tsx"]) {
     const source = read(file);
     assert.match(source, /import \{ CalculatorResultActions \} from ["']@\/components\/calculator-result-actions["']/);
-    assert.match(source, /<CalculatorResultActions\s+onCopy=/);
+    assert.match(source, /<CalculatorResultActions\b[^>]*\bonCopy=/);
   }
   assert.match(shared, /data-testid="calculator-copy"/);
   assert.match(shared, /data-testid="calculator-save"/);
