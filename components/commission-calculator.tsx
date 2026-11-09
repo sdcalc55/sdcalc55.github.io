@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Calculator, Info, RotateCcw, Wallet, X } from "lucide-react";
-import { focusNextCalculatorInput } from "@/lib/calculator-input";
+import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
@@ -40,6 +40,7 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
     <div className={`sd-commission-money-field relative rounded-xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
       <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid || Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
+          if (handleFormattedBackspace(event, onChange)) return;
           if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
