@@ -2,9 +2,9 @@ name: Verify static site build
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, reduce-supabase-traffic]
   push:
-    branches: [reduce-supabase-traffic, prepayment-advisor, realtor-mortgage-assistant]
+    branches: [reduce-supabase-traffic, prepayment-advisor, realtor-mortgage-assistant, fix/prepayment-math]
 
 permissions:
   contents: read
