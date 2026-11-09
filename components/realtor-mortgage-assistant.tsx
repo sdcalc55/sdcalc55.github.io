@@ -41,7 +41,7 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           if (maxValue !== undefined && normalized !== "" && Number(normalized) > maxValue) return;
           if (validateValue && !validateValue(normalized)) return;
           const position = event.target.selectionStart ?? raw.length;
-          const significant = raw.slice(0, position).length;
+          const significant = event.target.value.slice(0, position).replace(/[^\d.,]/g, "").length;
           const next = formatInput(normalized);
           let index = 0, count = 0;
           while (index < next.length && count < significant) {
