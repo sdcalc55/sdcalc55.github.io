@@ -5,6 +5,7 @@ import { HandCoins, Wallet, BadgeCheck, X, RotateCcw } from "lucide-react";
 import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
+import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "@/lib/prepayment-simulation";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
 const num = (value: string) => Math.max(0, Number(value.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")) || 0);
@@ -60,62 +61,6 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
     {error ? <span id={errorId} role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">{error}</span> : hint && <span className="mt-1 block text-xs text-[#8993A2] dark:text-[#B8C5D3]">{hint}</span>}
   </div>;
 }
-type Plan = { months: number; interest: number; firstPayment: number; completed: boolean };
-const MAX_MONTHS = 600;
-function annuity(balance: number, monthlyRate: number, months: number) {
-  if (months <= 0 || balance <= 0) return 0;
-  if (monthlyRate === 0) return balance / months;
-  const factor = Math.pow(1 + monthlyRate, months);
-  return balance * monthlyRate * factor / (factor - 1);
-}
-function simulateFixedPayment(balanceStart: number, rateYear: number, payment: number, extraMonthly: number, lump: number): Plan {
-  let balance = balanceStart;
-  let interest = 0;
-  let months = 0;
-  const monthlyRate = rateYear / 1200;
-  const firstPayment = payment;
-  if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
-  for (let i = 0; i < MAX_MONTHS && balance > 0.01; i++) {
-    const monthInterest = balance * monthlyRate;
-    const due = balance + monthInterest;
-    const regularPaid = Math.min(due, payment);
-    interest += monthInterest;
-    balance = Math.max(0, due - regularPaid);
-    const prepayment = extraMonthly + (i === 0 ? lump : 0);
-    balance = Math.max(0, balance - Math.min(balance, prepayment));
-    months++;
-  }
-  return { months, interest, firstPayment, completed: balance <= 0.01 };
-}
-function simulateReducedPayment(balanceStart: number, rateYear: number, termMonths: number, initialPayment: number, extraMonthly: number, lump: number): Plan {
-  let balance = balanceStart;
-  let interest = 0;
-  let months = 0;
-  let scheduledPayment = initialPayment;
-  let nextPayment = initialPayment;
-  let firstPaymentAfterPrepayment = 0;
-  const monthlyRate = rateYear / 1200;
-  if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
-  for (let i = 0; i < termMonths && balance > 0.01; i++) {
-    const monthInterest = balance * monthlyRate;
-    const due = balance + monthInterest;
-    const regularPaid = Math.min(due, scheduledPayment);
-    interest += monthInterest;
-    balance = Math.max(0, due - regularPaid);
-    const prepayment = extraMonthly + (i === 0 ? lump : 0);
-    balance = Math.max(0, balance - Math.min(balance, prepayment));
-    months++;
-    if (balance <= 0.01) {
-      nextPayment = 0;
-      break;
-    }
-    const remainingMonths = termMonths - months;
-    nextPayment = remainingMonths > 0 ? annuity(balance, monthlyRate, remainingMonths) : 0;
-    if (months === 1) firstPaymentAfterPrepayment = nextPayment;
-    scheduledPayment = nextPayment;
-  }
-  return { months, interest, firstPayment: firstPaymentAfterPrepayment, completed: balance <= 0.01 };
-}
 function duration(months: number) {
   const years = Math.floor(months / 12), rest = months % 12;
   if (years && rest) return `${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"} ${rest} мес.`;
@@ -149,22 +94,20 @@ export function RealtorMortgageAssistant() {
     const regularPayment = num(payment);
     const extra = num(extraMonthly);
     const oneTime = num(lump);
-    const base = simulateFixedPayment(principal, num(rate), regularPayment, 0, 0);
-    const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
-    const termMonths = base.completed ? base.months : null;
-    const paymentPlan = termMonths !== null && termMonths > 0
-      ? simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime)
-      : null;
+    const inferredTerm = inferRemainingTerm(principal, num(rate), regularPayment);
+    const base = simulateFixedPayment(principal, num(rate), regularPayment, 0, 0, inferredTerm);
+    const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime, inferredTerm);
+    const paymentPlan = simulateReducedPayment(principal, num(rate), inferredTerm, regularPayment, extra, oneTime);
     const hasExtra = extra > 0 || oneTime > 0;
     return {
       base,
       term,
       paymentPlan,
-      termMonths,
+      termMonths: inferredTerm,
       estimatedTermMonths: base.months,
       hasExtra,
-      termSaving: base.completed && term.completed ? Math.max(0, base.interest - term.interest) : null,
-      paymentSaving: base.completed && paymentPlan?.completed ? Math.max(0, base.interest - paymentPlan.interest) : null,
+      termSaving: base.completed && term.completed ? base.interest - term.interest : null,
+      paymentSaving: base.completed && paymentPlan.completed ? base.interest - paymentPlan.interest : null,
       monthsSaved: base.completed && term.completed ? Math.max(0, base.months - term.months) : null,
     };
   }, [balance, rate, payment, extraMonthly, lump, isValid]);
