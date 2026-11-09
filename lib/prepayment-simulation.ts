@@ -23,7 +23,7 @@ export function inferRemainingTerm(balance: number, annualRate: number, payment:
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Процентная ставка должна быть от 0 до 30%.");
   if (!Number.isFinite(payment) || payment <= 0) throw new Error("Ежемесячный платёж должен быть больше нуля.");
   const rate = annualRate / 1200;
-  if (payment <= balance * rate) throw new Error("Ежемесячный платёж не покрывает проценты по кредиту.");
+  if (payment <= balance * rate) throw new Error("Ежемесячный платёж не покрывает проценты по кредиту: он должен быть больше начисляемых процентов.");
   const term = rate === 0 ? balance / payment : -Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate);
   if (!Number.isFinite(term) || term <= 0 || term > MAX_MONTHS) throw new Error("Расчётный срок превышает 50 лет. Увеличьте ежемесячный платёж.");
   return term;
