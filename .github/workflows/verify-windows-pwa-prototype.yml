@@ -36,4 +36,4 @@ jobs:
         run: |
           test -f out/index.html
           test -f out/manifest.webmanifest
-          node -e "const m=require('./out/manifest.webmanifest'); if(m.launch_handler?.client_mode!=='focus-existing') process.exit(1)"
+          node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('./out/manifest.webmanifest','utf8')); if(m.launch_handler?.client_mode!=='focus-existing') process.exit(1)"
