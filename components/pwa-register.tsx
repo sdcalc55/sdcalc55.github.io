@@ -60,20 +60,22 @@ export default function PwaRegister() {
     }
     if (!isAndroid && !isIOS) return;
 
-    try {
-      if (
-        localStorage.getItem("sd-app-installed") !== "1" &&
-        sessionStorage.getItem("sd-install-banner-dismissed") !== "1"
-      ) {
-        setShowInstallBanner(true);
+    const canShowInstallBanner = () => {
+      try {
+        return localStorage.getItem("sd-app-installed") !== "1" &&
+          sessionStorage.getItem("sd-install-banner-dismissed") !== "1";
+      } catch {
+        return true;
       }
-    } catch {
-      setShowInstallBanner(true);
-    }
+    };
 
     const handleInstallAvailable = (event: Event) => {
       event.preventDefault();
+      // Android only offers this event when the browser considers the site
+      // installable. An already-installed PWA therefore won't show the banner
+      // again when the user opens an ordinary link in the browser.
       setInstallPrompt(event as InstallPromptEvent);
+      if (canShowInstallBanner()) setShowInstallBanner(true);
     };
     const handleInstalled = () => {
       setShowInstallBanner(false);
