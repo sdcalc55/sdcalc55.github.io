@@ -182,7 +182,7 @@ export function RealtorMortgageAssistant() {
         </div>
       </div>
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
-        <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35] dark:text-[#FF7770]" /><h3 className="font-semibold">Два варианта для клиента</h3></div>
+        <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35] dark:text-[#FF7770]" /><h3 className="font-semibold">Сравнение сценариев</h3></div>
         {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Проверьте отмеченные поля, чтобы выполнить расчёт.</p> : plans?.hasExtra ? <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="flex h-full flex-col rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
