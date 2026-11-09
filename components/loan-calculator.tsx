@@ -184,9 +184,9 @@ export function LoanCalculator() {
     }
     const lines = [
       `Ежемесячный платёж: ${amount(result.monthlyPayment)}`,
-      `Сумма кредита: ${amount(result.principal)}`,
-      `Срок кредита: ${result.months} мес.`,
+      `Срок: ${result.months} мес.`,
       `Ставка: ${result.annualRate}%`,
+      `Сумма кредита: ${amount(result.principal)}`,
     ];
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
@@ -278,7 +278,7 @@ export function LoanCalculator() {
           </dl>
           <svg role="img" aria-label={`Основной долг ${amount(result.principal)}, проценты ${amount(result.interest)}`} viewBox="0 0 100 12" preserveAspectRatio="none" className="mt-6 h-3 w-full overflow-hidden rounded-full"><rect width="100" height="12" className="fill-[#26364A]" /><rect width={result.principal / result.totalPayment * 100} height="12" className="fill-[#E83C35]" /></svg>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#596779] dark:text-[#D5DEE8]"><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#E83C35]" />Основной долг</span><span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#26364A]" />Проценты</span></div>
-<CalculatorResultActions onCopy={copyResults} onSave={save} isSaved={isSaved} copyKey={result && !changed && !error ? [`Ежемесячный платёж: ${amount(result.monthlyPayment)}`, `Сумма кредита: ${amount(result.principal)}`, `Срок кредита: ${result.months} мес.`, `Ставка: ${result.annualRate}%`].join("\n") : ""} disabled={changed || !!error} /><details className="mt-4 border-t border-[#26364A]/10 pt-4 text-xs leading-relaxed text-[#596779] dark:border-[#607084] dark:text-[#C2CCD8]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><div className="mt-3 space-y-2 text-justify">
+<CalculatorResultActions onCopy={copyResults} onSave={save} isSaved={isSaved} copyKey={result && !changed && !error ? [`Ежемесячный платёж: ${amount(result.monthlyPayment)}`, `Срок: ${result.months} мес.`, `Ставка: ${result.annualRate}%`, `Сумма кредита: ${amount(result.principal)}`].join("\n") : ""} disabled={changed || !!error} /><details className="mt-4 border-t border-[#26364A]/10 pt-4 text-xs leading-relaxed text-[#596779] dark:border-[#607084] dark:text-[#C2CCD8]"><summary className="cursor-pointer font-semibold">Подробности расчёта</summary><div className="mt-3 space-y-2 text-justify">
             <p>{reverse ? result.annualRate === 0 ? "S = A × n" : "S = A × (1 − (1 + i)⁻ⁿ) / i" : result.annualRate === 0 ? "A = S / n" : "A = S × i × (1 + i)ⁿ / ((1 + i)ⁿ − 1)"}</p>
             <p>A - ежемесячный платёж; S - сумма кредита; i - годовая ставка / 12 / 100; n - срок в месяцах.</p>
             <p>{reverse ? "Сумма кредита округлена вниз до копеек, чтобы платёж не превышал указанный. Итоги рассчитаны для этой суммы кредита." : "Ежемесячный платёж рассчитывается без промежуточного округления. Суммы отображаются с точностью до копеек."}</p>
