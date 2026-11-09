@@ -203,3 +203,86 @@ test("accepts valid boundary values including zero interest and a one-period pay
   assert.equal(result.completed, true);
   assert.ok(result.firstPayment > 0);
 });
+
+
+// Golden values below were calculated independently from the recurrence:
+// interest = opening balance * annual rate / 1200; then scheduled payment;
+// then the extra payment. Values are not derived from production helpers.
+test("matches independent golden values for a standard monthly schedule", () => {
+  const result = calculatePrepayment({
+    balance: 1000000,
+    monthlyPayment: 100000,
+    annualRate: 12,
+    extraPayment: 0,
+  });
+  assert.equal(result.baseline.months, 11);
+  assert.ok(Math.abs(result.baseline.interest - 58984.88) < 0.01);
+  assert.ok(Math.abs(result.baseline.totalPaid - 1058984.88) < 0.01);
+  assert.ok(Math.abs(result.baseline.finalPayment - 58984.88) < 0.01);
+});
+
+test("matches independent golden values when a lump sum is applied after the regular payment", () => {
+  const result = calculatePrepayment({
+    balance: 1000000,
+    monthlyPayment: 100000,
+    annualRate: 12,
+    extraPayment: 50000,
+  });
+  assert.equal(result.shorten.months, 11);
+  assert.ok(Math.abs(result.shorten.interest - 53753.77) < 0.01);
+  assert.ok(Math.abs(result.shorten.totalPaid - 1053753.77) < 0.01);
+  assert.ok(Math.abs(result.shorten.finalPayment - 3753.77) < 0.01);
+});
+
+test("fully paid loan in the first period reports zero future required payment", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const result = calculatePlanOptions({
+    balance: 100000,
+    monthlyPayment: 10000,
+    annualRate: 12,
+    lumpSum: 91000,
+    monthlyExtra: 0,
+  });
+  assert.equal(result.lumpShorten.months, 1);
+  assert.equal(result.lumpShorten.interest, 1000);
+  assert.equal(result.lumpShorten.totalPaid, 101000);
+  assert.equal(result.lumpReduce.months, 1);
+  assert.equal(result.lumpReduce.requiredPayment, 0);
+  assert.equal(result.lumpReduce.totalMonthlyOutflow, 0);
+});
+
+test("calendar estimate counts completed calendar months and rejects future or malformed dates", () => {
+  const asOf = new Date(2024, 3, 15);
+  const result = estimateRemainingBalance(1000000, 12, 15000, "2024-01", asOf);
+  assert.equal(result.monthsPaid, 3);
+  assert.ok(Math.abs(result.balance - 984849.5) < 0.01);
+  assert.equal(estimateRemainingBalance(1000000, 12, 15000, "2024-04", asOf).monthsPaid, 0);
+  assert.throws(() => estimateRemainingBalance(1000000, 12, 15000, "2024-13", asOf), /формате/);
+  assert.throws(() => estimateRemainingBalance(1000000, 12, 15000, "2024-4", asOf), /формате/);
+  assert.throws(() => estimateRemainingBalance(1000000, 12, 15000, "2024-05", asOf), /позже даты/);
+  assert.throws(() => estimateRemainingBalance(1000000, 12, 15000, "2024-01", new Date("invalid")), /дату расчёта/);
+});
+
+test("rejects contradictory and out-of-range values before producing a result", () => {
+  assert.throws(() => calculatePrepayment({ balance: 0, monthlyPayment: 10000, annualRate: 12, extraPayment: 0 }));
+  assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 0, annualRate: 12, extraPayment: 0 }));
+  assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 10000, annualRate: 30.01, extraPayment: 0 }));
+  assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 10000, annualRate: 12, extraPayment: 1000001 }));
+  assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 10000, annualRate: 12, extraPayment: NaN }));
+  assert.throws(() => calculatePrepayment({ balance: 1000000, monthlyPayment: 10000, annualRate: 12, extraPayment: Infinity }));
+});
+
+test("zero-rate boundary has exact principal-only repayment", () => {
+  const result = calculatePrepayment({
+    balance: 120000,
+    monthlyPayment: 10000,
+    annualRate: 0,
+    extraPayment: 20000,
+  });
+  assert.equal(result.baseline.months, 12);
+  assert.equal(result.baseline.interest, 0);
+  assert.equal(result.baseline.totalPaid, 120000);
+  assert.equal(result.shorten.months, 10);
+  assert.equal(result.shorten.interest, 0);
+  assert.equal(result.shorten.totalPaid, 100000);
+});
