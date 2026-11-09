@@ -71,7 +71,7 @@ export function simulateFixedPayment(
   return { months, interest, totalPaid, firstPayment: months ? Math.min(balanceStart * (1 + rate), payment) : 0, finalPayment, completed: balance <= EPSILON };
 }
 
-/** Recalculates the required payment over the remaining whole monthly periods after each payment. */
+/** Recalculates the required payment over the exact remaining amortization term; interest still accrues only in full monthly periods. */
 export function simulateReducedPayment(
   balanceStart: number,
   annualRate: number,
@@ -105,8 +105,8 @@ export function simulateReducedPayment(
       if (months === 1) firstPayment = 0;
       break;
     }
-    const remainingPeriods = Math.ceil(termMonths - months - 1e-10);
-    scheduledPayment = remainingPeriods > 0 ? annuityPayment(balance, rate, remainingPeriods) : 0;
+    const remainingTerm = termMonths - months;
+    scheduledPayment = remainingTerm > 0 ? annuityPayment(balance, rate, remainingTerm) : 0;
     if (months === 1) firstPayment = scheduledPayment;
   }
   return { months, interest, totalPaid, firstPayment, finalPayment, completed: balance <= EPSILON };
