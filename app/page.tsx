@@ -11,6 +11,7 @@ import { MortgageCalculators } from "@/components/mortgage-calculators";
 import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
 import { LoanCalculator } from "@/components/loan-calculator";
 import { PrepaymentCalculator } from "@/components/prepayment-calculator";
+import { RealtorMortgageAssistant } from "@/components/realtor-mortgage-assistant";
 import type { Operation } from "@/lib/calculator";
 import { discounts } from "@/lib/discounts";
 import { useTariffs } from "@/hooks/use-tariffs";
@@ -18,9 +19,9 @@ import { clearCalculationHistory, clearCalculationKinds, deleteCalculation, getC
 
 const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
 
-type Screen = "home" | "commission" | "mortgage" | "prepayment" | "history" | "settings";
+type Screen = "home" | "commission" | "mortgage" | "prepayment" | "realtor" | "history" | "settings";
 type ThemeMode = "light" | "dark" | "system";
-const titles = { commission: "Комиссия", mortgage: "Ипотека", prepayment: "Досрочное погашение", history: "История расчётов", settings: "Настройки" };
+const titles = { commission: "Комиссия", mortgage: "Ипотека", prepayment: "Досрочное погашение", realtor: "Ипотечный помощник риелтора", history: "История расчётов", settings: "Настройки" };
 
 const historyFieldLabels: Record<string, string> = {
   mode: "Тип расчёта",
@@ -246,7 +247,7 @@ export default function Home() {
   useEffect(() => {
     // Restore the current section after a browser refresh in the same tab.
     const validScreen = (value: unknown): value is Screen =>
-      value === "home" || value === "commission" || value === "mortgage" || value === "prepayment" || value === "history" || value === "settings";
+      value === "home" || value === "commission" || value === "mortgage" || value === "prepayment" || value === "realtor" || value === "history" || value === "settings";
     let restored: Screen = "home";
     const navigationType = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
     try {
@@ -316,6 +317,8 @@ export default function Home() {
             <NavigationRow title="Кредитный калькулятор" icon={Calculator} onClick={() => navigate("mortgage", "loan")} />
             <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
             <NavigationRow title="Досрочное погашение ипотеки" icon={WalletCards} onClick={() => navigate("prepayment")} />
+            <div className="mr-4 ml-[68px] border-t border-[#EBEEF2] sm:mr-5 sm:ml-[80px]" />
+            <NavigationRow title="Ипотечный помощник риелтора" icon={HousePlus} red onClick={() => navigate("realtor")} />
           </div>
         </section>
       </div>}
@@ -329,6 +332,7 @@ export default function Home() {
       <div id="loan-calculator" hidden={screen !== "mortgage" || mortgageTab !== "loan"}><LoanCalculator /></div>
       <div hidden={screen !== "mortgage" || mortgageTab !== "downpayment"}><MortgageCalculators /></div>
       {screen === "prepayment" && <PrepaymentCalculator />}
+      {screen === "realtor" && <RealtorMortgageAssistant />}
       {screen === "history" && <section className="space-y-5">
         <div role="group" aria-label="Фильтр истории" className="grid grid-cols-4 gap-1.5 rounded-2xl border border-[#E4E8ED] bg-[#EEF1F5] p-1 dark:border-[#405064] dark:bg-[#111820]">{([{value:"all",label:"Все"},{value:"commission",label:"Комиссия"},{value:"downpayment",label:"ПВ"},{value:"loan",label:"Кредит"}] as const).map(option => { const count = historyItems.filter(item => option.value === "all" || (option.value === "commission" ? item.kind === "commission" : option.value === "downpayment" ? item.kind.startsWith("mortgage-") : item.kind === "loan")).length; return <button key={option.value} type="button" aria-pressed={historyFilter === option.value} onClick={() => { setHistoryFilter(option.value); try { window.sessionStorage.setItem("sd-history-filter", option.value); } catch {} }} className={`min-h-10 rounded-xl px-1.5 py-2 text-xs font-semibold transition sm:text-sm ${historyFilter === option.value ? "bg-white text-[#26364A] shadow-sm dark:bg-[#253241] dark:text-[#E6ECF3]" : "text-[#647184] hover:text-[#26364A] dark:text-[#AAB6C5] dark:hover:text-white"}`}>{option.label}</button>; })}</div>
         {historyItems.length > 0 && <div className="flex justify-between gap-3 text-xs text-[#748195]"><span>Записей: {filteredHistoryItems.length}</span><button type="button" onClick={() => { if (historyFilter === "all") { clearCalculationHistory(); setHistoryItems([]); } else { const kinds: CalculationKind[] = historyFilter === "commission" ? ["commission"] : historyFilter === "downpayment" ? ["mortgage-part", "mortgage-whole", "mortgage-adjustment"] : ["loan"]; clearCalculationKinds(kinds); setHistoryItems(getCalculationHistory()); } setExpandedHistory(new Set()); }} disabled={!historyItems.length} className="text-sm text-[#A94442] disabled:opacity-40">{historyFilter === "all" ? "Очистить всю историю" : "Очистить категорию"}</button></div>}
