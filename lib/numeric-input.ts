@@ -11,8 +11,12 @@ export type NumericInputRules = {
  */
 export function normalizeNumericInput(raw: string, rules: NumericInputRules = {}): string | null {
   if (typeof raw !== "string" || !/^[\\d\\s\\u00a0\\u202f.,]*$/.test(raw)) return null;
+  const separators = raw.match(/[.,]/g) ?? [];
+  if (separators.length > 1) return null;
+  const groupingPattern = /^\\d{1,3}(?:[\\s\\u00a0\\u202f]\\d{3})*(?:[.,]\\d*)?$/;
+  const plainPattern = /^\\d*(?:[.,]\\d*)?$/;
+  if (!plainPattern.test(raw) && !groupingPattern.test(raw)) return null;
   const compact = raw.replace(/[\\s\\u00a0\\u202f]/g, "");
-  if ((compact.match(/[.,]/g) ?? []).length > 1) return null;
   const normalized = compact.replace(",", ".");
   const [integer = "", fraction] = normalized.split(".");
   const integerDigits = integer.replace(/^0+(?=\\d)/, "");
