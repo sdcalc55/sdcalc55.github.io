@@ -20,7 +20,7 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
     }
   });
   const decimal = allowDecimal;
-  return <div className="min-w-0">
+  return <div className={`min-w-0 ${className}`}>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label>
     <div className="relative">
       <input ref={input} id={id} name={`sd-calc-${id}`} type="text" inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoComplete="off" enterKeyHint="next" placeholder="0"
