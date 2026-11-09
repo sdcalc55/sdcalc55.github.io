@@ -136,12 +136,12 @@ export function RealtorMortgageAssistant() {
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195] dark:text-[#B8C5D3]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <Field className="md:col-span-1 lg:col-span-1" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
-          <Field className="md:col-span-1 lg:col-span-1" label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
-          <Field className="md:col-span-1 lg:col-span-1" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
-          <Field className="md:col-span-1 lg:col-span-1" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
-          <Field className="md:col-span-1 lg:col-span-1" label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
+          <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
+          <Field className="md:col-span-2" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
+          <Field label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
+          <Field label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
         <div className="mt-5 flex justify-end border-t border-[#EBEEF2] pt-3 dark:border-[#354354]">
           <button type="button" onClick={() => { setBalance("4500000"); setPayment("42000"); setRate("6"); setExtraMonthly(""); setLump(""); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-2 text-sm font-semibold text-[#647184] transition hover:bg-[#F5F7FA] hover:text-[#E83C35] dark:border-[#405064] dark:text-[#D5DEE8] dark:hover:bg-[#253241]"><RotateCcw className="size-4" />СБРОСИТЬ</button>
@@ -182,14 +182,14 @@ export function RealtorMortgageAssistant() {
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-lg text-[#596779] shadow-sm transition-transform group-open:rotate-180 dark:bg-[#17212C] dark:text-[#D5DEE8]" aria-hidden="true">⌄</span>
         </summary>
         <div className="px-1 pb-1 pt-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
-          <p>Расчёт выполняется по помесячной модели: проценты начисляются по ставке, разделённой на 12. Оставшийся срок оценивается по введённым остатку долга, ставке и текущему платежу; последний период может быть неполным. Банковский график может отличаться из-за фактических дат платежей, количества дней в процентном периоде и правил банка.</p>
+          <p>Расчёт выполняется помесячно. Поскольку срок кредита отдельно не вводится, сначала он определяется расчётно по остатку основного долга, процентной ставке и текущему обязательному платежу. Полученный срок используется как исходный для сравнения двух сценариев. Проценты начисляются на остаток долга по месячной ставке (годовая ставка / 12 / 100).</p>
           <ol className="mt-3 list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#748195] dark:marker:text-[#B8C5D3]">
-            <li>Рассчитывается базовый график погашения без досрочных взносов.</li>
-            <li>Определяется сумма процентов, начисляемых за каждый расчётный месяц.</li>
-            <li>Учитывается погашение основного долга обязательным платежом и досрочными взносами.</li>
-            <li>Моделируется изменение остатка задолженности и пересчитываются параметры платежей в зависимости от выбранного сценария.</li>
-            <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
-            <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
+            <li>По введённым данным определяется расчётный срок кредита и строится базовый график без досрочных взносов.</li>
+            <li>Для каждого месяца рассчитываются проценты на текущий остаток основного долга.</li>
+            <li>Из обязательного платежа сначала погашаются начисленные проценты, оставшаяся часть уменьшает основной долг.</li>
+            <li>Досрочные взносы учитываются отдельно от обязательного платежа: ежемесячный взнос добавляется к нему каждый месяц, разовый - в первом расчётном месяце. Сумма досрочного взноса уменьшает остаток долга и не заменяет обязательный платёж.</li>
+            <li>В сценарии «Сокращение срока» текущий обязательный платёж сохраняется, а досрочные взносы направляются на уменьшение остатка долга. В сценарии «Уменьшение платежа» после досрочного погашения обязательный платёж пересчитывается на оставшийся расчётный срок.</li>
+            <li>Для каждого сценария определяется дата (расчётный месяц) полного погашения и сумма процентов. Результаты сравниваются с базовым графиком, а экономия определяется как разница в процентах.</li>
           </ol>
           
         </div>
