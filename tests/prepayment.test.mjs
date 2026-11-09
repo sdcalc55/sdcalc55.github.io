@@ -55,3 +55,19 @@ test("does not recommend a strategy when no additional payments are entered", as
   const result = calculatePlanOptions({ balance: 1200000, monthlyPayment: 30000, annualRate: 12, lumpSum: 0, monthlyExtra: 0 });
   assert.equal(result.recommendation, null);
 });
+
+test("does not overstate the final payment when the regular payment closes the loan", async () => {
+  const { calculatePlanOptions } = await import("../lib/prepayment.ts");
+  const result = calculatePlanOptions({
+    balance: 1000,
+    monthlyPayment: 1010,
+    annualRate: 12,
+    lumpSum: 500,
+    monthlyExtra: 0,
+  });
+  assert.equal(result.baseline.months, 1);
+  assert.equal(result.lumpShorten.months, 1);
+  assert.equal(result.lumpShorten.totalPaid, 1010);
+  assert.equal(result.lumpShorten.finalPayment, 1010);
+  assert.equal(result.lumpShorten.interest, 10);
+});
