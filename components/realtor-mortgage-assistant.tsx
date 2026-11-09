@@ -4,6 +4,7 @@ import { useLayoutEffect, useMemo, useRef, useState, useId } from "react";
 import { HandCoins, Wallet, BadgeCheck, X, RotateCcw } from "lucide-react";
 import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
+import { normalizeNumericInput } from "@/lib/numeric-input";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "@/lib/prepayment-simulation";
 
@@ -34,14 +35,14 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={event => {
-          const raw = event.target.value.replace(/[^\d.,]/g, "");
-          const separatorIndex = decimal ? raw.search(/[.,]/) : -1;
-          const integerRaw = separatorIndex < 0 ? raw : raw.slice(0, separatorIndex);
-          const integerPart = integerRaw.slice(0, maxIntegerDigits);
-          const fractionPart = separatorIndex < 0 ? "" : raw.slice(separatorIndex + 1).replace(/[.,]/g, "").slice(0, maxDecimalDigits);
-          const normalized = separatorIndex >= 0 ? `${integerPart}.${fractionPart}` : integerPart;
-          if (maxValue !== undefined && normalized !== "" && Number(normalized) > maxValue) return;
+          const normalized = normalizeNumericInput(event.target.value, {
+            maxIntegerDigits,
+            maxFractionDigits: decimal ? maxDecimalDigits : 0,
+            maxValue,
+          });
+          if (normalized === null) return;
           if (validateValue && !validateValue(normalized)) return;
+          const raw = normalized;
           const position = event.target.selectionStart ?? raw.length;
           const significant = event.target.value.slice(0, position).replace(/[^\d.,]/g, "").length;
           const next = formatInput(normalized);
