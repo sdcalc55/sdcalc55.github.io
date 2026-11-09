@@ -56,16 +56,17 @@ export function calculatePlanOptions(input: { balance: number; monthlyPayment: n
   if (!Number.isFinite(monthlyExtra) || monthlyExtra < 0 || monthlyExtra > 999999999) throw new Error("Проверьте ежемесячную дополнительную сумму.");
   const rate = annualRate / 1200, baseline = schedule(balance, monthlyPayment, rate);
   const firstInterest = balance * rate, afterRegular = Math.max(0, balance - Math.max(0, monthlyPayment - firstInterest));
+  const firstRegularPayment = Math.min(monthlyPayment, balance + firstInterest);
   const appliedLump = Math.min(lumpSum, afterRegular), afterLump = Math.max(0, afterRegular - appliedLump);
   const remainingMonths = Math.max(1, baseline.months - 1);
   const lumpShortFuture = afterLump > 0 ? schedule(afterLump, monthlyPayment, rate) : emptyScenario();
-  const lumpShort = { monthlyPayment, months: 1 + lumpShortFuture.months, interest: firstInterest + lumpShortFuture.interest, totalPaid: monthlyPayment + appliedLump + lumpShortFuture.totalPaid, finalPayment: lumpShortFuture.months ? lumpShortFuture.finalPayment : monthlyPayment + appliedLump };
+  const lumpShort = { monthlyPayment, months: 1 + lumpShortFuture.months, interest: firstInterest + lumpShortFuture.interest, totalPaid: firstRegularPayment + appliedLump + lumpShortFuture.totalPaid, finalPayment: lumpShortFuture.months ? lumpShortFuture.finalPayment : firstRegularPayment + appliedLump };
   const reducedRequired = paymentFor(afterLump, rate, remainingMonths);
   const lumpReduceFuture = afterLump > 0 ? schedule(afterLump, reducedRequired, rate) : emptyScenario();
-  const lumpReduce = { monthlyPayment: reducedRequired, months: 1 + lumpReduceFuture.months, interest: firstInterest + lumpReduceFuture.interest, totalPaid: monthlyPayment + appliedLump + lumpReduceFuture.totalPaid, finalPayment: lumpReduceFuture.months ? lumpReduceFuture.finalPayment : monthlyPayment + appliedLump };
+  const lumpReduce = { monthlyPayment: reducedRequired, months: 1 + lumpReduceFuture.months, interest: firstInterest + lumpReduceFuture.interest, totalPaid: firstRegularPayment + appliedLump + lumpReduceFuture.totalPaid, finalPayment: lumpReduceFuture.months ? lumpReduceFuture.finalPayment : firstRegularPayment + appliedLump };
   const recurring = schedule(balance, monthlyPayment, rate, monthlyExtra);
   const combinedFuture = afterLump > 0 ? schedule(afterLump, monthlyPayment, rate, monthlyExtra) : emptyScenario();
-  const combined = { monthlyPayment, months: 1 + combinedFuture.months, interest: firstInterest + combinedFuture.interest, totalPaid: monthlyPayment + appliedLump + combinedFuture.totalPaid, finalPayment: combinedFuture.months ? combinedFuture.finalPayment : monthlyPayment + appliedLump };
+  const combined = { monthlyPayment, months: 1 + combinedFuture.months, interest: firstInterest + combinedFuture.interest, totalPaid: firstRegularPayment + appliedLump + combinedFuture.totalPaid, finalPayment: combinedFuture.months ? combinedFuture.finalPayment : firstRegularPayment + appliedLump };
   const candidates: { key: PlanOptions["recommendation"]; scenario: PrepaymentScenario; required: number; extra: number }[] = [
     { key: "lumpShorten" as const, scenario: lumpShort, required: monthlyPayment, extra: 0 },
     { key: "lumpReduce" as const, scenario: lumpReduce, required: reducedRequired, extra: 0 },
