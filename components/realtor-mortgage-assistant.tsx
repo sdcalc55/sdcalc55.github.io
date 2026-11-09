@@ -130,11 +130,11 @@ export function RealtorMortgageAssistant() {
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-start gap-2"><HandCoins className="mt-0.5 size-5 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><div><h2 className="font-semibold">Досрочное погашение</h2><p className="mt-1 text-sm text-[#748195] dark:text-[#B8C5D3]">Сравните, как досрочные взносы повлияют на срок кредита и размер ежемесячного платежа</p></div></div>
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <Field className="" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
-          <Field className="" label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
-          <Field className="" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
-          <Field className="" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
-          <Field className="" label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
+          <Field className="md:col-span-1 lg:col-span-1" label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
+          <Field className="md:col-span-1 lg:col-span-1" label="Процентная ставка" value={rate} onChange={setRate} suffix="%" allowDecimal maxIntegerDigits={2} maxDecimalDigits={2} maxValue={30} error={errors.rate} />
+          <Field className="md:col-span-1 lg:col-span-1" label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
+          <Field className="md:col-span-1 lg:col-span-1" label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
+          <Field className="md:col-span-1 lg:col-span-1" label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
         <div className="mt-5 flex justify-end border-t border-[#EBEEF2] pt-3 dark:border-[#354354]">
           <button type="button" onClick={() => { setBalance("4500000"); setPayment("42000"); setRate("6"); setExtraMonthly(""); setLump(""); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#E4E8ED] px-4 py-2 text-sm font-semibold text-[#647184] transition hover:bg-[#F5F7FA] hover:text-[#E83C35] dark:border-[#405064] dark:text-[#D5DEE8] dark:hover:bg-[#253241]"><RotateCcw className="size-4" />СБРОСИТЬ</button>
