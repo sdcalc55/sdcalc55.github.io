@@ -202,6 +202,10 @@ export function RealtorMortgageAssistant() {
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Заполните оставшийся срок по графику</p>
             </div>}
           </div>
+          <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
+            <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#6685A5] dark:text-[#9CB8D4]" />Почему для расчётов нужны разные данные?</div>
+            <p className="mt-2">При сокращении срока текущий обязательный платёж сохраняется, поэтому можно смоделировать погашение без указания срока по графику. При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
+          </div>
           <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
         </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><HandCoins className="size-6 shrink-0 text-[#E83C35] dark:text-[#83C9C2]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       </div>
@@ -209,7 +213,7 @@ export function RealtorMortgageAssistant() {
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#26364A] dark:text-[#E6ECF3]">
           <span>Подробности расчёта</span><span className="text-[#8993A2] transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
         </summary>
-        <div className="mt-4 space-y-4 text-sm text-[#B8C5D3] dark:text-[#B8C5D3]">
+        <div className="mt-4 space-y-4 text-sm leading-relaxed text-[#536273] dark:text-[#B8C5D3]">
           <p>Расчёт выполнен методом помесячного моделирования кредитного обязательства с последовательным пересчётом остатка основного долга и процентных начислений.</p>
           <ol className="list-decimal space-y-2 pl-5 marker:font-semibold marker:text-[#E83C35]">
             <li>Рассчитан базовый график погашения без досрочных взносов.</li>
