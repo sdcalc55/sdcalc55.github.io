@@ -176,8 +176,8 @@ export function RealtorMortgageAssistant() {
           <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
           <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" step={0.1} error={errors.rate} />
           <Field label="Оставшийся срок по графику" value={remainingYears} onChange={setRemainingYears} suffix="лет" hint={!remainingYears ? "Укажите срок для расчёта по снижению платежа" : undefined} error={errors.term} />
-          <Field label="Дополнительно каждый месяц" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
-          <Field label="Разовый досрочный взнос" value={lump} onChange={setLump} error={errors.lump} />
+          <Field label="Ежемесячный досрочный платёж" value={extraMonthly} onChange={setExtraMonthly} error={errors.extraMonthly} />
+          <Field label="Разовый досрочный платёж" value={lump} onChange={setLump} error={errors.lump} />
         </div>
       </div>
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
@@ -198,7 +198,7 @@ export function RealtorMortgageAssistant() {
             <p className="mt-3 text-sm text-[#596779] dark:text-[#D5DEE8]">{plans.paymentPlan ? <>Срок по графику: {duration(plans.termMonths!)}. Ежемесячная досрочная сумма продолжает вноситься сверх нового обязательного платежа.</> : <>Укажите срок для расчёта по снижению платежа.</>}</p>
           </div>
           <p className="text-xs text-[#748195] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
-        </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p>}
+        </div> : <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/65 px-4 py-5 text-center text-sm leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]"><BadgeCheck className="size-6 shrink-0 text-[#E83C35] dark:text-[#83C9C2]" /><p className="max-w-sm">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта</p></div>}
       </div>
       {isValid && plans?.hasExtra && <details className="group rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-[#26364A] dark:text-[#E6ECF3]">
