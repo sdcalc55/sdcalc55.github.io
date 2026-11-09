@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
+import { normalizeNumericInput } from "@/lib/numeric-input";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 import { Calculator, Wallet, RotateCcw } from "lucide-react";
 import { calculatePlanOptions, calculatePrepayment, type PrepaymentResult, type PlanOptions } from "@/lib/prepayment";
@@ -60,21 +61,15 @@ function InputField({label,value,onChange,type="text",hint,className,money=true,
   return <div className="min-w-0"><label className="mb-2 block text-sm font-semibold text-[#596779] dark:text-[#D5DEE8]">{label}</label><div className="relative">
     <input ref={ref} type={type} value={value} inputMode={numeric?"decimal":undefined} autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={e=>scrollFocusedInputIntoView(e.currentTarget)} onClick={e=>scrollFocusedInputIntoView(e.currentTarget)} onKeyDown={e=>{if(money&&handleFormattedBackspace(e,onChange))return;if(e.key==="-"||e.key==="−"||e.key==="Subtract")e.preventDefault();if(e.key==="Enter"&&!e.nativeEvent.isComposing){e.preventDefault();focusNextCalculatorInput(e.currentTarget);}}} onChange={e=>{
       if(!numeric){onChange(e.target.value);return;}
-      const raw=e.target.value.replace(/[^\d.,]/g,"").replace(/([.,].*)[.,]/g,"$1");
-      const digits=raw.replace(/[\s\u00a0\u202f]/g,"").split(/[.,]/)[0].replace(/^0+/,"");
-      if(money&&digits.length>(maxDigits??10))return;
-      const position=e.target.selectionStart??raw.length;
-      const significant=raw.slice(0,position).replace(/[\s\u00a0\u202f]/g,"").length;
-      const normalized=raw.replace(",",".");
-      const candidateParts=normalized.split(".");
-      const candidate=candidateParts.length>2?candidateParts[0]+"."+candidateParts.slice(1).join(""):normalized;
-      const integerDigits=(candidateParts[0]??"").replace(/\D/g,"").replace(/^0+/,"");
-      const fractionDigits=candidateParts[1]??"";
-      if(!money&&maxIntegerDigits!==undefined&&integerDigits.length>maxIntegerDigits)return;
-      if(!money&&maxFractionDigits!==undefined&&fractionDigits.length>maxFractionDigits)return;
-      const number=Number(candidate);
-      if(!money&&candidate!==""&&Number.isFinite(number)&&maxValue!==undefined&&number>maxValue)return;
-      const next=money?formatInput(raw):candidate;
+      const candidate=normalizeNumericInput(e.target.value,{
+        maxIntegerDigits:money?(maxDigits??10):maxIntegerDigits,
+        maxFractionDigits:money?undefined:maxFractionDigits,
+        maxValue:money?undefined:maxValue,
+      });
+      if(candidate===null)return;
+      const position=e.target.selectionStart??e.target.value.length;
+      const significant=e.target.value.slice(0,position).replace(/[\s\u00a0\u202f]/g,"").length;
+      const next=money?formatInput(candidate):candidate;
       let index=0,count=0;while(index<next.length&&count<significant){if(!/[\s\u00a0\u202f]/.test(next[index]))count++;index++;}
       cursor.current=index;onChange(next);render(n=>n+1);
     }} className={`${className} ${numeric?"pr-10 text-lg font-medium tabular-nums":"pr-3"}`} />
