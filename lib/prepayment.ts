@@ -1,3 +1,5 @@
+import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "@/lib/prepayment-simulation";
+
 export type PrepaymentInput = { balance: number; monthlyPayment: number; annualRate: number; extraPayment: number };
 export type PrepaymentScenario = { monthlyPayment: number; months: number; interest: number; totalPaid: number; finalPayment: number };
 export type PrepaymentResult = { baseline: PrepaymentScenario; shorten: PrepaymentScenario; reduce: PrepaymentScenario; appliedExtra: number; balanceAfterFirstPayment: number };
@@ -5,7 +7,6 @@ export type PlanScenario = PrepaymentScenario & { requiredPayment: number; month
 export type PlanOptions = { baseline: PrepaymentScenario; lumpShorten: PlanScenario; lumpReduce: PlanScenario; recurringShorten: PlanScenario; combined: PlanScenario; recommendation: "lumpShorten" | "lumpReduce" | "recurringShorten" | "combined" | null; };
 const MAX_MONTHS = 600;
 const roundMoney = (n: number) => Math.round(n * 100) / 100;
-import { inferRemainingTerm, simulateFixedPayment, simulateReducedPayment } from "@/lib/prepayment-simulation";
 
 function toScenario(plan: ReturnType<typeof simulateFixedPayment>, monthlyPayment: number): PrepaymentScenario {
   if (!plan.completed) throw new Error("Не удалось завершить расчёт в пределах 50 лет. Проверьте параметры кредита.");
