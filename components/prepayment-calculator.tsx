@@ -12,20 +12,35 @@ const term = (months:number) => { const years=Math.floor(months/12), mod=years%1
 const parse = (v: string) => { const n = v.replace(/[\s\u00a0\u202f]/g, "").replace(",", "."); return /^\d+(?:\.\d+)?$/.test(n) ? Number(n) : NaN; };
 type Mode = "quick" | "planner";
 export function PrepaymentCalculator() {
-  const [mode,setMode]=useState<Mode>("quick"), [unknown,setUnknown]=useState(false);
+  const [mode,setMode]=useState<Mode>("quick");
   const [balance,setBalance]=useState(""), [principal,setPrincipal]=useState(""), [startDate,setStartDate]=useState("");
+  const [estimateInfo,setEstimateInfo]=useState<{balance:number;monthsPaid:number}|null>(null);
   const [rate,setRate]=useState(""), [payment,setPayment]=useState(""), [extra,setExtra]=useState("");
   const [goal,setGoal]=useState<PlannerGoal>("payment"), [target,setTarget]=useState("");
   const [result,setResult]=useState<PrepaymentResult|null>(null), [picked,setPicked]=useState<number|null>(null), [error,setError]=useState(""), [showDetails,setShowDetails]=useState(false);
   const inputClass="mt-2 h-14 w-full rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 text-base font-medium tabular-nums text-[#26364A] outline-none transition placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10 dark:border-[#405064] dark:bg-[#111820] dark:text-[#E6ECF3]";
 
-  const calculate=()=>{try{setError("");let current=parse(balance);if(unknown)current=estimateRemainingBalance(parse(principal),parse(rate),parse(payment),startDate).balance;
+  const calculate=()=>{try{
+    setError("");setEstimateInfo(null);
+    const hasBalance=balance.trim()!=="", hasPrincipal=principal.trim()!=="", hasStartDate=startDate.trim()!=="";
+    let current=hasBalance?parse(balance):NaN, estimate:null|{balance:number;monthsPaid:number}=null;
+    if(hasPrincipal&&hasStartDate){
+      const match=startDate.trim().match(/^(0?[1-9]|1[0-2])[./](\d{4})$/);
+      if(!match)throw new Error("Введите дату кредита в формате ММ.ГГГГ, например 08.2020.");
+      estimate=estimateRemainingBalance(parse(principal),parse(rate),parse(payment),match[2]+"-"+match[1].padStart(2,"0"));
+      if(!hasBalance)current=estimate.balance;
+    }else if(!hasBalance){
+      throw new Error("Для быстрого расчёта укажите текущий остаток долга. Если он неизвестен, заполните первоначальную сумму кредита и дату оформления.");
+    }
+    if((hasPrincipal&&!hasStartDate)||(!hasPrincipal&&hasStartDate)){
+      if(!hasBalance)throw new Error("Чтобы рассчитать остаток по первоначальным данным, заполните и сумму кредита, и дату оформления.");
+    }
     const base={balance:current,monthlyPayment:parse(payment),annualRate:parse(rate)};
     if(mode==="planner"){const amount=findPrepaymentAmount(base,goal,parse(target));setPicked(amount);setResult(calculatePrepayment({...base,extraPayment:amount}));}
     else{setPicked(null);setResult(calculatePrepayment({...base,extraPayment:parse(extra)}));}
-  }catch(e){setResult(null);setPicked(null);setError(e instanceof Error?e.message:"Не удалось выполнить расчёт.");}};
-  const reset=()=>{setBalance("");setPrincipal("");setStartDate("");setRate("");setPayment("");setExtra("");setTarget("");setResult(null);setPicked(null);setError("");};
-  
+    if(estimate)setEstimateInfo(estimate);
+  }catch(e){setResult(null);setPicked(null);setEstimateInfo(null);setError(e instanceof Error?e.message:"Не удалось выполнить расчёт.");}};
+  const reset=()=>{setBalance("");setPrincipal("");setStartDate("");setRate("");setPayment("");setExtra("");setTarget("");setResult(null);setPicked(null);setEstimateInfo(null);setError("");};
   const card=(title:string,data:PrepaymentResult["shorten"],saved:number)=><section className="rounded-2xl border border-[#E1E6ED] bg-white p-4 dark:border-[#405064] dark:bg-[#1B2632]"><h3 className="font-semibold text-[#26364A] dark:text-[#F1F5F9]">{title}</h3><p className="mt-2 text-2xl font-bold tabular-nums text-[#E83C35]">{rub(saved)}</p><p className="text-xs text-[#748195]">Экономия на процентах</p><dl className="mt-4 space-y-2 text-sm"><Row label="Ежемесячный платёж" value={rub(data.monthlyPayment)}/><Row label="Срок после досрочного взноса" value={term(data.months)}/><Row label="Переплата по процентам" value={rub(data.interest)}/></dl></section>;
   return <div className="space-y-5">
     <div className="grid grid-cols-2 gap-1 rounded-2xl border border-[#E4E8ED] bg-[#EEF1F5] p-1 dark:border-[#405064] dark:bg-[#111820]" role="tablist" aria-label="Режим досрочного погашения">
