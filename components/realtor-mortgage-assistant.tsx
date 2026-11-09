@@ -231,6 +231,6 @@ export function RealtorMortgageAssistant() {
         </div>
       </details>}
     </div>
-    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</div>
+    {isValid && plans?.hasExtra && <p className="flex items-start gap-2 text-xs leading-relaxed text-[#748195] dark:text-[#B8C5D3]"><Wallet className="mt-0.5 size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" /><span>Расчёт предварительный. Фактическая экономия зависит от даты досрочного погашения и условий банка.</span></p>}
   </section>;
 }
