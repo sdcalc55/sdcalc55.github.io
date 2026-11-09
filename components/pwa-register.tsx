@@ -16,14 +16,33 @@ export default function PwaRegister() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    const register = () => {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((error) => {
-        console.error("PWA service worker registration failed:", error);
-      });
+    let refreshing = false;
+    const handleControllerChange = () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
     };
-    if (document.readyState === "complete") register();
+    // When an updated worker takes control, reload once to show its fresh app shell.
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+    }
+    const register = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+          updateViaCache: "none",
+        });
+        await registration.update();
+      } catch (error) {
+        console.error("PWA service worker registration failed:", error);
+      }
+    };
+    if (document.readyState === "complete") void register();
     else window.addEventListener("load", register, { once: true });
-    return () => window.removeEventListener("load", register);
+    return () => {
+      window.removeEventListener("load", register);
+      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+    };
   }, []);
 
   useEffect(() => {
