@@ -32,6 +32,7 @@ export function calculateMortgage(mode: MortgageMode, values: string[], allowLar
   const parsed = inputs.map(parse);
   if (parsed.some(v => v === null)) return { status: "error", message: "Введите число, используя запятую или точку для дробной части." };
   const [amount, second, third] = parsed as Fraction[];
+  if (amount.n <= BigInt(0)) return { status: "error", message: "Стоимость объекта должна быть больше нуля." };
   const maxMoney = BigInt(999999999);
   if ((!allowLargeAmount && amount.n > amount.d * maxMoney) || (mode === "adjustment" && second.n > second.d * maxMoney)) return { status: "error", message: "Введите корректную сумму. Максимум — 999 999 999 ₽." };
   let result: Fraction;
