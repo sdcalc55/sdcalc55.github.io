@@ -67,10 +67,10 @@ export function calculatePlanOptions(input: { balance: number; monthlyPayment: n
   const combinedFuture = afterLump > 0 ? schedule(afterLump, monthlyPayment, rate, monthlyExtra) : emptyScenario();
   const combined = { monthlyPayment, months: 1 + combinedFuture.months, interest: firstInterest + combinedFuture.interest, totalPaid: monthlyPayment + appliedLump + combinedFuture.totalPaid, finalPayment: combinedFuture.months ? combinedFuture.finalPayment : monthlyPayment + appliedLump };
   const candidates: { key: PlanOptions["recommendation"]; scenario: PrepaymentScenario; required: number; extra: number }[] = [
-    { key: "lumpShorten", scenario: lumpShort, required: monthlyPayment, extra: 0 },
-    { key: "lumpReduce", scenario: lumpReduce, required: reducedRequired, extra: 0 },
-    { key: "recurringShorten", scenario: recurring, required: monthlyPayment, extra: monthlyExtra },
-    { key: "combined", scenario: combined, required: monthlyPayment, extra: monthlyExtra },
+    { key: "lumpShorten" as const, scenario: lumpShort, required: monthlyPayment, extra: 0 },
+    { key: "lumpReduce" as const, scenario: lumpReduce, required: reducedRequired, extra: 0 },
+    { key: "recurringShorten" as const, scenario: recurring, required: monthlyPayment, extra: monthlyExtra },
+    { key: "combined" as const, scenario: combined, required: monthlyPayment, extra: monthlyExtra },
   ].filter(x => x.scenario.months > 0 && (x.key === "lumpShorten" || x.key === "lumpReduce" ? appliedLump > 0 : monthlyExtra > 0 || (x.key === "combined" && appliedLump > 0)));
   const recommendation = candidates.length ? candidates.reduce((best, item) => item.scenario.interest < best.scenario.interest ? item : best).key : "lumpShorten";
   return {
