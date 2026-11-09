@@ -1,39 +1,48 @@
 export type RepaymentPlan = { months: number; interest: number; totalPaid: number; firstPayment: number; finalPayment: number; completed: boolean };
 const MAX_MONTHS = 600;
 const EPSILON = 0.005;
+const MAX_AMOUNT = 999999999;
 
 function validateSimulationInputs(balance: number, annualRate: number, payment: number, extraMonthly: number, lump: number) {
-  if (!Number.isFinite(balance) || balance <= 0 || balance > 999999999) throw new Error("Проверьте остаток основного долга.");
+  if (!Number.isFinite(balance) || balance <= 0 || balance > MAX_AMOUNT) throw new Error("Проверьте остаток основного долга.");
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Процентная ставка должна быть от 0 до 30%.");
-  if (!Number.isFinite(payment) || payment <= 0) throw new Error("Ежемесячный платёж должен быть больше нуля.");
-  if (!Number.isFinite(extraMonthly) || extraMonthly < 0 || extraMonthly > balance) throw new Error("Ежемесячный досрочный платёж не может превышать остаток долга.");
-  if (!Number.isFinite(lump) || lump < 0 || lump > balance) throw new Error("Разовый досрочный платёж не может превышать остаток долга.");
+  if (!Number.isFinite(payment) || payment <= 0 || payment > MAX_AMOUNT) throw new Error("Ежемесячный платёж должен быть больше нуля и не превышать 999 999 999 ₽.");
+  if (!Number.isFinite(extraMonthly) || extraMonthly < 0 || extraMonthly > balance) throw new Error("Ежемесячный досрочный платёж не может превышать текущий остаток долга.");
+  if (!Number.isFinite(lump) || lump < 0 || lump > balance) throw new Error("Разовый досрочный платёж не может превышать текущий остаток долга.");
 }
 
 export function annuityPayment(balance: number, monthlyRate: number, months: number): number {
-  if (balance <= 0 || months <= 0) return 0;
+  if (!Number.isFinite(balance) || balance <= 0 || !Number.isFinite(months) || months <= 0) return 0;
+  if (!Number.isFinite(monthlyRate) || monthlyRate < 0) throw new Error("Некорректная процентная ставка для пересчёта платежа.");
   if (monthlyRate === 0) return balance / months;
-  const factor = Math.pow(1 + monthlyRate, months);
-  return balance * monthlyRate * factor / (factor - 1);
+  const logFactor = months * Math.log1p(monthlyRate);
+  const denominator = -Math.expm1(-logFactor);
+  return balance * monthlyRate / denominator;
 }
 
-/** Infers a fractional mathematical term from the current balance, rate and payment. */
+/** Returns a whole number of monthly payment periods. No fractional interest periods are simulated. */
 export function inferRemainingTerm(balance: number, annualRate: number, payment: number): number {
-  if (!Number.isFinite(balance) || balance <= 0 || balance > 999999999) throw new Error("Проверьте остаток основного долга.");
+  if (!Number.isFinite(balance) || balance <= 0 || balance > MAX_AMOUNT) throw new Error("Проверьте остаток основного долга.");
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Процентная ставка должна быть от 0 до 30%.");
-  if (!Number.isFinite(payment) || payment <= 0) throw new Error("Ежемесячный платёж должен быть больше нуля.");
+  if (!Number.isFinite(payment) || payment <= 0 || payment > MAX_AMOUNT) throw new Error("Ежемесячный платёж должен быть больше нуля.");
   const rate = annualRate / 1200;
-  if (payment <= balance * rate) throw new Error("Ежемесячный платёж не покрывает проценты по кредиту: он должен быть больше начисляемых процентов.");
-  const term = rate === 0 ? balance / payment : -Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate);
-  if (!Number.isFinite(term) || term <= 0 || term > MAX_MONTHS) throw new Error("Расчётный срок превышает 50 лет. Увеличьте ежемесячный платёж.");
-  return term;
+  if (payment <= balance * rate + 1e-9) throw new Error("Ежемесячный платёж не покрывает проценты по кредиту: он должен быть больше начисляемых процентов.");
+  const exact = rate === 0 ? balance / payment : -Math.log1p(-(balance * rate) / payment) / Math.log1p(rate);
+  if (!Number.isFinite(exact) || exact <= 0 || exact > MAX_MONTHS) throw new Error("Расчётный срок превышает 50 лет. Увеличьте ежемесячный платёж.");
+  return Math.max(1, Math.ceil(exact - 1e-10));
 }
 
-function periodInterest(balance: number, rate: number, period: number): number {
-  return balance * (Math.pow(1 + rate, period) - 1);
+function accrueMonthlyInterest(balance: number, monthlyRate: number): number {
+  return balance * monthlyRate;
 }
 
-/** Fixed mandatory payment; extra payments are applied after it in each period. */
+function validateTerm(termMonths: number) {
+  if (!Number.isInteger(termMonths) || termMonths < 1 || termMonths > MAX_MONTHS) {
+    throw new Error("Срок расчёта должен составлять от 1 до 600 полных месяцев.");
+  }
+}
+
+/** Fixed mandatory payment remains unchanged; extra payments are applied after it on each monthly payment date. */
 export function simulateFixedPayment(
   balanceStart: number,
   annualRate: number,
@@ -43,15 +52,14 @@ export function simulateFixedPayment(
   termMonths = inferRemainingTerm(balanceStart, annualRate, payment),
 ): RepaymentPlan {
   validateSimulationInputs(balanceStart, annualRate, payment, extraMonthly, lump);
+  validateTerm(termMonths);
   let balance = balanceStart, interest = 0, totalPaid = 0, finalPayment = 0, months = 0;
   const rate = annualRate / 1200;
-  if (balance <= EPSILON) return { months: 0, interest: 0, totalPaid: 0, firstPayment: 0, finalPayment: 0, completed: true };
-  for (let i = 0; i < MAX_MONTHS && balance > EPSILON; i++) {
-    const period = Math.min(1, termMonths - i);
-    if (period <= 0) break;
-    const accrued = periodInterest(balance, rate, period), due = balance + accrued;
+  for (let i = 0; i < termMonths && balance > EPSILON; i++) {
+    const accrued = accrueMonthlyInterest(balance, rate);
+    const due = balance + accrued;
     const regular = Math.min(due, payment);
-    if (regular <= accrued + 0.000001) break;
+    if (regular <= accrued + 1e-9) break;
     interest += accrued;
     balance = Math.max(0, due - regular);
     const extra = Math.min(balance, extraMonthly + (i === 0 ? lump : 0));
@@ -60,10 +68,10 @@ export function simulateFixedPayment(
     totalPaid += finalPayment;
     months++;
   }
-  return { months, interest, totalPaid, firstPayment: payment, finalPayment, completed: balance <= EPSILON };
+  return { months, interest, totalPaid, firstPayment: months ? Math.min(balanceStart * (1 + rate), payment) : 0, finalPayment, completed: balance <= EPSILON };
 }
 
-/** Recalculates the mandatory payment after every period while retaining the original fractional term. */
+/** Recalculates the required payment over the remaining whole monthly periods after each payment. */
 export function simulateReducedPayment(
   balanceStart: number,
   annualRate: number,
@@ -73,16 +81,15 @@ export function simulateReducedPayment(
   lump = 0,
 ): RepaymentPlan {
   validateSimulationInputs(balanceStart, annualRate, initialPayment, extraMonthly, lump);
+  validateTerm(termMonths);
   let balance = balanceStart, interest = 0, totalPaid = 0, months = 0, finalPayment = 0;
-  let scheduledPayment = initialPayment, firstPayment = 0;
+  let scheduledPayment = initialPayment, firstPayment = initialPayment;
   const rate = annualRate / 1200;
-  if (balance <= EPSILON) return { months: 0, interest: 0, totalPaid: 0, firstPayment: 0, finalPayment: 0, completed: true };
-  for (let i = 0; i < MAX_MONTHS && balance > EPSILON; i++) {
-    const period = Math.min(1, termMonths - i);
-    if (period <= 0) break;
-    const accrued = periodInterest(balance, rate, period), due = balance + accrued;
+  for (let i = 0; i < termMonths && balance > EPSILON; i++) {
+    const accrued = accrueMonthlyInterest(balance, rate);
+    const due = balance + accrued;
     const regular = Math.min(due, scheduledPayment);
-    if (regular <= accrued + 0.000001) break;
+    if (regular <= accrued + 1e-9) break;
     interest += accrued;
     balance = Math.max(0, due - regular);
     const extra = Math.min(balance, extraMonthly + (i === 0 ? lump : 0));
@@ -90,9 +97,12 @@ export function simulateReducedPayment(
     finalPayment = regular + extra;
     totalPaid += finalPayment;
     months++;
-    if (balance <= EPSILON) break;
-    const remainingTerm = termMonths - months;
-    scheduledPayment = remainingTerm > 0 ? annuityPayment(balance, rate, remainingTerm) : 0;
+    if (balance <= EPSILON) {
+      if (months === 1) firstPayment = 0;
+      break;
+    }
+    const remainingPeriods = termMonths - months;
+    scheduledPayment = remainingPeriods > 0 ? annuityPayment(balance, rate, remainingPeriods) : 0;
     if (months === 1) firstPayment = scheduledPayment;
   }
   return { months, interest, totalPaid, firstPayment, finalPayment, completed: balance <= EPSILON };
