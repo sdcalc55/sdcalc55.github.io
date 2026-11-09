@@ -21,6 +21,11 @@ const assert = require('node:assert/strict');
     const monthlyExtra = field('Ежемесячный досрочный платёж');
     const lump = field('Разовый досрочный платёж');
 
+    // The preliminary-calculation disclaimer and details must stay hidden
+    // until the user has entered an early repayment and results are shown.
+    await page.getByTestId('prepayment-disclaimer').waitFor({ state: 'detached' });
+    await page.getByText('Подробности расчёта', { exact: true }).waitFor({ state: 'detached' });
+
     await balance.fill('1234567');
     assert.equal(await balance.inputValue(), '1 234 567');
 
@@ -88,6 +93,13 @@ const assert = require('node:assert/strict');
     await payment.fill('42000');
     await monthlyExtra.fill('5000');
     await page.getByText('Сокращение срока', { exact: true }).waitFor();
+    const disclaimer = page.getByTestId('prepayment-disclaimer');
+    await disclaimer.waitFor({ state: 'visible' });
+    await page.getByText('Подробности расчёта', { exact: true }).waitFor({ state: 'visible' });
+    const disclaimerIndex = await disclaimer.evaluate(element => element.compareDocumentPosition(
+      [...document.querySelectorAll('summary')].find(item => item.innerText.includes('Подробности расчёта'))
+    ));
+    assert.ok(disclaimerIndex & Node.DOCUMENT_POSITION_FOLLOWING, 'disclaimer must appear immediately before calculation details');
     const before = await page.locator('body').innerText();
     await monthlyExtra.fill('6000');
     const after = await page.locator('body').innerText();
