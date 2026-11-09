@@ -50,10 +50,13 @@ export function simulateFixedPayment(
   extraMonthly = 0,
   lump = 0,
   termMonths = inferRemainingTerm(balanceStart, annualRate, payment),
+  initialPeriodDays = 0,
 ): RepaymentPlan {
   validateSimulationInputs(balanceStart, annualRate, payment, extraMonthly, lump);
   validateTerm(termMonths);
-  let balance = balanceStart, interest = 0, totalPaid = 0, finalPayment = 0, months = 0;
+  if (!Number.isInteger(initialPeriodDays) || initialPeriodDays < 0 || initialPeriodDays > 366) throw new Error("Количество дней начального периода должно быть от 0 до 366.");
+  const initialInterest = balanceStart * (annualRate / 100) * initialPeriodDays / 365;
+  let balance = balanceStart, interest = initialInterest, totalPaid = initialInterest, finalPayment = 0, months = 0;
   const rate = annualRate / 1200;
   for (let i = 0; i < Math.ceil(termMonths - 1e-10) && balance > EPSILON; i++) {
     const accrued = accrueMonthlyInterest(balance, rate);
@@ -79,14 +82,17 @@ export function simulateReducedPayment(
   initialPayment: number,
   extraMonthly = 0,
   lump = 0,
+  initialPeriodDays = 0,
 ): RepaymentPlan {
   validateSimulationInputs(balanceStart, annualRate, initialPayment, extraMonthly, lump);
   validateTerm(termMonths);
+  if (!Number.isInteger(initialPeriodDays) || initialPeriodDays < 0 || initialPeriodDays > 366) throw new Error("Количество дней начального периода должно быть от 0 до 366.");
+  const initialInterest = balanceStart * (annualRate / 100) * initialPeriodDays / 365;
   if (extraMonthly === 0 && lump === 0) {
     const unchanged = simulateFixedPayment(balanceStart, annualRate, initialPayment, 0, 0, termMonths);
-    return { ...unchanged, firstPayment: initialPayment };
+    return { ...unchanged, interest: unchanged.interest + initialInterest, totalPaid: unchanged.totalPaid + initialInterest, firstPayment: initialPayment };
   }
-  let balance = balanceStart, interest = 0, totalPaid = 0, months = 0, finalPayment = 0;
+  let balance = balanceStart, interest = initialInterest, totalPaid = initialInterest, months = 0, finalPayment = 0;
   let scheduledPayment = initialPayment, firstPayment = initialPayment;
   const rate = annualRate / 1200;
   for (let i = 0; i < termMonths && balance > EPSILON; i++) {
