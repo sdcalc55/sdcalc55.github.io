@@ -209,14 +209,14 @@ export function RealtorMortgageAssistant() {
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Экономия на процентах</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
               <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
               <p className="mt-auto pt-3 text-sm leading-5 text-[#596779] dark:text-[#B8C5D3]"><span className="block">Срок по графику: {duration(plans.termMonths!)}.</span><span className="block">Ежемесячная досрочная сумма вносится сверх нового обязательного платежа.</span></p>
-            </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl bg-[#EAF2FB]/75 px-4 py-5 text-center dark:bg-[#263648]">
+            </> : <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">{plans.termMismatch ? "Срок по графику не совпадает с расчётным. Проверьте остаток долга, ставку, платёж и срок по графику." : "Заполните оставшийся срок по графику"}</p>
               {plans.termMismatch && <p className="max-w-xs text-xs leading-5 text-[#596779] dark:text-[#B8C5D3]">При остатке долга, ставке и текущем платеже {money(num(payment))} модельный срок составляет {duration(plans.estimatedTermMonths)}. Указанный срок не согласуется с этими данными. Проверьте срок и параметры кредита: расчёт уменьшения платежа остановлен, чтобы не сравнивать разные периоды.</p>}
             </div>}
           </div>
-          <div className="rounded-xl border border-[#E2E7ED] bg-[#F7F8FA] p-3 text-sm text-[#536273] dark:border-[#405064] dark:bg-[#17212C] dark:text-[#C5D0DC] sm:col-span-2">
-            <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Почему для расчётов нужны разные данные?</div>
+          <div className="rounded-xl p-3 text-sm text-[#536273] dark:text-[#C5D0DC] sm:col-span-2">
+            <div className="flex items-center gap-2 font-semibold text-[#26364A] dark:text-[#E6ECF3]"><Wallet className="size-4 shrink-0 text-[#E83C35] dark:text-[#FF7770]" />Зачем указывать оставшийся срок кредита?</div>
             <p className="mt-2">При сокращении срока текущий обязательный платёж сохраняется, поэтому можно смоделировать погашение без указания срока по графику. При уменьшении платежа его размер пересчитывается на оставшийся срок кредита. Поэтому без срока нельзя определить новый платёж и корректно сравнить экономию на процентах.</p>
           </div>
           <p className="text-xs text-[#748195] dark:text-[#B8C5D3] sm:col-span-2">Модель последовательно рассчитывает каждый месяц: начисляет проценты на текущий остаток, учитывает обязательный платёж и затем досрочные взносы. В сценарии уменьшения платежа обязательный платёж пересчитывается на оставшийся срок, а ежемесячная доплата сохраняется сверх него.</p>
@@ -240,7 +240,7 @@ export function RealtorMortgageAssistant() {
             <li>Определяются срок полного погашения и общая сумма уплаченных процентов.</li>
             <li>Результаты сравниваются с базовым графиком для определения экономии.</li>
           </ol>
-          <div className="mt-4 rounded-xl border border-[#DCE3EA] bg-white p-3 dark:border-[#405064] dark:bg-[#17212C]">
+          <div className="mt-4 rounded-xl p-3">
             <div className="font-semibold text-[#26364A] dark:text-[#E6ECF3]">Почему для расчётов нужны разные данные?</div>
             <p className="mt-2">При сокращении срока текущий платёж сохраняется, поэтому срок по графику не нужен. При уменьшении платежа новый платёж рассчитывается на оставшийся срок, поэтому срок необходим для корректного расчёта экономии.</p>
           </div>
