@@ -2,6 +2,18 @@ export type RepaymentPlan = { months: number; interest: number; firstPayment: nu
 const MAX_MONTHS = 600;
 const EPSILON = 0.005;
 
+function validateSimulationInputs(balance: number, annualRate: number, payment: number, extraMonthly: number, lump: number) {
+  if (!Number.isFinite(balance) || balance <= 0) throw new Error("Остаток долга должен быть больше нуля.");
+  if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Проверьте процентную ставку.");
+  if (!Number.isFinite(payment) || payment <= 0) throw new Error("Платёж должен быть больше нуля.");
+  if (!Number.isFinite(extraMonthly) || extraMonthly < 0 || extraMonthly > balance) {
+    throw new Error("Ежемесячный досрочный платёж не может превышать остаток долга.");
+  }
+  if (!Number.isFinite(lump) || lump < 0 || lump > balance) {
+    throw new Error("Разовый досрочный платёж не может превышать остаток долга.");
+  }
+}
+
 export function annuityPayment(balance: number, monthlyRate: number, months: number): number {
   if (balance <= 0 || months <= 0) return 0;
   if (monthlyRate === 0) return balance / months;
@@ -36,6 +48,7 @@ export function simulateFixedPayment(
   lump = 0,
   termMonths = inferRemainingTerm(balanceStart, annualRate, payment),
 ): RepaymentPlan {
+  validateSimulationInputs(balanceStart, annualRate, payment, extraMonthly, lump);
   let balance = balanceStart, interest = 0, months = 0;
   const rate = annualRate / 1200;
   if (balance <= EPSILON) return { months: 0, interest: 0, firstPayment: 0, completed: true };
@@ -70,6 +83,7 @@ export function simulateReducedPayment(
   extraMonthly = 0,
   lump = 0,
 ): RepaymentPlan {
+  validateSimulationInputs(balanceStart, annualRate, initialPayment, extraMonthly, lump);
   let balance = balanceStart, interest = 0, months = 0;
   let scheduledPayment = initialPayment, firstPayment = 0;
   const rate = annualRate / 1200;
