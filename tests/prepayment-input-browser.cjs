@@ -24,6 +24,12 @@ const assert = require('node:assert/strict');
     await balance.fill('1234567');
     assert.equal(await balance.inputValue(), '1 234 567');
 
+    // Backspace directly after a thousands separator removes the preceding digit.
+    await balance.evaluate(input => input.setSelectionRange(2, 2));
+    await balance.press('Backspace');
+    assert.equal(await balance.inputValue(), '234 567');
+    await balance.fill('1234567');
+
     // Backspace and Delete must edit digits rather than getting stuck on grouping spaces.
     await balance.press('End');
     await balance.press('Backspace');
@@ -46,11 +52,13 @@ const assert = require('node:assert/strict');
     assert.equal(await balance.evaluate(input => input.selectionStart), 2);
 
     // Invalid pasted content must be rejected as a whole, not stripped into a valid amount.
-    await page.evaluate(() => navigator.clipboard.writeText('-450000'));
-    await balance.focus();
-    await balance.press('Control+A');
-    await balance.press('Control+V');
-    assert.equal(await balance.inputValue(), '7 654 321');
+    for (const invalid of ['-450000', 'NaN', 'Infinity', '1e6', '1,2.3', '12%']) {
+      await page.evaluate(value => navigator.clipboard.writeText(value), invalid);
+      await balance.focus();
+      await balance.press('Control+A');
+      await balance.press('Control+V');
+      assert.equal(await balance.inputValue(), '7 654 321', 'invalid clipboard value rejected: ' + invalid);
+    }
 
     await page.evaluate(() => navigator.clipboard.writeText('1 23'));
     await balance.focus();
