@@ -59,7 +59,7 @@ function annuity(balance: number, monthlyRate: number, months: number) {
   return balance * monthlyRate * factor / (factor - 1);
 }
 function simulateFixedPayment(balanceStart: number, rateYear: number, payment: number, extraMonthly: number, lump: number): Plan {
-  let balance = Math.max(0, balanceStart - lump);
+  let balance = balanceStart;
   let interest = 0;
   let months = 0;
   const monthlyRate = rateYear / 1200;
@@ -67,34 +67,42 @@ function simulateFixedPayment(balanceStart: number, rateYear: number, payment: n
   if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
   for (let i = 0; i < MAX_MONTHS && balance > 0.01; i++) {
     const monthInterest = balance * monthlyRate;
-    if (payment + extraMonthly <= monthInterest + 0.000001) {
-      return { months, interest, firstPayment, completed: false };
-    }
     const due = balance + monthInterest;
-    const paid = Math.min(due, payment + extraMonthly);
+    const regularPaid = Math.min(due, payment);
     interest += monthInterest;
-    balance = Math.max(0, due - paid);
+    balance = Math.max(0, due - regularPaid);
+    const prepayment = extraMonthly + (i === 0 ? lump : 0);
+    balance = Math.max(0, balance - Math.min(balance, prepayment));
     months++;
   }
   return { months, interest, firstPayment, completed: balance <= 0.01 };
 }
-function simulateReducedPayment(balanceStart: number, rateYear: number, termMonths: number, extraMonthly: number, lump: number): Plan {
-  let balance = Math.max(0, balanceStart - lump);
+function simulateReducedPayment(balanceStart: number, rateYear: number, termMonths: number, initialPayment: number, extraMonthly: number, lump: number): Plan {
+  let balance = balanceStart;
   let interest = 0;
   let months = 0;
+  let scheduledPayment = initialPayment;
+  let nextPayment = initialPayment;
   const monthlyRate = rateYear / 1200;
-  const firstPayment = annuity(balance, monthlyRate, termMonths);
   if (balance <= 0.01) return { months: 0, interest: 0, firstPayment: 0, completed: true };
   for (let i = 0; i < termMonths && balance > 0.01; i++) {
-    const scheduledPayment = annuity(balance, monthlyRate, termMonths - i);
     const monthInterest = balance * monthlyRate;
     const due = balance + monthInterest;
-    const paid = Math.min(due, scheduledPayment + extraMonthly);
+    const regularPaid = Math.min(due, scheduledPayment);
     interest += monthInterest;
-    balance = Math.max(0, due - paid);
+    balance = Math.max(0, due - regularPaid);
+    const prepayment = extraMonthly + (i === 0 ? lump : 0);
+    balance = Math.max(0, balance - Math.min(balance, prepayment));
     months++;
+    if (balance <= 0.01) {
+      nextPayment = 0;
+      break;
+    }
+    const remainingMonths = termMonths - months;
+    nextPayment = remainingMonths > 0 ? annuity(balance, monthlyRate, remainingMonths) : 0;
+    scheduledPayment = nextPayment;
   }
-  return { months, interest, firstPayment, completed: balance <= 0.01 };
+  return { months, interest, firstPayment: nextPayment, completed: balance <= 0.01 };
 }
 function duration(months: number) {
   const years = Math.floor(months / 12), rest = months % 12;
@@ -134,7 +142,7 @@ export function RealtorMortgageAssistant() {
     const term = simulateFixedPayment(principal, num(rate), regularPayment, extra, oneTime);
     const estimatedTerm = base.completed ? base.months : MAX_MONTHS;
     const termMonths = Math.max(1, Math.min(MAX_MONTHS, Math.round(num(remainingYears) * 12) || estimatedTerm));
-    const paymentPlan = simulateReducedPayment(principal, num(rate), termMonths, extra, oneTime);
+    const paymentPlan = simulateReducedPayment(principal, num(rate), termMonths, regularPayment, extra, oneTime);
     const hasExtra = extra > 0 || oneTime > 0;
     return {
       base,
@@ -177,10 +185,10 @@ export function RealtorMortgageAssistant() {
             <div className="mt-3"><div className="text-xs text-[#748195]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
             <p className="mt-3 text-xs text-[#748195]">Плановый срок кредита: {duration(plans.termMonths)}. При регулярной доплате {money(num(extraMonthly))} фактическое закрытие может наступить раньше: {plans.paymentPlan.completed ? duration(plans.paymentPlan.months) : "срок более 50 лет"}.</p>
           </div>
-          <p className="text-xs text-[#748195] sm:col-span-2">В обоих вариантах разовый взнос сразу уменьшает долг. При уменьшении платежа он пересчитывается после каждого ежемесячного досрочного взноса.</p>
+          <p className="text-xs text-[#748195] sm:col-span-2">Модель считает досрочный взнос в дату ежемесячного платежа: сначала начисляются проценты и вносится обычный платёж, затем остаток уменьшается на досрочную сумму. В варианте с уменьшением платежа новый обязательный платёж рассчитывается на оставшийся срок после каждого досрочного взноса.</p>
         </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта.</p>}
       </div>
     </div>
-    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Модель: аннуитетный кредит, проценты начисляются ежемесячно на остаток долга. Досрочные взносы считаются в конце расчётного месяца; разовый взнос - до первого месяца. Условия банка и даты платежей могут изменить результат.</div>
+    <div className="flex items-start gap-2 rounded-xl bg-[#F3F5F8] p-3 text-xs text-[#748195] dark:bg-[#111820]"><Wallet className="mt-0.5 size-4 shrink-0" />Расчётная модель: аннуитетный кредит с ежемесячным начислением процентов. В дату ежемесячного платежа сначала учитываются проценты и обязательный платёж, затем досрочный взнос. После досрочного взноса обязательный платёж пересчитывается на оставшийся срок. Фактический график зависит от даты взноса и правил банка.</div>
   </section>;
 }
