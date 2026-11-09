@@ -168,14 +168,14 @@ export function RealtorMortgageAssistant() {
             <div className="mt-1 text-lg font-bold text-[#B8322D] dark:text-[#F09A94]">Сокращение срока</div>
             <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#748195]">Новый срок</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{plans.term.completed ? duration(plans.term.months) : "Долг не погашается за 50 лет"}</div></div>
-            <p className="mt-3 text-xs text-[#748195]">Платёж остаётся {money(num(payment))} + досрочная доплата {money(num(extraMonthly))} в месяц.</p>
+            <p className="mt-3 text-xs text-[#748195]">Текущий платёж {money(num(payment))} сохраняется, доплата {money(num(extraMonthly))} в месяц идёт сверх него. Закрытие на {plans.monthsSaved === null ? "срок не определён" : duration(plans.monthsSaved)} раньше.</p>
           </div>
           <div className="rounded-xl border border-[#DCE2E9] bg-[#F7F8FA] p-3 dark:border-[#405064] dark:bg-[#111820]">
             <div className="text-xs font-semibold text-[#647184] dark:text-[#AAB6C5]">Если уменьшать обязательный платёж</div>
             <div className="mt-1 text-lg font-bold text-[#26364A] dark:text-[#E6ECF3]">Уменьшение платежа</div>
             <div className="mt-3"><div className="text-xs text-[#748195]">Экономия на процентах</div><div className="mt-1 text-xl font-bold text-[#26364A] dark:text-[#E6ECF3]">{plans.paymentSaving === null ? "Не удалось рассчитать" : money(plans.paymentSaving)}</div></div>
             <div className="mt-3"><div className="text-xs text-[#748195]">Новый обязательный платёж</div><div className="mt-1 font-semibold text-[#26364A] dark:text-[#E6ECF3]">{money(plans.paymentPlan.firstPayment)}</div></div>
-            <p className="mt-3 text-xs text-[#748195]">Срок сохраняется: {duration(plans.termMonths)}. Доплата {money(num(extraMonthly))} в месяц остаётся сверх обязательного платежа.</p>
+            <p className="mt-3 text-xs text-[#748195]">Плановый срок кредита: {duration(plans.termMonths)}. При регулярной доплате {money(num(extraMonthly))} фактическое закрытие может наступить раньше: {plans.paymentPlan.completed ? duration(plans.paymentPlan.months) : "срок более 50 лет"}.</p>
           </div>
           <p className="text-xs text-[#748195] sm:col-span-2">В обоих вариантах разовый взнос сразу уменьшает долг. При уменьшении платежа он пересчитывается после каждого ежемесячного досрочного взноса.</p>
         </div> : <p className="mt-3 text-sm text-[#748195]">Укажите разовый или ежемесячный досрочный взнос, чтобы сравнить два варианта.</p>}
