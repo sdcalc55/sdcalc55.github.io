@@ -8,7 +8,7 @@ function validateSimulationInputs(balance: number, annualRate: number, payment: 
   if (!Number.isFinite(annualRate) || annualRate < 0 || annualRate > 30) throw new Error("Процентная ставка должна быть от 0 до 30%.");
   if (!Number.isFinite(payment) || payment <= 0 || payment > MAX_AMOUNT) throw new Error("Ежемесячный платёж должен быть больше нуля и не превышать 999 999 999 ₽.");
   if (!Number.isFinite(extraMonthly) || extraMonthly < 0 || extraMonthly > balance) throw new Error("Ежемесячный досрочный платёж не может превышать остаток долга.");
-  if (!Number.isFinite(lump) || lump < 0 || lump > balance) throw new Error("Разовый досрочный платёж не может превышать текущий остаток долга.");
+  if (!Number.isFinite(lump) || lump < 0 || lump > balance) throw new Error("Разовый досрочный платёж не может превышать остаток долга.");
 }
 
 export function annuityPayment(balance: number, monthlyRate: number, months: number): number {
