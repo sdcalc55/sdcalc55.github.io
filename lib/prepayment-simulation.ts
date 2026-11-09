@@ -9,10 +9,7 @@ export function annuityPayment(balance: number, monthlyRate: number, months: num
   return balance * monthlyRate * factor / (factor - 1);
 }
 
-/**
- * Infers the mathematical remaining term from the current balance and scheduled
- * payment. A fractional final month is retained instead of rounding the term up.
- */
+/** Infers a fractional mathematical term from balance, rate and current payment. */
 export function inferRemainingTerm(balance: number, annualRate: number, payment: number): number {
   const rate = annualRate / 1200;
   if (balance <= 0 || payment <= 0 || payment <= balance * rate) {
@@ -22,24 +19,36 @@ export function inferRemainingTerm(balance: number, annualRate: number, payment:
   return -Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate);
 }
 
+function periodInterest(balance: number, rate: number, period: number): number {
+  return balance * (Math.pow(1 + rate, period) - 1);
+}
+
+/**
+ * Monthly annuity model with a fractional final period inferred from the entered
+ * balance/payment/rate. This keeps the no-prepayment baseline anchored to the
+ * entered payment instead of silently replacing it with a rounded-month annuity.
+ */
 export function simulateFixedPayment(
   balanceStart: number,
   annualRate: number,
   payment: number,
   extraMonthly = 0,
   lump = 0,
+  termMonths = inferRemainingTerm(balanceStart, annualRate, payment),
 ): RepaymentPlan {
   let balance = balanceStart, interest = 0, months = 0;
   const rate = annualRate / 1200;
   if (balance <= EPSILON) return { months: 0, interest: 0, firstPayment: 0, completed: true };
   for (let i = 0; i < MAX_MONTHS && balance > EPSILON; i++) {
-    const monthInterest = balance * rate;
-    const due = balance + monthInterest;
+    const period = Math.min(1, termMonths - i);
+    if (period <= 0) break;
+    const accrued = periodInterest(balance, rate, period);
+    const due = balance + accrued;
     const regular = Math.min(due, payment);
-    if (regular <= monthInterest + 0.000001) {
+    if (regular <= accrued + 0.000001) {
       return { months, interest, firstPayment: payment, completed: false };
     }
-    interest += monthInterest;
+    interest += accrued;
     balance = Math.max(0, due - regular);
     const extra = extraMonthly + (i === 0 ? lump : 0);
     balance = Math.max(0, balance - Math.min(balance, extra));
@@ -49,9 +58,9 @@ export function simulateFixedPayment(
 }
 
 /**
- * Keeps the inferred original term. After each regular payment and extra payment,
- * recalculates the required payment over the exact remaining fractional term.
- * The final installment is limited to the actual outstanding balance plus interest.
+ * Keeps the inferred original term. Recalculates the mandatory payment after
+ * each regular and extra payment. The final fractional period is accrued using
+ * the same fractional-period convention as the baseline.
  */
 export function simulateReducedPayment(
   balanceStart: number,
@@ -67,13 +76,15 @@ export function simulateReducedPayment(
   if (balance <= EPSILON) return { months: 0, interest: 0, firstPayment: 0, completed: true };
 
   for (let i = 0; i < MAX_MONTHS && balance > EPSILON; i++) {
-    const monthInterest = balance * rate;
-    const due = balance + monthInterest;
+    const period = Math.min(1, termMonths - i);
+    if (period <= 0) break;
+    const accrued = periodInterest(balance, rate, period);
+    const due = balance + accrued;
     const regular = Math.min(due, scheduledPayment);
-    if (regular <= monthInterest + 0.000001) {
+    if (regular <= accrued + 0.000001) {
       return { months, interest, firstPayment, completed: false };
     }
-    interest += monthInterest;
+    interest += accrued;
     balance = Math.max(0, due - regular);
     const extra = extraMonthly + (i === 0 ? lump : 0);
     balance = Math.max(0, balance - Math.min(balance, extra));
@@ -81,13 +92,7 @@ export function simulateReducedPayment(
     if (balance <= EPSILON) break;
 
     const remainingTerm = termMonths - months;
-    if (remainingTerm <= 0) {
-      scheduledPayment = balance * (1 + rate);
-    } else if (remainingTerm <= 1) {
-      scheduledPayment = balance * (1 + rate);
-    } else {
-      scheduledPayment = annuityPayment(balance, rate, remainingTerm);
-    }
+    scheduledPayment = remainingTerm > 0 ? annuityPayment(balance, rate, remainingTerm) : 0;
     if (months === 1) firstPayment = scheduledPayment;
   }
   return { months, interest, firstPayment, completed: balance <= EPSILON };
