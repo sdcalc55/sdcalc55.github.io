@@ -62,3 +62,16 @@ test("the deployed navigation mounts the updated calculator and does not reintro
   assert.match(component, /Результаты сравниваются с базовым графиком/);
   assert.doesNotMatch(component, /Регулярные взносы|Сравнение вариантов|Моя сумма/);
 });
+
+
+test("rejects malformed grouping, whitespace injection and oversized pasted values", () => {
+  for (const value of [" 123", "123 ", "1 23", "12 34 567", "1 234 56", "1 234. 5", "1\\t234", "1\\n234", "1".repeat(129)]) {
+    assert.equal(normalizeNumericInput(value, { maxIntegerDigits: 9 }), null, JSON.stringify(value));
+  }
+  assert.equal(normalizeNumericInput("999 999 999", { maxIntegerDigits: 9, maxValue: 999999999 }), "999999999");
+  assert.equal(normalizeNumericInput("1 234 567,89", { maxIntegerDigits: 9, maxFractionDigits: 2 }), "1234567.89");
+});
+
+test("rejects numeric values that overflow finite JavaScript numbers", () => {
+  assert.equal(normalizeNumericInput("9".repeat(128)), null);
+});
