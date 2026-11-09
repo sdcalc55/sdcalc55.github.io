@@ -399,7 +399,7 @@ function referenceSchedule({ balance, annualRate, monthlyPayment, monthlyExtra =
       break;
     }
     if (reduced) {
-      const left = periods - months;
+      const left = exactTerm - months;
       scheduled = left > 0 ? referenceAnnuityPayment(remaining, rate, left) : 0;
       if (months === 1) firstRecalculatedPayment = scheduled;
     }
