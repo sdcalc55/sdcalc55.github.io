@@ -427,7 +427,7 @@ test("all active repayment scenarios match an independent monthly oracle", () =>
     const baseline = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 0, 0, term);
     const shorten = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, input.monthlyExtra, input.lump, term);
     const reduce = simulateReducedPayment(input.balance, input.annualRate, term, input.monthlyPayment, input.monthlyExtra, input.lump);
-    const expectedBase = referenceSchedule(input);
+    const expectedBase = referenceSchedule({ ...input, monthlyExtra: 0, lump: 0 });
     const expectedShorten = referenceSchedule({ ...input });
     const expectedReduce = referenceSchedule({ ...input, reduced: true });
     for (const [actual, expected, name] of [
@@ -473,7 +473,8 @@ test("additional payments remain separate from the mandatory installment", () =>
   const firstInterest = balance * annualRate / 1200;
   assert.equal(plan.firstPayment, payment);
   assert.ok(plan.totalPaid > payment);
-  assert.ok(plan.finalPayment >= payment);
+  const baseline = simulateFixedPayment(balance, annualRate, payment, 0, 0, term);
+  assert.ok(plan.totalPaid > baseline.totalPaid);
   assert.ok(firstInterest < payment);
 });
 
