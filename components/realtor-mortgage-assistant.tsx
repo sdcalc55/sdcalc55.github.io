@@ -8,8 +8,9 @@ import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
 
 const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(Number.isFinite(value) ? value : 0)) + " ₽";
 const num = (value: string) => Math.max(0, Number(value.replace(/[\\s\\u00a0\\u202f]/g, "").replace(",", ".")) || 0);
-function Field({ label, value, onChange, suffix = "₽", step = 10000, hint }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string }) {
+function Field({ label, value, onChange, suffix = "₽", step = 10000, hint, error }: { label: string; value: string; onChange: (value: string) => void; suffix?: string; step?: number; hint?: string; error?: string }) {
   const id = useId();
+  const errorId = useId();
   const input = useRef<HTMLInputElement>(null);
   const cursor = useRef<number | null>(null);
   useLayoutEffect(() => {
@@ -32,8 +33,6 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint }: {
         }}
         onChange={event => {
           const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
-          const digitsBeforeDecimal = raw.replace(/[\s\u00a0\u202f]/g, "").split(/[.,]/)[0].replace(/^0+/, "");
-          if (digitsBeforeDecimal.length > 10) return;
           const position = event.target.selectionStart ?? raw.length;
           const significant = raw.slice(0, position).replace(/[\s\u00a0\u202f]/g, "").length;
           const normalized = decimal ? raw.replace(",", ".") : raw.replace(/[.,].*$/, "");
@@ -48,7 +47,7 @@ function Field({ label, value, onChange, suffix = "₽", step = 10000, hint }: {
       {value !== "" && <button type="button" tabIndex={-1} aria-label={`Очистить поле: ${label}`} title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
       <span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#8993A2]">{suffix}</span>
     </div>
-    {hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}
+    {error ? <span id={errorId} role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">{error}</span> : hint && <span className="mt-1 block text-xs text-[#8993A2]">{hint}</span>}
   </div>;
 }
 type Plan = { months: number; interest: number; firstPayment: number };
@@ -88,7 +87,16 @@ export function RealtorMortgageAssistant() {
   const [payment, setPayment] = useState("42000");
   const [extraMonthly, setExtraMonthly] = useState("");
   const [lump, setLump] = useState("");
+  const errors = {
+    balance: num(balance) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
+    payment: num(payment) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
+    extraMonthly: num(extraMonthly) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
+    lump: num(lump) > 999999999 ? "Максимальная сумма - 999 999 999 ₽." : "",
+    rate: num(rate) > 30 ? "Максимальная ставка - 30%." : "",
+  };
+  const isValid = !Object.values(errors).some(Boolean);
   const plans = useMemo(() => {
+    if (!isValid) return { base: { months: 0, interest: 0, firstPayment: 0 }, term: { months: 0, interest: 0, firstPayment: 0 }, paymentPlan: { months: 0, interest: 0, firstPayment: 0 }, recommended: "term" as const, selected: { months: 0, interest: 0, firstPayment: 0 }, saving: 0, paymentReduction: 0, monthsSaved: 0, hasExtra: false, estimated: !remainingYears.trim() };
     const principal = num(balance);
     const monthlyRate = num(rate) / 1200;
     const regularPayment = num(payment);
@@ -118,23 +126,23 @@ export function RealtorMortgageAssistant() {
       hasExtra,
       estimated: !remainingYears.trim(),
     };
-  }, [balance, rate, payment, remainingYears, extraMonthly, lump]);
+  }, [balance, rate, payment, remainingYears, extraMonthly, lump, isValid]);
   return <section className="space-y-5">
     <div className="space-y-4">
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-start gap-2"><Calculator className="mt-0.5 size-5 shrink-0 text-[#E83C35]" /><div><h2 className="font-semibold">Стратегия погашения</h2><p className="mt-1 text-sm text-[#748195]">Введите параметры действующего кредита и дополнительные суммы для досрочного погашения.</p></div></div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Field label="Остаток основного долга" value={balance} onChange={setBalance} />
-          <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} />
-          <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" step={0.1} />
+          <Field label="Остаток основного долга" value={balance} onChange={setBalance} error={errors.balance} />
+          <Field label="Текущий ежемесячный платёж" value={payment} onChange={setPayment} error={errors.payment} />
+          <Field label="Процентная ставка" value={rate} onChange={setRate} suffix="%" step={0.1} error={errors.rate} />
           <Field label="Оставшийся срок по графику (необязательно)" value={remainingYears} onChange={setRemainingYears} suffix="лет" />
-          <Field label="Дополнительно каждый месяц" value={extraMonthly} onChange={setExtraMonthly} hint="Необязательно" />
-          <Field label="Разовый досрочный взнос" value={lump} onChange={setLump} hint="Необязательно" />
+          <Field label="Дополнительно каждый месяц" value={extraMonthly} onChange={setExtraMonthly} hint="Необязательно" error={errors.extraMonthly} />
+          <Field label="Разовый досрочный взнос" value={lump} onChange={setLump} hint="Необязательно" error={errors.lump} />
         </div>
       </div>
       <div className="rounded-2xl border border-[#E2E7ED] bg-white p-4 dark:border-[#354354] dark:bg-[#1B2632]">
         <div className="flex items-center gap-2"><BadgeCheck className="size-5 text-[#E83C35]" /><h3 className="font-semibold">Что выгоднее выбрать клиенту</h3></div>
-        {plans.hasExtra ? <div className="mt-3 rounded-xl bg-[#FCEBEA] p-3 dark:bg-[#352322]">
+        {!isValid ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">Исправьте значения в отмеченных полях, чтобы выполнить расчёт.</p> : plans.hasExtra ? <div className="mt-3 rounded-xl bg-[#FCEBEA] p-3 dark:bg-[#352322]">
           <div className="text-xs font-semibold text-[#9B302B] dark:text-[#F09A94]">Рекомендуемая стратегия</div>
           <div className="mt-1 text-xl font-bold text-[#B8322D] dark:text-[#F09A94]">{plans.recommended === "term" ? "Сокращение срока" : "Уменьшение ежемесячного платежа"}</div>
           <div className="mt-3 grid grid-cols-2 gap-3">
