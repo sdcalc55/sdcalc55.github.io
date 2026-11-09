@@ -106,8 +106,12 @@ export function RealtorMortgageAssistant() {
       termMonths: inferredTerm,
       estimatedTermMonths: base.months,
       hasExtra,
-      termSaving: base.completed && term.completed ? base.interest - term.interest : null,
-      paymentSaving: base.completed && paymentPlan.completed ? base.interest - paymentPlan.interest : null,
+      termSaving: base.completed && term.completed
+        ? (base.interest - term.interest >= -0.01 ? Math.max(0, base.interest - term.interest) : null)
+        : null,
+      paymentSaving: base.completed && paymentPlan.completed
+        ? (base.interest - paymentPlan.interest >= -0.01 ? Math.max(0, base.interest - paymentPlan.interest) : null)
+        : null,
       monthsSaved: base.completed && term.completed ? Math.max(0, base.months - term.months) : null,
     };
   }, [balance, rate, payment, extraMonthly, lump, isValid]);
