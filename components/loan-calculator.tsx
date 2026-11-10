@@ -13,7 +13,12 @@ import { formatLoanTerm } from "@/lib/loan-term";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
 const currency = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const amount = (value: number) => `${currency.format(value)}\u00a0₽`;
+const wholeCurrency = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+const amount = (value: number) => {
+  const rounded = Math.round((value + Number.EPSILON) * 100) / 100;
+  const formatted = Number.isInteger(rounded) ? wholeCurrency.format(rounded) : currency.format(rounded);
+  return `${formatted}\u00a0₽`;
+};
 const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
