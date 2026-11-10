@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [reduce-supabase-traffic]
+    branches: [reduce-supabase-traffic, offline-full-check]
 
 permissions:
   contents: read
@@ -55,6 +55,9 @@ jobs:
 
       - name: Run browser interaction tests
         run: node tests/result-actions-browser.cjs
+
+      - name: Verify complete offline experience
+        run: node tests/offline-browser.cjs
 
       - name: Package static site
         run: |
