@@ -14,6 +14,7 @@ import type { Operation } from "@/lib/calculator";
 import { discounts } from "@/lib/discounts";
 import { useTariffs } from "@/hooks/use-tariffs";
 import { clearCalculationHistory, clearCalculationKinds, deleteCalculation, getCalculationHistory, getHistoryMode, setHistoryMode, type CalculationKind, type CalculationRecord, type HistoryMode } from "@/lib/history";
+import { normalizeLoanTerm } from "@/lib/loan-term";
 
 const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
 
@@ -81,29 +82,9 @@ function historyLabel(key: string) {
     (readable ? readable.charAt(0).toLocaleUpperCase("ru-RU") + readable.slice(1) : "Параметр расчёта");
 }
 
-function historyDuration(value: string, unit: string) {
-  const count = Number(value);
-  if (!Number.isFinite(count)) return `${value} ${unit === "years" ? "лет" : "месяцев"}`;
-  const lastTwo = Math.abs(count) % 100;
-  const last = Math.abs(count) % 10;
-  if (unit === "years") {
-    const word = lastTwo >= 11 && lastTwo <= 14 ? "лет" : last === 1 ? "год" : last >= 2 && last <= 4 ? "года" : "лет";
-    return `${value} ${word}`;
-  }
-  const word = lastTwo >= 11 && lastTwo <= 14 ? "месяцев" : last === 1 ? "месяц" : last >= 2 && last <= 4 ? "месяца" : "месяцев";
-  return `${value} ${word}`;
-}
-
 function historyDisplayValue(key: string, value: string, params?: Record<string, string>) {
   if (key === "term" || key === "months") {
-    // Normalize legacy entries where the month unit was appended to a year-only term.
-    const cleaned = value.trim()
-      .replace(/(\(\d+\s*мес\.\))\s+(?:месяц|месяца|месяцев)\s*$/i, "$1")
-      .replace(/(\d+\s+(?:год|года|лет))(?:\s+0\s+месяцев)?\s+месяцев$/i, "$1")
-      .replace(/(\d+\s+(?:год|года|лет))\s+0\s+месяцев$/i, "$1");
-    const alreadyFormatted = /\b(?:год|года|лет|месяц|месяца|месяцев|мес\.)\b/.test(cleaned);
-    if (alreadyFormatted) return cleaned;
-    return historyDuration(cleaned, key === "term" ? params?.unit ?? "months" : "months");
+    return normalizeLoanTerm(value, key === "term" && params?.unit === "years" ? "years" : "months");
   }
   if (["rate", "annualRate", "downPaymentPercent", "motivationPercent", "Первоначальный взнос, %", "Необходимый первоначальный взнос, %"].includes(key)) return value ? (value.endsWith("%") ? value : `${value}%`) : "-";
   const currencyKeys = ["value", "price", "amount", "credit", "pairedPrice", "downPayment", "loanAmount", "propertyPrice", "purchasePrice", "salePrice", "monthlyPayment", "principal", "interest", "totalPayment", "commission", "total", "payment", "final"];
