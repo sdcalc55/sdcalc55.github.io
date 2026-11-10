@@ -166,7 +166,6 @@ export default function Home() {
 
   const { tariffs, status: tariffStatus } = useTariffs();
   const [screen, setScreen] = useState<Screen>("home");
-  const [screenReady, setScreenReady] = useState(false);
   const [operation, setOperation] = useState<Operation>("sale");
   const [mortgageTab, setMortgageTab] = useState<"downpayment" | "loan">("downpayment");
   const [historyItems, setHistoryItems] = useState<CalculationRecord[]>([]);
@@ -271,7 +270,6 @@ export default function Home() {
       if (savedMortgageTab === "downpayment" || savedMortgageTab === "loan") setMortgageTab(savedMortgageTab);
     } catch {}
     setScreen(restored);
-    setScreenReady(true);
     window.history.replaceState({ ...window.history.state, sdScreen: restored }, "");
     const onBack = (event: PopStateEvent) => {
       const next = validScreen(event.state?.sdScreen) ? event.state.sdScreen : "home";
@@ -288,9 +286,10 @@ export default function Home() {
     if (next !== screen) window.history.pushState({ ...window.history.state, sdScreen: next }, "");
     try { window.sessionStorage.setItem("sd-current-screen", next); } catch {}
     setScreen(next);
+    if (next === "home") window.dispatchEvent(new Event("sd-app-safe-to-update"));
     window.scrollTo({ top: 0, behavior: "instant" });
   };
-  return <div className={`flex min-h-dvh flex-col bg-[#F5F7FA] text-[#26364A] ${screenReady ? "" : "invisible"}`}>
+  return <div className="flex min-h-dvh flex-col bg-[#F5F7FA] text-[#26364A]">
     <header className="border-b border-[#E7EBF0] bg-white">
       <div className="mx-auto flex min-h-20 max-w-[1200px] flex-nowrap items-center justify-between gap-x-2 px-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-4 sm:gap-x-4 sm:px-8 max-sm:min-h-16 max-sm:pt-[calc(.75rem+env(safe-area-inset-top,0px))] max-sm:pb-3">
         <a href="#" onClick={event => { event.preventDefault(); navigate("home"); }} aria-label="Калькулятор SD - главная" className="flex shrink-0 items-center gap-1 rounded-lg outline-offset-4 focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:gap-3">
