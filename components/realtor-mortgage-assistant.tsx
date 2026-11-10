@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useMemo, useRef, useState, useId } from "react";
 import { HandCoins, Wallet, X, RotateCcw } from "lucide-react";
-import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
+import { focusNextCalculatorInput, handleFormattedBackspace, handleFormattedDelete } from "@/lib/calculator-input";
 import { formatInput } from "@/lib/calculator";
 import { normalizeNumericInput } from "@/lib/numeric-input";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
@@ -30,7 +30,7 @@ function Field({ label, value, onChange, suffix = "₽", hint, error, allowDecim
         onFocus={event => scrollFocusedInputIntoView(event.currentTarget)}
         onClick={event => scrollFocusedInputIntoView(event.currentTarget)}
         onKeyDown={event => {
-          if (handleFormattedBackspace(event, onChange, false)) return;
+          if (handleFormattedBackspace(event, onChange, false) || handleFormattedDelete(event, onChange, false)) return;
           if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
