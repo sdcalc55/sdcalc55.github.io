@@ -45,16 +45,20 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={e => {
-          const raw = e.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
-          const digitsBeforeDecimal = raw.replace(/[ \u00a0\u202f]/g, "").split(/[.,]/)[0].replace(/^0+/, "");
+          const typed = e.target.value;
+          const caret = e.target.selectionStart ?? typed.length;
+          const digitsBeforeCaret = typed.slice(0, caret).replace(/\D/g, "").length;
+          const raw = typed.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
-          const caret = e.target.selectionStart ?? raw.length;
-          const significant = raw.slice(0, caret).replace(/[ \u00a0\u202f]/g, "").length;
           const formatted = formatInput(raw);
           onChange(formatted);
           requestAnimationFrame(() => {
             let position = 0, seen = 0;
-            while (position < formatted.length && seen < significant) { if (!/[ \u00a0\u202f]/.test(formatted[position])) seen++; position++; }
+            while (position < formatted.length && seen < digitsBeforeCaret) {
+              if (/\d/.test(formatted[position])) seen++;
+              position++;
+            }
             input.current?.setSelectionRange(position, position);
           });
         }} className="h-14 w-full rounded-xl bg-transparent px-4 pr-[4.5rem] text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2]" />
