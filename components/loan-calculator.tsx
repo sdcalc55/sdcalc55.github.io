@@ -14,7 +14,7 @@ import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, remove
 const currency = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const amount = (value: number) => `${currency.format(value)}\u00a0₽`;
 const plural = (value: number, one: string, few: string, many: string) => { const mod=value%10, last=value%100; return last>=11&&last<=14?many:mod===1?one:mod>=2&&mod<=4?few:many; };
-const formatLoanTerm = (months: number) => { const years=Math.floor(months/12), remainingMonths=months%12; const yearText=years?`${years} ${plural(years,"год","года","лет")}`:""; const monthText=remainingMonths?`${remainingMonths} ${plural(remainingMonths,"месяц","месяца","месяцев")}`:""; const termText=[yearText,monthText].filter(Boolean).join(" "); return years?`${termText} (${months} мес.)`:termText; };
+const formatLoanTerm = (months: number) => { const years=Math.floor(months/12), remainingMonths=months%12; const yearText=years?`${years} ${plural(years,"год","года","лет")}`:""; const monthText=remainingMonths?`${remainingMonths} ${plural(remainingMonths,"месяц","месяца","месяцев")}`:""; const termText=[yearText,monthText].filter(Boolean).join(" "); return years && remainingMonths ? `${termText} (${months} мес.)` : termText; };
 const parse = (value: string) => {
   const normalized = value.replace(/\s/g, "").replace(",", ".");
   return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
