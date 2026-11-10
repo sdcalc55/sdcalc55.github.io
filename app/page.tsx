@@ -136,7 +136,7 @@ export default function Home() {
       if (event.key !== "Tab" || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       const target = event.target;
       if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
-      if (target.disabled || target.readOnly || target.type === "hidden") return;
+      if (target.disabled || ("readOnly" in target && target.readOnly) || target.type === "hidden") return;
       const calculator = target.closest("main");
       if (!calculator) return;
       const fields = Array.from(calculator.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
