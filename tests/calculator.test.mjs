@@ -69,6 +69,12 @@ for (const input of ['', ' ', '0','0,00','-1','-100 000','−500000','100-000','
 for (const [input,expected] of [['1 000 000',1000000],['1\u00a0000\u202f000,50',1000000.5],['1234.56',1234.56],['0,01',0.01]]) {
   test(`Десятичный ввод: ${input}`, () => assert.equal(parseMoney(input),expected));
 }
+test('Удаление первой цифры сохраняет нули для ввода замены', () => {
+  assert.equal(formatInput('000000'), '000 000');
+  assert.equal(formatInput('5000000'), '5 000 000');
+  assert.equal(formatInput('000123'), '123');
+  assert.equal(parseMoney(formatInput('000000')), null);
+});
 test('Форматирование сохраняет дробную часть и отрицательный знак', () => {
   assert.equal(formatInput('1234567,50'),'1 234 567,50'); assert.equal(formatInput('1234567.50'),'1 234 567.50');
   assert.equal(formatInput('-12345'),'-12345'); assert.equal(parseMoney(formatInput('-12345')),null);
