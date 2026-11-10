@@ -58,15 +58,3 @@ jobs:
           node tests/result-actions-browser.cjs
           node tests/prepayment-input-browser.cjs
 
-      - name: Package static site
-        run: |
-          cd out
-          zip -r ../sd-calculator-static-site.zip .
-
-      - name: Upload static site archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: sd-calculator-static-site
-          path: sd-calculator-static-site.zip
-          if-no-files-found: error
-          retention-days: 30
