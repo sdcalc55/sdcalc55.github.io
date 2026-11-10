@@ -24,10 +24,10 @@ test('Встречная сделка: обе скидки уменьшают т
   assert.equal(sale.status,'ok'); assert.equal(purchase.status,'ok');
   assert.equal(sale.total,185000); assert.equal(purchase.total,74000);
   assert.deepEqual(applyPairedDiscount(sale.total,purchase.total),{
-    total:177230, saving:7770, currentSaving:5550, previousSaving:2220,
+    total:177230, saving:7770, currentSaving:5550, previousSaving:2220, capped: false,
   });
   assert.deepEqual(applyPairedDiscount(purchase.total,sale.total),{
-    total:66230, saving:7770, currentSaving:2220, previousSaving:5550,
+    total:66230, saving:7770, currentSaving:2220, previousSaving:5550, capped: false,
   });
 });
 test('Родство указано в примечаниях только пяти разрешённых скидок', () => {
