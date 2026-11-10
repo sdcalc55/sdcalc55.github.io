@@ -1,4 +1,5 @@
-import { readdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const outputDirectory = path.resolve("out");
@@ -24,4 +25,14 @@ await collect(outputDirectory);
 files.sort();
 if (!files.includes("/index.html")) throw new Error("Static export is missing out/index.html");
 await writeFile(manifestPath, JSON.stringify({ version: 1, files }, null, 2) + "\n");
-console.log(`Generated offline precache manifest with ${files.length} files.`);
+const hash = createHash("sha256");
+for (const file of files) {
+  hash.update(file);
+  hash.update(await readFile(path.join(outputDirectory, file.slice(1))));
+}
+const buildVersion = hash.digest("hex").slice(0, 16);
+const serviceWorkerPath = path.join(outputDirectory, "sw.js");
+const serviceWorker = await readFile(serviceWorkerPath, "utf8");
+if (!serviceWorker.includes("__BUILD_VERSION__")) throw new Error("Service worker build version placeholder is missing");
+await writeFile(serviceWorkerPath, serviceWorker.replaceAll("__BUILD_VERSION__", buildVersion));
+console.log(`Generated offline precache manifest with ${files.length} files; service worker version ${buildVersion}.`);
