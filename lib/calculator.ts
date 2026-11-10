@@ -18,8 +18,9 @@ export function formatInput(value: string): string {
   const normalized = value.replace(/[ \u00a0\u202f]/g, "");
   if (!/^\d*(?:[.,]\d*)?$/.test(normalized)) return value;
   const [rawWhole, fraction] = normalized.split(/[.,]/);
-  const cleanedWhole = rawWhole.replace(/^0+(?=\d)/, "");
-  const whole = cleanedWhole;
+  // Keep an all-zero value intact while the user is editing the leading digit.
+  // This lets them delete the first digit of e.g. 2 000 000 and type a replacement.
+  const whole = /^0+$/.test(rawWhole) ? rawWhole : rawWhole.replace(/^0+(?=\d)/, "");
   const separator = normalized.includes(",") ? "," : ".";
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (fraction !== undefined ? separator + fraction : "");
 }
