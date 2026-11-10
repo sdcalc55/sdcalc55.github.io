@@ -163,6 +163,17 @@ const assert = require('node:assert/strict');
     await lump.fill('1000');
     await page.getByText('Сокращение срока', { exact: true }).waitFor();
 
+    // Regression: a 3.5m monthly extra on a 4.5m balance must close
+    // the loan in about two periods in BOTH strategies. The reduced-payment
+    // card must show its own simulated term, not the original baseline term.
+    await balance.fill('4500000');
+    await rate.fill('6');
+    await payment.fill('42000');
+    await lump.fill('0');
+    await monthlyExtra.fill('3500000');
+    assert.equal((await remainingTerm.innerText()).trim(), '2 мес.');
+    await page.getByText('Остаток срока: 2 мес.', { exact: true }).waitFor();
+
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     console.log('PASS: prepayment input typing, paste, clear, selection, cursor, validation and live result recalculation.');
   } finally {
