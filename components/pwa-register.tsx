@@ -13,18 +13,40 @@ export default function PwaRegister() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [installing, setInstalling] = useState(false);
   const [showIosInstructions, setShowIosInstructions] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    // Check for an updated worker on each app launch. Do not force-reload an
-    // open calculator: that could discard values the user has not saved yet.
+    // Detect updates automatically, but never reload an active calculator
+    // without the user's consent because that could discard entered values.
+    let applyingUpdate = false;
+    let registration: ServiceWorkerRegistration | null = null;
+    const handleControllerChange = () => {
+      if (applyingUpdate || (window as Window & { __sdApplyingPwaUpdate?: boolean }).__sdApplyingPwaUpdate) window.location.reload();
+    };
+    const inspectWaitingWorker = () => {
+      if (registration?.waiting && navigator.serviceWorker.controller) {
+        setUpdateAvailable(true);
+      }
+    };
+    const watchInstallingWorker = () => {
+      const installing = registration?.installing;
+      if (!installing) return;
+      installing.addEventListener("statechange", () => {
+        if (installing.state === "installed") inspectWaitingWorker();
+      });
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     const register = async () => {
       try {
-        const registration = await navigator.serviceWorker.register("/sw.js", {
+        registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
           updateViaCache: "none",
         });
+        inspectWaitingWorker();
+        registration.addEventListener("updatefound", watchInstallingWorker);
         await registration.update();
+        inspectWaitingWorker();
       } catch (error) {
         console.error("PWA service worker registration failed:", error);
       }
@@ -33,6 +55,8 @@ export default function PwaRegister() {
     else window.addEventListener("load", register, { once: true });
     return () => {
       window.removeEventListener("load", register);
+      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      registration?.removeEventListener("updatefound", watchInstallingWorker);
     };
   }, []);
   // Consume repeat-launch events for installed desktop PWAs. The manifest
@@ -93,6 +117,16 @@ export default function PwaRegister() {
       window.removeEventListener("appinstalled", handleInstalled);
     };
   }, []);
+
+  const applyUpdate = () => {
+    navigator.serviceWorker?.getRegistration("/").then((registration) => {
+      if (!registration?.waiting) return;
+      // Reload only after the user explicitly chooses to update.
+      (window as Window & { __sdApplyingPwaUpdate?: boolean }).__sdApplyingPwaUpdate = true;
+      registration.waiting.postMessage("SKIP_WAITING");
+      setUpdateAvailable(false);
+    });
+  };
 
   const dismissInstallBanner = () => {
     setShowInstallBanner(false);
@@ -162,6 +196,15 @@ export default function PwaRegister() {
 
   return (
     <>
+    {updateAvailable ? (
+    <div className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-[105] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-[#D7E2F1] bg-white p-3 shadow-[0_8px_30px_rgba(22,34,51,0.18)] dark:border-[#46576A] dark:bg-[#1B2633]">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-[#26364A] dark:text-[#E6ECF3]">Доступна новая версия</p>
+        <p className="text-xs text-[#748195] dark:text-[#AAB6C5]">Обновите приложение, чтобы получить исправления</p>
+      </div>
+      <button type="button" onClick={applyUpdate} className="shrink-0 rounded-full bg-[#1769E8] px-4 py-2.5 text-sm font-semibold text-white">Обновить</button>
+    </div>
+    ) : null}
     {showInstallBanner ? (
     <div className="fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-[100] mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-[#E7D5D4] bg-white p-3 shadow-[0_8px_30px_rgba(22,34,51,0.18)] dark:border-[#46576A] dark:bg-[#1B2633]">
       <img src="/icons/sd-512.png?v=sd-icon-20261109" alt="" className="size-12 shrink-0 rounded-xl object-cover" />
