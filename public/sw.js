@@ -27,6 +27,7 @@ self.addEventListener("install", (event) => {
         throw new Error("Critical asset manifest is empty or invalid");
       }
       // Cache only the entry page's essential JS/CSS. Other assets are cached on demand.
+      await precacheFiles(cache, manifest.critical);
 
       await self.skipWaiting();
     } catch (error) {
