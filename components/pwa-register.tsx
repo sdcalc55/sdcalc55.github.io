@@ -16,9 +16,12 @@ export default function PwaRegister() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    // The first controllerchange is initial installation, not an update.
+    // Reload only when this page already had a controlling service worker.
     let refreshing = false;
+    const hadController = Boolean(navigator.serviceWorker.controller);
     const handleControllerChange = () => {
-      if (refreshing) return;
+      if (!hadController || refreshing) return;
       refreshing = true;
       window.location.reload();
     };
