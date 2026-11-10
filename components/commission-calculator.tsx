@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUp, Calculator, Info, RotateCcw, Wallet, X } from "lucide-react";
 import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
@@ -34,6 +34,12 @@ const money = (n: number) => `${numberFormat.format(n)}\u00a0₽`;
 
 function MoneyInput({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (pendingCaret.current === null || !input.current) return;
+    input.current.setSelectionRange(pendingCaret.current, pendingCaret.current);
+    pendingCaret.current = null;
+  }, [value]);
   const invalid = value !== "" && parseMoney(value) === null;
   return <div>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label>
@@ -53,14 +59,12 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
           if (digitsBeforeDecimal.length > 10) return;
           const formatted = formatInput(raw);
           onChange(formatted);
-          requestAnimationFrame(() => {
-            let position = 0, seen = 0;
-            while (position < formatted.length && seen < digitsBeforeCaret) {
-              if (/\d/.test(formatted[position])) seen++;
-              position++;
-            }
-            input.current?.setSelectionRange(position, position);
-          });
+          let position = 0, seen = 0;
+          while (position < formatted.length && seen < digitsBeforeCaret) {
+            if (/\d/.test(formatted[position])) seen++;
+            position++;
+          }
+          pendingCaret.current = position;
         }} className="h-14 w-full rounded-xl bg-transparent px-4 pr-[4.5rem] text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2]" />
       {value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">₽</span>
     </div>
