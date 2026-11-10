@@ -50,7 +50,7 @@ const assert = require('node:assert/strict');
     assert.equal(await balance.inputValue(), '134 567');
     await balance.evaluate(input => input.setSelectionRange(1, 1));
     await balance.press('Delete');
-    assert.equal(await balance.inputValue(), '145 67'.replace('145 67', '14 567'));
+    assert.equal(await balance.inputValue(), '14 567');
 
     // Deleting a selected range spanning grouping spaces removes only selected digits.
     await balance.fill('1234567');
