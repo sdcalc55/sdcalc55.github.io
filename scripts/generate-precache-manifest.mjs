@@ -24,7 +24,17 @@ async function collect(directory) {
 await collect(outputDirectory);
 files.sort();
 if (!files.includes("/index.html")) throw new Error("Static export is missing out/index.html");
-await writeFile(manifestPath, JSON.stringify({ version: 1, files }, null, 2) + "\n");
+const html = await readFile(path.join(outputDirectory, "index.html"), "utf8");
+const critical = new Set();
+for (const match of html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)) {
+  critical.add(new URL(match[1], "https://sdcalc55.github.io").pathname);
+}
+for (const match of html.matchAll(/<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+)["'][^>]*>/gi)) {
+  critical.add(new URL(match[1], "https://sdcalc55.github.io").pathname);
+}
+const criticalFiles = [...critical].filter(file => file.startsWith("/_next/")).sort();
+if (criticalFiles.length === 0) throw new Error("Could not identify critical JS/CSS assets in index.html");
+await writeFile(manifestPath, JSON.stringify({ version: 2, files, critical: criticalFiles }, null, 2) + "\n");
 const hash = createHash("sha256");
 for (const file of files) {
   hash.update(file);
@@ -35,4 +45,4 @@ const serviceWorkerPath = path.join(outputDirectory, "sw.js");
 const serviceWorker = await readFile(serviceWorkerPath, "utf8");
 if (!serviceWorker.includes("__BUILD_VERSION__")) throw new Error("Service worker build version placeholder is missing");
 await writeFile(serviceWorkerPath, serviceWorker.replaceAll("__BUILD_VERSION__", buildVersion));
-console.log(`Generated offline precache manifest with ${files.length} files; service worker version ${buildVersion}.`);
+console.log(`Generated manifest with ${files.length} exported files and ${criticalFiles.length} critical assets; service worker version ${buildVersion}.`);
