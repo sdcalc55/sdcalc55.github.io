@@ -130,6 +130,31 @@ function NavigationRow({ title, icon: Icon, red, onClick }: { title: string; ico
 
 export default function Home() {
   useEffect(() => {
+    // Tab moves only between editable fields inside the active calculator.
+    // Buttons, links, tabs and other controls are deliberately skipped.
+    const handleCalculatorTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+      if (target.disabled || target.readOnly || target.type === "hidden") return;
+      const calculator = target.closest("main");
+      if (!calculator) return;
+      const fields = Array.from(calculator.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+        'input:not([type="hidden"]):not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled])'
+      )).filter(field => field.getClientRects().length > 0 && field.getAttribute("aria-hidden") !== "true");
+      const index = fields.indexOf(target);
+      if (index < 0 || fields.length < 2) return;
+      event.preventDefault();
+      const nextIndex = event.shiftKey
+        ? (index - 1 + fields.length) % fields.length
+        : (index + 1) % fields.length;
+      fields[nextIndex].focus();
+    };
+    document.addEventListener("keydown", handleCalculatorTab, true);
+    return () => document.removeEventListener("keydown", handleCalculatorTab, true);
+  }, []);
+
+  useEffect(() => {
     const blockedSelector = 'button, label, h1, h2, h3, h4, h5, h6, summary, [role="alert"], .select-none';
     const isBlocked = (target: EventTarget | null) => target instanceof Element && !!target.closest(blockedSelector);
     const preventBlockedSelection = (event: Event) => {
