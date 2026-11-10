@@ -24,6 +24,8 @@ export function applyDiscount(commission: number, percent: number) {
 export function applyPairedDiscount(commission: number, previousCommission: number) {
   const currentSaving = applyDiscount(commission, 3).saving;
   const previousSaving = applyDiscount(previousCommission, 3).saving;
-  const saving = currentSaving + previousSaving;
-  return { total: commission - saving, saving, currentSaving, previousSaving };
+  const requestedSaving = currentSaving + previousSaving;
+  const saving = Math.min(commission, requestedSaving);
+  const total = Math.max(0, commission - saving);
+  return { total, saving, currentSaving, previousSaving, capped: requestedSaving > commission };
 }
