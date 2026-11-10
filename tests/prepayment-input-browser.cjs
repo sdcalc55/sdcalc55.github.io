@@ -96,10 +96,12 @@ const assert = require('node:assert/strict');
     const disclaimer = page.getByTestId('prepayment-disclaimer');
     await disclaimer.waitFor({ state: 'visible' });
     await page.getByText('Подробности расчёта', { exact: true }).waitFor({ state: 'visible' });
-    const disclaimerIndex = await disclaimer.evaluate(element => element.compareDocumentPosition(
-      [...document.querySelectorAll('summary')].find(item => item.innerText.includes('Подробности расчёта'))
+    const disclaimerPrecedesDetails = await disclaimer.evaluate(element => Boolean(
+      element.compareDocumentPosition(
+        [...document.querySelectorAll('summary')].find(item => item.innerText.includes('Подробности расчёта'))
+      ) & 4
     ));
-    assert.ok(disclaimerIndex & Node.DOCUMENT_POSITION_FOLLOWING, 'disclaimer must appear immediately before calculation details');
+    assert.ok(disclaimerPrecedesDetails, 'disclaimer must appear before calculation details');
     const before = await page.locator('body').innerText();
     await monthlyExtra.fill('6000');
     const after = await page.locator('body').innerText();
