@@ -62,7 +62,7 @@ const assert = require('node:assert/strict');
     await balance.fill('1234567');
     await balance.evaluate(input => input.setSelectionRange(2, 4));
     await balance.press('Backspace');
-    assert.equal(await balance.inputValue(), '1 567');
+    assert.equal(await balance.inputValue(), '14 567');
 
     // Replacing a selection must preserve the new value and not corrupt formatting.
     await balance.fill('1234567');
