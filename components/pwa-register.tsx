@@ -16,31 +16,60 @@ export default function PwaRegister() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    // The first controllerchange is initial installation, not an update.
-    // Reload only when this page already had a controlling service worker.
+
+    // При обычном повторном запуске приложения проверяем обновление.
+    // Установка новой версии выполняется Service Worker, а не очисткой данных сайта.
     let refreshing = false;
+    let registration: ServiceWorkerRegistration | null = null;
     const hadController = Boolean(navigator.serviceWorker.controller);
+
     const handleControllerChange = () => {
+      // Перезагружаем страницу только при смене уже установленного контроллера.
+      // Первичная установка приложения не вызывает лишнюю перезагрузку.
       if (!hadController || refreshing) return;
       refreshing = true;
       window.location.reload();
     };
-    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+
+    const checkForUpdate = async () => {
+      if (document.visibilityState !== "visible" || !registration) return;
+      try {
+        await registration.update();
+      } catch (error) {
+        // При отсутствии сети остаёмся на последней рабочей офлайн-версии.
+        console.warn("PWA update check failed; keeping the current offline version:", error);
+      }
+    };
+
     const register = async () => {
       try {
-        const registration = await navigator.serviceWorker.register("/sw.js", {
+        registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
           updateViaCache: "none",
         });
-        await registration.update();
+        // При каждом открытии/перезапуске проверяем новую версию.
+        await checkForUpdate();
       } catch (error) {
         console.error("PWA service worker registration failed:", error);
       }
     };
+
+    const handlePageShow = () => { void checkForUpdate(); };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") void checkForUpdate();
+    };
+
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     if (document.readyState === "complete") void register();
     else window.addEventListener("load", register, { once: true });
+
     return () => {
       window.removeEventListener("load", register);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
   }, []);
