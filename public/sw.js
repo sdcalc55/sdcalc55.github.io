@@ -35,7 +35,8 @@ self.addEventListener("install", (event) => {
         throw new Error("Precache manifest is empty or invalid");
       }
       await precacheAllExportedFiles(cache, manifest.files);
-      await self.skipWaiting();
+      // Do not force activation while an older app window may contain unsaved input.
+      // The browser activates this worker after all clients of the old worker close.
     } catch (error) {
       await caches.delete(CACHE_NAME);
       // Keep the previous worker active if even one exported file cannot be cached.
