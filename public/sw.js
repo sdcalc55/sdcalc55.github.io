@@ -21,10 +21,6 @@ async function precacheAllExportedFiles(cache, files) {
   await Promise.all(Array.from({ length: Math.min(6, queue.length) }, worker));
 }
 
-self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") void self.skipWaiting();
-});
-
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -39,8 +35,8 @@ self.addEventListener("install", (event) => {
         throw new Error("Precache manifest is empty or invalid");
       }
       await precacheAllExportedFiles(cache, manifest.files);
-      // Do not force activation while an older app window may contain unsaved input.
-      // The browser activates this worker after all clients of the old worker close.
+      // Activate the fully downloaded worker immediately; clients reload on controllerchange.
+      await self.skipWaiting();
     } catch (error) {
       await caches.delete(CACHE_NAME);
       // Keep the previous worker active if even one exported file cannot be cached.
