@@ -17,9 +17,14 @@ const assert = require('node:assert/strict');
       const copy = container.getByTestId('calculator-copy');
       const save = container.getByTestId('calculator-save');
       await actions.waitFor({ state: 'visible' });
+      await page.waitForFunction(() => {
+        const node = document.querySelector('[data-testid="calculator-result-actions"] [data-testid="calculator-copy"]');
+        return !!node && node.isConnected && !node.hasAttribute("disabled");
+      });
+      await page.waitForTimeout(250);
       assert.equal(await copy.innerText(), 'Копировать');
       assert.equal(await save.innerText(), 'Сохранить');
-      await copy.click();
+      await copy.click({ timeout: 10000 });
       await page.getByText('Скопировано', { exact: true }).waitFor();
       await save.click();
       assert.equal(await save.getAttribute('aria-pressed'), 'true');
