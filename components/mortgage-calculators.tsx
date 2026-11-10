@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChartNoAxesCombined, House, Wallet, X } from "lucide-react";
-import { focusNextCalculatorInput, handleFormattedBackspace, handleFormattedDelete } from "@/lib/calculator-input";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { formatInput } from "@/lib/calculator";
