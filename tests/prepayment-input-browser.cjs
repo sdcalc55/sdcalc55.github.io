@@ -117,7 +117,7 @@ const assert = require('node:assert/strict');
     await termSavings.waitFor({ state: 'visible' });
     await remainingTerm.waitFor({ state: 'visible' });
     await reducedPayment.waitFor({ state: 'visible' });
-    assert.match(await remainingTerm.innerText(), /\\d+ (?:год|года|лет|мес\\.)/);
+    assert.match(await remainingTerm.innerText(), /\d+ (?:год|года|лет|мес\.)/);
     assert.equal(
       await reducedPayment.evaluate(element => getComputedStyle(element).backgroundColor),
       'rgba(0, 0, 0, 0)',
