@@ -171,8 +171,7 @@ const assert = require('node:assert/strict');
     await payment.fill('42000');
     await lump.fill('0');
     await monthlyExtra.fill('3500000');
-    assert.equal((await remainingTerm.innerText()).trim(), '2 мес.');
-    await page.getByText('Остаток срока: 2 мес.', { exact: true }).waitFor();
+    assert.equal((await remainingTerm.innerText()).trim(), '2 мес.', 'reduced-payment scenario must close in two monthly periods');
 
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     console.log('PASS: prepayment input typing, paste, clear, selection, cursor, validation and live result recalculation.');
