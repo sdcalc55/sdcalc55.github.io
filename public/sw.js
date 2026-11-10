@@ -39,13 +39,7 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys
-      .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
-      .map((key) => caches.delete(key)));
-    await self.clients.claim();
-  })());
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener("fetch", (event) => {
@@ -79,6 +73,14 @@ self.addEventListener("fetch", (event) => {
     // Cache exact URLs; newly requested assets are stored on demand.
     const cached = await cache.match(request);
     if (cached) return cached;
+    // A tab may still be running the previous app version. Keep its cached
+    // chunks available until that tab reloads safely.
+    const previousCaches = (await caches.keys()).filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME);
+    for (const previousName of previousCaches) {
+      const previousCache = await caches.open(previousName);
+      const previousAsset = await previousCache.match(request);
+      if (previousAsset) return previousAsset;
+    }
 
     try {
       const response = await fetch(request);
