@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Calculator, RotateCcw, X } from "lucide-react";
-import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
