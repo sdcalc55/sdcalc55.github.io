@@ -235,7 +235,10 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                 <p><span className="font-semibold">Примечание: </span>{discount.note}</p>
               </div>}
             </div>}
-            {discount?.paired && <MoneyInput id="paired-price" label={sale ? "Стоимость ранее приобретаемой недвижимости, ₽" : "Стоимость ранее продаваемой недвижимости, ₽"} value={pairedPrice} onChange={setPairedPrice} />}
+            {discount?.paired && <div className="space-y-2">
+              <MoneyInput id="paired-price" label={sale ? "Стоимость ранее приобретаемой недвижимости, ₽" : "Стоимость ранее продаваемой недвижимости, ₽"} value={pairedPrice} onChange={setPairedPrice} />
+              <p className="text-xs leading-relaxed text-[#748195] dark:text-[#AAB6C5]">Для расчёта встречной сделки используется категория недвижимости, выбранная для текущей сделки.</p>
+            </div>}
           </div>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <span className="flex select-none items-center gap-1.5 text-xs text-[#748195] dark:text-[#B8C4D2]"><span className="size-1.5 rounded-full bg-[#84A992]" />Автоматический расчёт</span>
