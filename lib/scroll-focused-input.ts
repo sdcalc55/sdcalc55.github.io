@@ -82,7 +82,8 @@ export function scrollFocusedInputIntoView(element: HTMLElement, revealThrough?:
     if (keyboardOpened) cleanup();
   }
 
-  reveal();
+  // Wait until iOS has opened the keyboard before scrolling. Scrolling on
+  // focus itself can interrupt Safari's tap-to-caret placement in text inputs.
   viewport?.addEventListener("resize", onViewportResize, { passive: true });
   window.addEventListener("resize", onWindowResize, { passive: true });
   document.addEventListener("touchstart", onUserInteraction, { passive: true, capture: true });
