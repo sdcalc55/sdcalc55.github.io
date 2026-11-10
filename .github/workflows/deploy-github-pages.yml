@@ -1,8 +1,9 @@
 name: Deploy SD Calculator to GitHub Pages
 
-# GitHub Pages deployment is paused while the site is hosted on Render.
-# Keep manual deployment available for a future return to GitHub Pages.
+# Deploy the production main branch to GitHub Pages.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
