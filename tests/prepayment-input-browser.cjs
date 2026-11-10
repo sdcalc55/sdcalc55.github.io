@@ -111,6 +111,18 @@ const assert = require('node:assert/strict');
     // and show the extra amount separately.
     await page.getByText('Текущий платёж 42 000 ₽ сохраняется.', { exact: true }).waitFor();
     await page.getByText('Досрочные взносы вносятся сверх него.', { exact: true }).waitFor();
+    const termSavings = page.getByTestId('term-interest-savings');
+    const remainingTerm = page.getByTestId('term-remaining-duration');
+    const reducedPayment = page.getByTestId('reduced-payment-display');
+    await termSavings.waitFor({ state: 'visible' });
+    await remainingTerm.waitFor({ state: 'visible' });
+    await reducedPayment.waitFor({ state: 'visible' });
+    assert.match(await remainingTerm.innerText(), /\\d+ (?:год|года|лет|мес\\.)/);
+    assert.equal(
+      await reducedPayment.evaluate(element => getComputedStyle(element).backgroundColor),
+      'rgba(0, 0, 0, 0)',
+      'new required payment must not sit inside a separate colored background block'
+    );
 
     // Lump sum boundary: greater than outstanding balance is rejected.
     await lump.fill('4500001');
