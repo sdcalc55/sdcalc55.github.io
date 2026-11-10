@@ -44,7 +44,7 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
   return <div>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label>
     <div className={`sd-commission-money-field relative rounded-xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
-      <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid || Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
+      <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid || Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
           if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
           if (handleFormattedBackspace(event, onChange)) return;
