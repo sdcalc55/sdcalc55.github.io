@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Calculator, Info, RotateCcw, Wallet, X } from "lucide-react";
-import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
+import { focusNextCalculatorInput } from "@/lib/calculator-input";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
