@@ -57,10 +57,12 @@ export function calculateMortgage(mode: MortgageMode, values: string[], allowLar
     missingPercent = numeric(missing);
     formula = `${format.format(numeric(amount))} × 100 ÷ (100 − ${format.format(missingPercent)})`;
   } else if (mode === "part") {
+    if (amount.n < BigInt(0)) return { status: "error", message: "Стоимость объекта не может быть отрицательной." };
     if (second.n < BigInt(0) || second.n > second.d * BigInt(100)) return { status: "error", message: "Первоначальный взнос должен быть от 0 до 100%." };
     result = divide(multiply(amount, second), hundred);
     formula = `${format.format(numeric(amount))} × ${format.format(numeric(second))} ÷ 100`;
   } else {
+    if (amount.n < BigInt(0)) return { status: "error", message: "Сумма первоначального взноса не может быть отрицательной." };
     if (second.n < BigInt(0) || second.n > second.d * BigInt(100)) return { status: "error", message: "Первоначальный взнос должен быть от 0 до 100%." };
     if (second.n === BigInt(0)) return { status: "error", message: "Процент не может быть равен нулю. Укажите другое значение." };
     result = divide(multiply(amount, hundred), second);
