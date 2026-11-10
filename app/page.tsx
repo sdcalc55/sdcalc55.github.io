@@ -97,8 +97,8 @@ function historyDuration(value: string, unit: string) {
 function historyDisplayValue(key: string, value: string, params?: Record<string, string>) {
   if (key === "term" || key === "months") {
     // Older history entries may already contain a duplicated unit after the total-months hint.
-    const cleaned = value.replace(/(\\(\\d+\\s*мес\\.\\))\\s+(?:месяц|месяца|месяцев)\\s*$/i, "$1");
-    const alreadyFormatted = /\\b(?:год|года|лет|месяц|месяца|месяцев|мес\\.)\\b/.test(cleaned);
+    const cleaned = value.replace(/(\(\d+\s*мес\.\))\s+(?:месяц|месяца|месяцев)\s*$/i, "$1");
+    const alreadyFormatted = /\b(?:год|года|лет|месяц|месяца|месяцев|мес\.)\b/.test(cleaned);
     if (alreadyFormatted) return cleaned;
     return historyDuration(cleaned, key === "term" ? params?.unit ?? "months" : "months");
   }
