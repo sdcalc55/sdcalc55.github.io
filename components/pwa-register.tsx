@@ -20,11 +20,23 @@ export default function PwaRegister() {
     // Страница сначала открывается из локального кэша.
     // При запуске проверяем опубликованную версию и загружаем её Service Worker.
     let refreshing = false;
-    const handleControllerChange = () => {
-      if (refreshing) return;
+    const isSafeToReload = () => {
+      let screen: string | null = null;
+      try { screen = sessionStorage.getItem("sd-current-screen"); } catch {}
+      if (screen && !["home", "history", "settings"].includes(screen)) return false;
+      const active = document.activeElement;
+      if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return false;
+      return true;
+    };
+    const reloadForUpdate = () => {
+      if (refreshing || !isSafeToReload()) return;
       refreshing = true;
-      // Новая версия уже полностью скачана и активирована - показываем её.
       window.location.reload();
+    };
+    const handleControllerChange = () => {
+      // Never interrupt an active calculation. Apply the update on a safe screen
+      // or the next app launch.
+      reloadForUpdate();
     };
 
     const register = async () => {
@@ -41,12 +53,14 @@ export default function PwaRegister() {
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+    window.addEventListener("sd-app-safe-to-update", reloadForUpdate);
     if (document.readyState === "complete") void register();
     else window.addEventListener("load", register, { once: true });
 
     return () => {
       window.removeEventListener("load", register);
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      window.removeEventListener("sd-app-safe-to-update", reloadForUpdate);
     };
   }, []);
   // Consume repeat-launch events for installed desktop PWAs. The manifest
