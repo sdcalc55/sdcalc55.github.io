@@ -282,6 +282,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                         <p>3% от текущей комиссии: <span data-testid="current-saving" className="whitespace-nowrap">{money(pairedDiscounted.currentSaving)}</span></p>
                         <p>3% от предыдущей комиссии: <span data-testid="previous-saving" className="whitespace-nowrap">{money(pairedDiscounted.previousSaving)}</span></p>
                       </div>
+                      {pairedDiscounted.capped && <p className="text-xs text-[#647184]">Скидка ограничена размером текущей комиссии.</p>}
                       <p className="border-t border-[#26364A]/10 pt-3 font-semibold">Общая скидка: <span data-testid="combined-saving" className="whitespace-nowrap">{money(pairedDiscounted.saving)}</span></p>
                     </> : <p className="text-[#647184]">{pairedResult?.status === "undefined" ? "Для указанной стоимости тариф не определён. Уточните размер комиссии" : "Укажите стоимость встречного объекта для расчёта итоговой комиссии"}</p>}
                   </div>}
