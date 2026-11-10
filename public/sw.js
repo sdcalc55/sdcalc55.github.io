@@ -1,100 +1,82 @@
-const CACHE_NAME = "sd-calculator-pwa-v15";
-const APP_SHELL = [
-  "/", "/manifest.webmanifest",
-  "/icons/sd-32.png", "/icons/sd-64.png", "/icons/sd-180.png", "/icons/SD-192.png", "/icons/sd-512.png",
-  "/icons/apple-touch-icon-180.png", "/favicon.png", "/favicon.ico",
-  "/images/sd-calculator-logo-transparent.webp", "/images/svdemidenko-portrait.webp",
-  "/fonts/InterVariable.woff2"
-];
+const CACHE_NAME = "sd-calculator-pwa-v16";
+const PRECACHE_MANIFEST = "/precache-manifest.json";
+const CORE_FILES = ["/", "/index.html", "/manifest.webmanifest", PRECACHE_MANIFEST];
+const CACHE_PREFIX = "sd-calculator-pwa-";
 
-async function fetchIntoCache(cache, url, required = false) {
-  const response = await fetch(url, { cache: "reload" });
-  if (!response.ok) {
-    if (required) throw new Error(`Failed to cache app resource: ${url} (${response.status})`);
-    return;
-  }
-  await cache.put(url, response);
+async function fetchAndCache(cache, path) {
+  const response = await fetch(path, { cache: "reload" });
+  if (!response.ok) throw new Error(`Failed to precache ${path}: HTTP ${response.status}`);
+  await cache.put(path, response);
+}
+
+async function precacheAllExportedFiles(cache, files) {
+  const queue = [...new Set(files)];
+  let nextIndex = 0;
+  const worker = async () => {
+    while (nextIndex < queue.length) {
+      const path = queue[nextIndex++];
+      await fetchAndCache(cache, path);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(6, queue.length) }, worker));
 }
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
-      // Download the new app shell completely before allowing this worker to activate.
-      const response = await fetch("/", { cache: "reload" });
-      if (!response.ok) throw new Error(`Failed to download app shell (${response.status})`);
-      await cache.put("/", response.clone());
-
-      const html = await response.text();
-      const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)]
-        .map((match) => new URL(match[1], self.location.origin).pathname);
-      await Promise.all([...new Set(assets)].map((url) => fetchIntoCache(cache, url, true)));
-
-      // Supporting icons and fonts are cached best-effort; the core HTML and
-      // its versioned Next.js assets above are the required offline app shell.
-      await Promise.all(APP_SHELL.filter((url) => url !== "/").map((url) => fetchIntoCache(cache, url)));
+      // The manifest is generated after the static export and lists every file
+      // in out/, including route HTML and chunks that the user has never opened.
+      await precacheAllExportedFiles(cache, CORE_FILES);
+      const manifestResponse = await cache.match(PRECACHE_MANIFEST);
+      if (!manifestResponse) throw new Error("Precache manifest was not cached");
+      const manifest = await manifestResponse.json();
+      if (!manifest || !Array.isArray(manifest.files) || manifest.files.length === 0) {
+        throw new Error("Precache manifest is empty or invalid");
+      }
+      await precacheAllExportedFiles(cache, manifest.files);
       await self.skipWaiting();
     } catch (error) {
       await caches.delete(CACHE_NAME);
+      // Keep the previous worker active if even one exported file cannot be cached.
       throw error;
     }
   })());
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys()
-    .then((keys) => Promise.all(keys.filter((key) => key.startsWith("sd-calculator-pwa-") && key !== CACHE_NAME).map((key) => caches.delete(key))))
-    .then(() => self.clients.claim()));
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+      .map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  if (request.mode === "navigate") {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(request, { ignoreSearch: true }) || await cache.match("/");
-      const refreshAppShell = async () => {
-        const response = await fetch(request, { cache: "no-store" });
-        if (!response.ok) return;
-        const html = await response.clone().text();
-        const assets = [...html.matchAll(/(?:src|href)=["']([^"']*\/_next\/static\/[^"']+)["']/g)]
-          .map((match) => new URL(match[1], self.location.origin).pathname);
-        await Promise.all([...new Set(assets)].map(async (assetUrl) => {
-          try {
-            const asset = await fetch(assetUrl, { cache: "no-store" });
-            if (asset.ok) await cache.put(assetUrl, asset);
-          } catch {}
-        }));
-        await cache.put("/", response);
-      };
-      if (cached) {
-        event.waitUntil(refreshAppShell().catch(() => {}));
-        return cached;
-      }
-      try {
-        const response = await fetch(request);
-        if (response.ok) await cache.put("/", response.clone());
-        return response;
-      } catch {
-        return Response.error();
-      }
-    })());
-    return;
-  }
-  const isAppAsset = url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/images/") || url.pathname.startsWith("/fonts/") ||
-    /\.(?:png|jpe?g|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname) || url.pathname === "/manifest.webmanifest";
-  if (isAppAsset) event.respondWith((async () => {
+
+  event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
+
+    // Every exported same-origin file should already be cached. This fallback
+    // covers late requests and stores successful responses for later offline use.
     try {
       const response = await fetch(request);
-      if (response.ok) await cache.put(url.pathname, response.clone());
+      if (response.ok && response.type === "basic") {
+        await cache.put(request, response.clone());
+      }
       return response;
     } catch {
+      if (request.mode === "navigate") {
+        const fallback = await cache.match("/") || await cache.match("/index.html");
+        if (fallback) return fallback;
+      }
       return Response.error();
     }
   })());
