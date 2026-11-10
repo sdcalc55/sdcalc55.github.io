@@ -42,7 +42,7 @@ const emptyDraft = (): LoanDraft => ({ value: "", term: "", unit: "years", rate:
 export function LoanCalculator() {
   const [mode, setMode] = useState<LoanMode>("principal");
   const amountInput = useRef<HTMLInputElement>(null);
-  const pendingAmountCaret = useRef<number | null>(null);
+  const [amountFocused, setAmountFocused] = useState(false);
   const [drafts, setDrafts] = useState<Record<LoanMode, LoanDraft>>({ principal: emptyDraft(), payment: emptyDraft() });
   const [draftsRestored, setDraftsRestored] = useState(false);
   useEffect(() => {
@@ -85,11 +85,6 @@ export function LoanCalculator() {
     } catch {}
   }, [drafts, draftsRestored]);
   const { value, term, unit, rate, result, error, changed, calculated } = drafts[mode];
-  useLayoutEffect(() => {
-    if (pendingAmountCaret.current === null || !amountInput.current) return;
-    amountInput.current.setSelectionRange(pendingAmountCaret.current, pendingAmountCaret.current);
-    pendingAmountCaret.current = null;
-  }, [value]);
   const reverse = mode === "payment";
   const update = (patch: Partial<LoanDraft>) => setDrafts(previous => ({ ...previous, [mode]: { ...previous[mode], ...patch } }));
   const edit = (patch: Partial<LoanDraft>) => update({ ...patch, changed: true, error: "" });
@@ -232,22 +227,11 @@ export function LoanCalculator() {
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-5"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
-        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} ref={amountInput} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={event => { if (handleFormattedBackspace(event, next => edit({ value: next }))) return; dismissKeyboard(event); }} autoComplete="off" value={value} onChange={event => {
-          const typed = event.target.value;
-          const caret = event.target.selectionStart ?? typed.length;
-          const digitsBeforeCaret = typed.slice(0, caret).replace(/\D/g, "").length;
-          const raw = typed.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} ref={amountInput} onFocus={event => { setAmountFocused(true); scrollFocusedInputIntoView(event.currentTarget); }} onBlur={() => { setAmountFocused(false); edit({ value: formatInput(value) }); }} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={amountFocused ? value.replace(/[\\s\\u00a0\\u202f]/g, "") : value} onChange={event => {
+          const raw = event.target.value.replace(/[^\\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
-          const formatted = formatInput(raw);
-          edit({ value: formatted });
-          const target = event.currentTarget;
-          let position = 0, seen = 0;
-          while (position < formatted.length && seen < digitsBeforeCaret) {
-            if (/\d/.test(formatted[position])) seen++;
-            position++;
-          }
-          pendingAmountCaret.current = position;
+          edit({ value: raw });
         }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-[4.5rem]`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ value: "" }); document.getElementById(reverse ? "loan-payment" : "loan-principal")?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
         <div>
           <label htmlFor="loan-term" className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">Срок кредита</label>
