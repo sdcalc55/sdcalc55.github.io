@@ -95,8 +95,11 @@ function historyDuration(value: string, unit: string) {
 }
 
 function historyDisplayValue(key: string, value: string, params?: Record<string, string>) {
-  if (key === "term") return /\b(?:год|года|лет|месяц|месяца|месяцев)\b/.test(value) ? value : historyDuration(value, params?.unit ?? "months");
-  if (key === "months") return /\b(?:год|года|лет)\b/.test(value) ? value : historyDuration(value, "months");
+  if (key === "term" || key === "months") {
+    const alreadyFormatted = /\b(?:год|года|лет|месяц|месяца|месяцев|мес\.)\b/.test(value);
+    if (alreadyFormatted) return value;
+    return historyDuration(value, key === "term" ? params?.unit ?? "months" : "months");
+  }
   if (["rate", "annualRate", "downPaymentPercent", "motivationPercent", "Первоначальный взнос, %", "Необходимый первоначальный взнос, %"].includes(key)) return value ? (value.endsWith("%") ? value : `${value}%`) : "-";
   const currencyKeys = ["value", "price", "amount", "credit", "pairedPrice", "downPayment", "loanAmount", "propertyPrice", "purchasePrice", "salePrice", "monthlyPayment", "principal", "interest", "totalPayment", "commission", "total", "payment", "final"];
   if (currencyKeys.includes(key) || ["Стоимость объекта, ₽", "Сумма первоначального взноса, ₽"].includes(key)) return (value.includes("₽") ? value : `${value} ₽`).replace(/\s₽/g, "\u00a0₽");
