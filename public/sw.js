@@ -21,6 +21,10 @@ async function precacheAllExportedFiles(cache, files) {
   await Promise.all(Array.from({ length: Math.min(6, queue.length) }, worker));
 }
 
+self.addEventListener("message", (event) => {
+  if (event.data === "SKIP_WAITING") void self.skipWaiting();
+});
+
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
