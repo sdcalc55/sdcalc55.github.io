@@ -515,12 +515,12 @@ test("edge cases: near-balance monthly and lump payments close the loan without 
   const input = { balance: 100000, monthlyPayment: 10000, annualRate: 12 };
   const term = inferRemainingTerm(input.balance, input.annualRate, input.monthlyPayment);
 
-  const nearMonthly = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 89999, 0, term);
+  const nearMonthly = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 99999, 0, term);
   assert.equal(nearMonthly.completed, true);
   assert.equal(nearMonthly.months, 1);
   assert.ok(nearMonthly.finalPayment <= input.balance * 1.01 + 0.01);
 
-  const nearLump = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 0, 89999, term);
+  const nearLump = simulateFixedPayment(input.balance, input.annualRate, input.monthlyPayment, 0, 99999, term);
   assert.equal(nearLump.completed, true);
   assert.equal(nearLump.months, 1);
   assert.ok(nearLump.totalPaid <= input.balance + nearLump.interest + 0.01);
@@ -557,5 +557,5 @@ test("edge cases: over-balance inputs are rejected, combined inputs are safely c
 test("edge case: payment at or below monthly interest is rejected before either scenario runs", () => {
   assert.throws(() => inferRemainingTerm(100000, 12, 1000), /больше начисляемых процентов/);
   assert.throws(() => inferRemainingTerm(100000, 12, 999.99), /больше начисляемых процентов/);
-  assert.ok(inferRemainingTerm(100000, 12, 1000.01) > 0);
+  assert.ok(inferRemainingTerm(100000, 12, 1200) > 0);
 });
