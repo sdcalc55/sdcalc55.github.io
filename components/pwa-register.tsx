@@ -22,10 +22,8 @@ export default function PwaRegister() {
       refreshing = true;
       window.location.reload();
     };
-    // When an updated worker takes control, reload once to show its fresh app shell.
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
-    }
+    // Listen before registration so first-visit and already-controlled clients both update.
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     const register = async () => {
       try {
         const registration = await navigator.serviceWorker.register("/sw.js", {
