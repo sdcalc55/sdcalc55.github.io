@@ -230,7 +230,7 @@ export function CommissionCalculator({ operation, tariffs }: { operation: Operat
                   {availableDiscounts.map(item => <SelectItem key={item.id} value={item.id} className="cursor-pointer whitespace-normal py-3 text-sm">{item.name} - {item.paired ? "3%+3%" : `${item.percent}%`}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <p className="mt-2 rounded-lg border border-[#F3D7A5] bg-[#FFF8E8] px-3 py-2 text-xs leading-relaxed text-[#805B20] dark:border-[#66502B] dark:bg-[#332A1B] dark:text-[#F2D9A6]">Обратите внимание: с 1 декабря 2026 года планируются изменения в системе скидок.</p>
+              <p className="mt-2 rounded-md border border-[#F3D7A5] bg-[#FFF8E8] px-2 py-1 text-[11px] leading-snug text-[#805B20] dark:border-[#66502B] dark:bg-[#332A1B] dark:text-[#F2D9A6]">С 1 декабря 2026 года планируются изменения в системе скидок.</p>
               {discount && <div data-testid="discount-details" className="mt-3 space-y-3 rounded-xl bg-[#EAF2FB]/65 p-3.5 text-xs leading-relaxed text-[#536A84] dark:border dark:border-[#405064] dark:bg-[#263648] dark:text-[#D6E0EA]">
                 <p><span className="font-semibold">Примечание: </span>{discount.note}</p>
               </div>}
