@@ -44,6 +44,18 @@ export default function PwaRegister() {
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
   }, []);
+  // Consume repeat-launch events for installed desktop PWAs. The manifest
+  // uses focus-existing, so Chromium focuses the current app window instead
+  // of opening another one; no navigation means in-progress calculations stay.
+  useEffect(() => {
+    const launchQueue = (window as Window & {
+      launchQueue?: { setConsumer: (consumer: (params: unknown) => void) => void };
+    }).launchQueue;
+    launchQueue?.setConsumer(() => {
+      // Intentionally keep the current screen and its entered values unchanged.
+    });
+  }, []);
+
 
   useEffect(() => {
     const isAndroid = /Android/i.test(navigator.userAgent);
