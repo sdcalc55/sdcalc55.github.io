@@ -1,4 +1,4 @@
-const CACHE_NAME = "sd-calculator-pwa-v16";
+const CACHE_NAME = "sd-calculator-pwa-__BUILD_VERSION__";
 const PRECACHE_MANIFEST = "/precache-manifest.json";
 const CORE_FILES = ["/", "/index.html", "/manifest.webmanifest", PRECACHE_MANIFEST];
 const CACHE_PREFIX = "sd-calculator-pwa-";
@@ -35,6 +35,7 @@ self.addEventListener("install", (event) => {
         throw new Error("Precache manifest is empty or invalid");
       }
       await precacheAllExportedFiles(cache, manifest.files);
+      // Activate the fully downloaded worker immediately; clients reload on controllerchange.
       await self.skipWaiting();
     } catch (error) {
       await caches.delete(CACHE_NAME);
