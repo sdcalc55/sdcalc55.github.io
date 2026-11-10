@@ -62,11 +62,28 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
+
+    // Always try the network first for page navigations so users receive the
+    // newest published app. If offline, fall back to the last cached page.
+    if (request.mode === "navigate") {
+      try {
+        const response = await fetch(request, { cache: "no-cache" });
+        if (response.ok && response.type === "basic") {
+          await cache.put(request, response.clone());
+        }
+        return response;
+      } catch {
+        const cachedPage = await cache.match(request, { ignoreSearch: true }) ||
+          await cache.match("/") ||
+          await cache.match("/index.html");
+        return cachedPage || Response.error();
+      }
+    }
+
+    // Keep versioned assets cache-first for fast startup and reliable offline use.
     const cached = await cache.match(request, { ignoreSearch: true });
     if (cached) return cached;
 
-    // Every exported same-origin file should already be cached. This fallback
-    // covers late requests and stores successful responses for later offline use.
     try {
       const response = await fetch(request);
       if (response.ok && response.type === "basic") {
@@ -74,11 +91,7 @@ self.addEventListener("fetch", (event) => {
       }
       return response;
     } catch {
-      if (request.mode === "navigate") {
-        const fallback = await cache.match("/") || await cache.match("/index.html");
-        if (fallback) return fallback;
-      }
       return Response.error();
     }
-  })());
+  })());;
 });
