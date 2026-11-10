@@ -157,7 +157,7 @@ test("calendar-based historical balance estimate validates dates and elapsed hor
 test("inferred term is stable at zero rate and rejects exact non-amortizing boundary", () => {
   assert.equal(inferRemainingTerm(120000, 0, 10000), 12);
   assert.throws(() => inferRemainingTerm(100000, 12, 1000));
-  assert.ok(inferRemainingTerm(100000, 12, 1000.01) > 0);
+  assert.throws(() => inferRemainingTerm(100000, 12, 1000.01), /превышает 50 лет/);
 });
 
 test("initial stub-period interest is day-based and independent of monthly accrual", () => {
