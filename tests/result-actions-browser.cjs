@@ -37,7 +37,7 @@ const assert = require('node:assert/strict');
     await click('Расчёт комиссии при продаже');
     await page.locator('#price').fill('3000000');
     await page.getByTestId('total').waitFor();
-    await checkActions(page.getByRole('region', { name: 'Комиссия' }));
+    await checkActions(page.getByLabel('Комиссия'));
 
     await click('На главный экран');
     await click('Расчёт по первоначальному взносу');
