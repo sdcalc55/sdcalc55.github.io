@@ -165,7 +165,7 @@ export function RealtorMortgageAssistant() {
                 <div className="mt-1 text-xs text-[#748195] dark:text-[#B8C5D3]">Вместо {money(num(payment))}</div>
               </div>
               <div className="mt-3"><div className="text-xs text-[#748195] dark:text-[#B8C5D3]">Переплата уменьшится на</div><div className="mt-1 text-lg font-semibold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentSaving)}</div></div>
-              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Остаток срока: {duration(plans.termMonths!)}.</span><span className="lg:block">Досрочные взносы вносятся сверх нового обязательного платежа.</span></p>
+              <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="lg:block">Остаток срока: {duration(plans.paymentPlan.months)}.</span><span className="lg:block">Досрочные взносы вносятся сверх нового обязательного платежа.</span></p>
             </> : plans.paymentPlan?.completed ? <div className="mt-4 flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl px-4 py-5 text-center">
               <Wallet className="size-6 text-[#E83C35] dark:text-[#FF7770]" />
               <p className="max-w-xs text-sm font-semibold leading-relaxed text-[#405A75] dark:text-[#D6E0EA]">Досрочные взносы полностью погашают кредит в первом расчётном периоде. Новый обязательный платёж не требуется.</p>
