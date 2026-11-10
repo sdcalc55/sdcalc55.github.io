@@ -43,6 +43,27 @@ const assert = require('node:assert/strict');
     await balance.press('Delete');
     assert.equal(await balance.inputValue(), '23 456');
 
+    // Delete adjacent to a thousands separator removes the next digit and keeps the caret usable.
+    await balance.fill('1234567');
+    await balance.evaluate(input => input.setSelectionRange(1, 1));
+    await balance.press('Delete');
+    assert.equal(await balance.inputValue(), '134 567');
+    await balance.evaluate(input => input.setSelectionRange(1, 1));
+    await balance.press('Delete');
+    assert.equal(await balance.inputValue(), '145 67'.replace('145 67', '14 567'));
+
+    // Deleting a selected range spanning grouping spaces removes only selected digits.
+    await balance.fill('1234567');
+    await balance.evaluate(input => input.setSelectionRange(1, 5));
+    await balance.press('Backspace');
+    assert.equal(await balance.inputValue(), '1 567');
+
+    // Backspace with a selected range removes exactly the selection.
+    await balance.fill('1234567');
+    await balance.evaluate(input => input.setSelectionRange(2, 4));
+    await balance.press('Backspace');
+    assert.equal(await balance.inputValue(), '1 567');
+
     // Replacing a selection must preserve the new value and not corrupt formatting.
     await balance.fill('1234567');
     await balance.evaluate(input => input.setSelectionRange(0, input.value.length));
