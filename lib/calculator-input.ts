@@ -70,24 +70,24 @@ export function handleFormattedDelete(
   const start = input.selectionStart;
   const end = input.selectionEnd;
   if (start === null || end === null || start !== end || start >= input.value.length) return false;
-  if (!/[ \\u00a0\\u202f]/.test(input.value[start])) return false;
+  if (!/[ \u00a0\u202f]/.test(input.value[start])) return false;
 
   event.preventDefault();
   let digitIndex = start + 1;
-  while (digitIndex < input.value.length && !/\\d/.test(input.value[digitIndex])) digitIndex++;
+  while (digitIndex < input.value.length && !/\d/.test(input.value[digitIndex])) digitIndex++;
   if (digitIndex >= input.value.length) return true;
 
-  const digitsBefore = input.value.slice(0, digitIndex).replace(/\\D/g, "").length - 1;
-  const raw = input.value.replace(/[ \\u00a0\\u202f]/g, "");
+  const digitsBefore = input.value.slice(0, digitIndex).replace(/\D/g, "").length;
+  const raw = input.value.replace(/[ \u00a0\u202f]/g, "");
   let rawDigitIndex = 0;
-  for (let i = 0; i < digitIndex; i++) if (/\\d/.test(input.value[i])) rawDigitIndex++;
+  for (let i = 0; i < digitIndex; i++) if (/\d/.test(input.value[i])) rawDigitIndex++;
   const nextRaw = raw.slice(0, rawDigitIndex) + raw.slice(rawDigitIndex + 1);
-  const formatted = nextRaw.replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+  const formatted = nextRaw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   onChange(storeFormatted ? formatted : nextRaw);
   requestAnimationFrame(() => {
     let caret = 0, seen = 0;
     while (caret < formatted.length && seen < digitsBefore) {
-      if (/\\d/.test(formatted[caret])) seen++;
+      if (/\d/.test(formatted[caret])) seen++;
       caret++;
     }
     input.setSelectionRange(caret, caret);
