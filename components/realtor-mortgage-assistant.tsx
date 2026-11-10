@@ -151,15 +151,15 @@ export function RealtorMortgageAssistant() {
           <div className="flex h-full flex-col rounded-2xl border border-[#F1DCD9] bg-[#FFF7F6] p-4 dark:border-[#65413F] dark:bg-[#302629]">
             
             <div className={`mt-1 text-lg font-bold ${termScenarioHasHigherSavings ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Сокращение срока</div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Переплата уменьшится на</div><div className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
-            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Остаток срока после досрочного погашения</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.term.completed ? duration(plans.term.months) : "Не удалось определить"}</div><div className="mt-2 text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Переплата уменьшится на</div><div data-testid="term-interest-savings" className="mt-1 text-xl font-bold leading-7 text-[#26364A] dark:text-[#F1F5F9]">{plans.termSaving === null ? "Не удалось рассчитать" : money(plans.termSaving)}</div></div>
+            <div className="mt-3"><div className="text-xs text-[#647184] dark:text-[#C5D0DC]">Остаток срока после досрочного погашения</div><div data-testid="term-remaining-duration" className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.term.completed ? duration(plans.term.months) : "Не удалось определить"}</div><div className="mt-2 text-xs text-[#647184] dark:text-[#C5D0DC]">Срок сокращён на</div><div className="mt-1 text-base font-semibold leading-6 text-[#26364A] dark:text-[#F1F5F9]">{plans.monthsSaved === null ? "Не удалось определить" : duration(plans.monthsSaved)}</div></div>
             <p className="mt-auto pt-3 text-xs leading-5 text-[#748195] dark:text-[#B8C5D3]"><span className="block">Текущий платёж {money(num(payment))} сохраняется.</span><span className="mt-1 block">Досрочные взносы вносятся сверх него.</span></p>
           </div>
           <div className="flex h-full flex-col rounded-2xl border border-[#D6E2F0] bg-[#F5F9FE] p-4 dark:border-[#405A75] dark:bg-[#202F40]">
             
             <div className={`mt-1 text-lg font-bold ${!termScenarioHasHigherSavings && plans.paymentSaving !== null ? "text-[#C93630] dark:text-[#FF7770]" : "text-[#26364A] dark:text-[#F1F5F9]"}`}>Уменьшение платежа</div>
             {plans.paymentPlan?.completed && plans.paymentSaving !== null && plans.paymentPlan.firstPayment > 0 ? <>
-              <div className="mt-3">
+              <div data-testid="reduced-payment-display" className="mt-3 bg-transparent">
                 <div className="text-xs font-medium text-[#647184] dark:text-[#C5D0DC]">Новый обязательный платёж</div>
                 <div className="mt-1 text-2xl font-bold leading-8 tabular-nums text-[#26364A] dark:text-[#F1F5F9]">{money(plans.paymentPlan.firstPayment)}</div>
                 <div className="mt-1 text-xs text-[#748195] dark:text-[#B8C5D3]">Вместо {money(num(payment))}</div>
