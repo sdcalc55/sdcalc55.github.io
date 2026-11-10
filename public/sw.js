@@ -9,33 +9,25 @@ async function fetchAndCache(cache, path) {
   await cache.put(path, response);
 }
 
-async function precacheAllExportedFiles(cache, files) {
-  const queue = [...new Set(files)];
-  let nextIndex = 0;
-  const worker = async () => {
-    while (nextIndex < queue.length) {
-      const path = queue[nextIndex++];
-      await fetchAndCache(cache, path);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(6, queue.length) }, worker));
+async function precacheFiles(cache, files) {
+  for (const path of [...new Set(files)]) {
+    await fetchAndCache(cache, path);
+  }
 }
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
-      // The manifest is generated after the static export and lists every file
-      // in out/, including route HTML and chunks that the user has never opened.
-      await precacheAllExportedFiles(cache, CORE_FILES);
+      await precacheFiles(cache, CORE_FILES);
       const manifestResponse = await cache.match(PRECACHE_MANIFEST);
       if (!manifestResponse) throw new Error("Precache manifest was not cached");
       const manifest = await manifestResponse.json();
-      if (!manifest || !Array.isArray(manifest.files) || manifest.files.length === 0) {
-        throw new Error("Precache manifest is empty or invalid");
+      if (!manifest || !Array.isArray(manifest.critical) || manifest.critical.length === 0) {
+        throw new Error("Critical asset manifest is empty or invalid");
       }
-      await precacheAllExportedFiles(cache, manifest.files);
-      // Activate the fully downloaded worker immediately; clients reload on controllerchange.
+      // Cache only the entry page's essential JS/CSS. Other assets are cached on demand.
+
       await self.skipWaiting();
     } catch (error) {
       await caches.delete(CACHE_NAME);
@@ -63,25 +55,28 @@ self.addEventListener("fetch", (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
 
-    // Always try the network first for page navigations so users receive the
-    // newest published app. If offline, fall back to the last cached page.
+    // Serve the installed app immediately and refresh HTML in the background.
     if (request.mode === "navigate") {
-      try {
-        const response = await fetch(request, { cache: "no-cache" });
-        if (response.ok && response.type === "basic") {
-          await cache.put(request, response.clone());
-        }
+      const cachedPage = await cache.match(request) ||
+        await cache.match("/") ||
+        await cache.match("/index.html");
+      const refreshPage = fetch(request, { cache: "no-cache" }).then(async (response) => {
+        if (response.ok && response.type === "basic") await cache.put(request, response.clone());
         return response;
+      });
+      if (cachedPage) {
+        event.waitUntil(refreshPage.catch(() => undefined));
+        return cachedPage;
+      }
+      try {
+        return await refreshPage;
       } catch {
-        const cachedPage = await cache.match(request, { ignoreSearch: true }) ||
-          await cache.match("/") ||
-          await cache.match("/index.html");
-        return cachedPage || Response.error();
+        return await cache.match("/") || await cache.match("/index.html") || Response.error();
       }
     }
 
-    // Keep versioned assets cache-first for fast startup and reliable offline use.
-    const cached = await cache.match(request, { ignoreSearch: true });
+    // Cache exact URLs; newly requested assets are stored on demand.
+    const cached = await cache.match(request);
     if (cached) return cached;
 
     try {
