@@ -32,7 +32,15 @@ for (const match of html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi
 for (const match of html.matchAll(/<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+)["'][^>]*>/gi)) {
   critical.add(new URL(match[1], "https://sdcalc55.github.io").pathname);
 }
-const criticalFiles = [...critical].filter(file => file.startsWith("/_next/")).sort();
+// The header logo is visible immediately on launch and must be available
+// when the installed PWA is opened without a network connection.
+critical.add("/images/sd-calculator-logo-transparent.webp");
+critical.add("/images/svdemidenko-portrait.webp");
+const criticalFiles = [...critical].filter(file =>
+  file.startsWith("/_next/") ||
+  file === "/images/sd-calculator-logo-transparent.webp" ||
+  file === "/images/svdemidenko-portrait.webp"
+).sort();
 if (criticalFiles.length === 0) throw new Error("Could not identify critical JS/CSS assets in index.html");
 await writeFile(manifestPath, JSON.stringify({ version: 2, files, critical: criticalFiles }, null, 2) + "\n");
 const hash = createHash("sha256");
