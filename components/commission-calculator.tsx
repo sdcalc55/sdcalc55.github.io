@@ -34,43 +34,29 @@ const money = (n: number) => `${numberFormat.format(n)}\u00a0₽`;
 
 function MoneyInput({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
-  const pendingCaret = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    if (pendingCaret.current === null || !input.current) return;
-    input.current.setSelectionRange(pendingCaret.current, pendingCaret.current);
-    pendingCaret.current = null;
-  }, [value]);
+  const [focused, setFocused] = useState(false);
+  const displayValue = focused ? value.replace(/[\\s\\u00a0\\u202f]/g, "") : value;
   const invalid = value !== "" && parseMoney(value) === null;
   return <div>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label>
     <div className={`sd-commission-money-field relative rounded-xl border bg-[#F7F8FA] transition focus-within:border-[#E83C35] focus-within:ring-4 focus-within:ring-[#E83C35]/10 ${invalid ? "border-[#E83C35]" : "border-[#E4E8ED]"}`}>
-      <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={value} aria-invalid={invalid || Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
+      <input ref={input} id={id} name={`sd-calc-${id}`} onFocus={event => { setFocused(true); scrollFocusedInputIntoView(event.currentTarget); }} onBlur={() => { setFocused(false); onChange(formatInput(value)); }} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder="Введите стоимость" value={displayValue} aria-invalid={invalid || Number(value.replace(/[\\s\\u00a0\\u202f]/g, "")) > 999999999} aria-describedby={invalid ? `${id}-error` : undefined}
         onKeyDown={event => {
           if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
-          if (handleFormattedBackspace(event, onChange)) return;
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={e => {
-          const typed = e.target.value;
-          const caret = e.target.selectionStart ?? typed.length;
-          const digitsBeforeCaret = typed.slice(0, caret).replace(/\D/g, "").length;
-          const raw = typed.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const raw = e.target.value.replace(/[^\\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
-          const formatted = formatInput(raw);
-          onChange(formatted);
-          let position = 0, seen = 0;
-          while (position < formatted.length && seen < digitsBeforeCaret) {
-            if (/\d/.test(formatted[position])) seen++;
-            position++;
-          }
-          pendingCaret.current = position;
+          onChange(raw);
         }} className="h-14 w-full rounded-xl bg-transparent px-4 pr-[4.5rem] text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2]" />
       {value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">₽</span>
     </div>
-    {value !== "" && Number(value.replace(/[\s\u00a0\u202f]/g, "")) > 999999999 ? <p id={`${id}-error`} role="alert" className="mt-2 text-sm text-[#BD302A]">Объект дороже 999 999 999 рублей? Кажется, мы нашли элитную недвижимость! 😄</p> : invalid && <p id={`${id}-error`} className="mt-2 text-sm text-[#BD302A]">Введите корректную сумму.</p>}
+    {value !== "" && Number(value.replace(/[\\s\\u00a0\\u202f]/g, "")) > 999999999 ? <p id={`${id}-error`} role="alert" className="mt-2 text-sm text-[#BD302A]">Объект дороже 999 999 999 рублей? Кажется, мы нашли элитную недвижимость! 😄</p> : invalid && <p id={`${id}-error`} className="mt-2 text-sm text-[#BD302A]">Введите корректную сумму.</p>}
   </div>;
 }
+
 
 export function CommissionCalculator({ operation, tariffs }: { operation: Operation; tariffs?: TariffSnapshot; tariffStatus?: string }) {
   type Draft = { category: Category; price: string; credit: string; discountId: string; pairedPrice: string; motivationOpen: boolean; motivationPercent: string };
