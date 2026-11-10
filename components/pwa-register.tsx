@@ -16,14 +16,8 @@ export default function PwaRegister() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    let refreshing = false;
-    const handleControllerChange = () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    };
-    // Listen before registration so first-visit and already-controlled clients both update.
-    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+    // Check for an updated worker on each app launch. Do not force-reload an
+    // open calculator: that could discard values the user has not saved yet.
     const register = async () => {
       try {
         const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -39,7 +33,6 @@ export default function PwaRegister() {
     else window.addEventListener("load", register, { once: true });
     return () => {
       window.removeEventListener("load", register);
-      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
   }, []);
   // Consume repeat-launch events for installed desktop PWAs. The manifest
