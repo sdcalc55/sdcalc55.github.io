@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChartNoAxesCombined, House, Wallet, X } from "lucide-react";
-import { focusNextCalculatorInput, handleFormattedBackspace } from "@/lib/calculator-input";
+import { focusNextCalculatorInput, handleFormattedBackspace, handleFormattedDelete } from "@/lib/calculator-input";
 import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { formatInput } from "@/lib/calculator";
@@ -57,7 +57,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     if (cursor.current !== null) { ref.current?.setSelectionRange(cursor.current, cursor.current); cursor.current = null; }
   });
   return <div><label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label><div className="relative"><input id={id} name={`sd-calc-${id}`} ref={ref} value={value} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onClick={event => { if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onKeyDown={event => {
-    if (money && handleFormattedBackspace(event, onChange)) return;
+    if (money && (handleFormattedBackspace(event, onChange) || handleFormattedDelete(event, onChange))) return;
     if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
     if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
   }} onChange={event => {
