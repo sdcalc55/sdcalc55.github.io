@@ -12,7 +12,7 @@ const assert = require('node:assert/strict');
 
   await page.goto('http://127.0.0.1:3000/', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
-  await page.waitForFunction(() => 'serviceWorker' in navigator && navigator.serviceWorker.controller, { timeout: 60000 });
+  await page.waitForFunction(() => 'serviceWorker' in navigator && navigator.serviceWorker.controller, null, { timeout: 60000 });
 
   const precache = await page.evaluate(async () => {
     const registration = await navigator.serviceWorker.ready;
@@ -46,7 +46,7 @@ const assert = require('node:assert/strict');
   await context.setOffline(true);
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Расчёт комиссии при продаже', exact: true }).click();
-  await page.getByRole('heading', { name: 'Комиссия', exact: true }).waitFor();
+  await page.locator('h1').filter({ hasText: /^Комиссия$/ }).waitFor({ state: 'visible' });
   await page.locator('#price').fill('3000000');
   await page.getByTestId('total').waitFor();
   assert.equal((await page.getByTestId('total').innerText()).replace(/\s/g, ''), '95000₽');
