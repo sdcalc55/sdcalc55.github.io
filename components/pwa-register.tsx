@@ -17,59 +17,35 @@ export default function PwaRegister() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
-    // При обычном повторном запуске приложения проверяем обновление.
-    // Установка новой версии выполняется Service Worker, а не очисткой данных сайта.
+    // Страница сначала открывается из локального кэша.
+    // При запуске проверяем опубликованную версию и загружаем её Service Worker.
     let refreshing = false;
-    let registration: ServiceWorkerRegistration | null = null;
-    const hadController = Boolean(navigator.serviceWorker.controller);
-
     const handleControllerChange = () => {
-      // Перезагружаем страницу только при смене уже установленного контроллера.
-      // Первичная установка приложения не вызывает лишнюю перезагрузку.
-      if (!hadController || refreshing) return;
+      if (refreshing) return;
       refreshing = true;
+      // Новая версия уже полностью скачана и активирована - показываем её.
       window.location.reload();
-    };
-
-    const checkForUpdate = async () => {
-      if (document.visibilityState !== "visible" || !registration) return;
-      try {
-        await registration.update();
-      } catch (error) {
-        // При отсутствии сети остаёмся на последней рабочей офлайн-версии.
-        console.warn("PWA update check failed; keeping the current offline version:", error);
-      }
     };
 
     const register = async () => {
       try {
-        registration = await navigator.serviceWorker.register("/sw.js", {
+        const registration = await navigator.serviceWorker.register("/sw.js", {
           scope: "/",
           updateViaCache: "none",
         });
-        // При каждом открытии/перезапуске проверяем новую версию.
-        await checkForUpdate();
+        await registration.update();
       } catch (error) {
-        console.error("PWA service worker registration failed:", error);
+        // Если сети нет, продолжаем работать с последней кэшированной версией.
+        console.warn("PWA update check failed; keeping the cached version:", error);
       }
     };
 
-    const handlePageShow = () => { void checkForUpdate(); };
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") void checkForUpdate();
-    };
-
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
-    window.addEventListener("pageshow", handlePageShow);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
     if (document.readyState === "complete") void register();
     else window.addEventListener("load", register, { once: true });
 
     return () => {
       window.removeEventListener("load", register);
-      window.removeEventListener("pageshow", handlePageShow);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
   }, []);
