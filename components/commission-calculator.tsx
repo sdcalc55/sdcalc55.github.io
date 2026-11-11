@@ -11,6 +11,7 @@ import { applyDiscount, applyPairedDiscount, discounts } from "@/lib/discounts";
 import { DEFAULT_TARIFFS, type TariffSnapshot } from "@/lib/tariffs";
 import { calculate, formatInput, parseMoney, type Category, type Operation } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
+import { sanitizeDecimalInput } from "@/lib/input-sanitize";
 
 const titles: Record<Category, string> = {
   apartment: "Квартира / жилое помещение", country: "Загородная недвижимость", garage: "Гараж / парковочное место", commercial: "Коммерческая недвижимость", land: "Земельный участок с ипотекой на строительство дома",
@@ -46,7 +47,7 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
           if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
         }}
         onChange={e => {
-          const raw = e.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const raw = sanitizeDecimalInput(e.target.value);
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           onChange(raw);
