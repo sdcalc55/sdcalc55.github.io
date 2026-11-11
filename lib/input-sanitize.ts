@@ -8,9 +8,10 @@ export function sanitizeIntegerInput(value: string, maxLength: number): string {
 
 /** Maps a caret offset measured in an unformatted value to its formatted display position. */
 export function getFormattedCaretPosition(formatted: string, rawCaret: number): number {
+  if (rawCaret <= 0) return 0;
   let visibleCharacters = 0;
   for (let index = 0; index < formatted.length; index += 1) {
-    if (!/[ \\u00a0\\u202f]/.test(formatted[index])) visibleCharacters += 1;
+    if (!/[ \u00a0\u202f]/.test(formatted[index])) visibleCharacters += 1;
     if (visibleCharacters >= rawCaret) return index + 1;
   }
   return formatted.length;
