@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
-import { sanitizeDecimalInput } from "@/lib/input-sanitize";
+import { getFormattedCaretPosition, sanitizeDecimalInput } from "@/lib/input-sanitize";
 import { calculateMortgage, type MortgageMode } from "@/lib/mortgage";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
@@ -53,7 +53,7 @@ const themes = {
 function MortgageInput({ id, label, value, money, suffix, placeholder, onChange }: { id: string; label: string; value: string; money: boolean; suffix?: string; placeholder: string; onChange: (value: string) => void }) {
   const ref = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const displayValue = money && focused ? value.replace(/[\s\u00a0\u202f]/g, "") : value;
+  const displayValue = money && focused ? formatInput(value) : value;
   return <div><label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label><div className="relative"><input id={id} name={`sd-calc-${id}`} ref={ref} value={displayValue} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" placeholder={placeholder} onFocus={event => { if (money) setFocused(true); if (money && value === "0") event.currentTarget.select(); scrollFocusedInputIntoView(event.currentTarget, id === "mortgage-adjustment-1" ? document.getElementById("mortgage-adjustment-2") : null); }} onBlur={() => { if (money) { setFocused(false); onChange(formatInput(value)); } }} onKeyDown={event => {
     if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
     if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
@@ -62,7 +62,13 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     if (money) {
       const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
       if (digitsBeforeDecimal.length > 10) return;
+      const formatted = formatInput(raw);
+      const caret = sanitizeDecimalInput(event.currentTarget.value.slice(0, event.currentTarget.selectionStart ?? event.currentTarget.value.length)).length;
       onChange(raw);
+      requestAnimationFrame(() => {
+        const position = getFormattedCaretPosition(formatted, caret);
+        ref.current?.setSelectionRange(position, position);
+      });
       return;
     }
     const normalized = raw.replace(",", ".").replace(/[^\d.]/g, "");

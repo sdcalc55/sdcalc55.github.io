@@ -8,7 +8,7 @@ import { CalculatorResultActions } from "@/components/calculator-result-actions"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
-import { sanitizeDecimalInput, sanitizeIntegerInput } from "@/lib/input-sanitize";
+import { getFormattedCaretPosition, sanitizeDecimalInput, sanitizeIntegerInput } from "@/lib/input-sanitize";
 import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/loan";
 import { formatLoanTerm } from "@/lib/loan-term";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
@@ -228,11 +228,17 @@ export function LoanCalculator() {
     <form onSubmit={submit} autoComplete="off" className="min-w-0 rounded-3xl border border-[#EBEEF2] bg-white p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-5"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
-        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} ref={amountInput} onFocus={event => { setAmountFocused(true); scrollFocusedInputIntoView(event.currentTarget); }} onBlur={() => { setAmountFocused(false); edit({ value: formatInput(value) }); }} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={amountFocused ? value.replace(/[\s\u00a0\u202f]/g, "") : value} onChange={event => {
+        <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} ref={amountInput} onFocus={event => { setAmountFocused(true); scrollFocusedInputIntoView(event.currentTarget); }} onBlur={() => { setAmountFocused(false); edit({ value: formatInput(value) }); }} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={amountFocused ? formatInput(value) : value} onChange={event => {
           const raw = sanitizeDecimalInput(event.target.value);
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
+          const formatted = formatInput(raw);
+          const caret = sanitizeDecimalInput(event.currentTarget.value.slice(0, event.currentTarget.selectionStart ?? event.currentTarget.value.length)).length;
           edit({ value: raw });
+          requestAnimationFrame(() => {
+            const position = getFormattedCaretPosition(formatted, caret);
+            amountInput.current?.setSelectionRange(position, position);
+          });
         }} placeholder={reverse ? "Введите платёж" : "Введите сумму"} aria-invalid={value !== "" && parse(value) > 999999999} className={`${inputStyle} pr-[4.5rem]`} />{value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ value: "" }); document.getElementById(reverse ? "loan-payment" : "loan-principal")?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7B8797]">₽</span></div>{value !== "" && parse(value) > 999999999 && <p role="alert" className="mt-2 text-sm leading-relaxed text-[#BD302A]">{reverse ? "Платёж больше миллиарда в месяц? Кажется, такой кредит вам точно не нужен 😄" : "Банк уже знает, что вы собираетесь у него попросить? 😄"}</p>}</div>
         <div>
           <label htmlFor="loan-term" className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">Срок кредита</label>

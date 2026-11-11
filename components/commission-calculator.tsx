@@ -11,7 +11,7 @@ import { applyDiscount, applyPairedDiscount, discounts } from "@/lib/discounts";
 import { DEFAULT_TARIFFS, type TariffSnapshot } from "@/lib/tariffs";
 import { calculate, formatInput, parseMoney, type Category, type Operation } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
-import { sanitizeDecimalInput } from "@/lib/input-sanitize";
+import { getFormattedCaretPosition, sanitizeDecimalInput } from "@/lib/input-sanitize";
 
 const titles: Record<Category, string> = {
   apartment: "Квартира / жилое помещение", country: "Загородная недвижимость", garage: "Гараж / парковочное место", commercial: "Коммерческая недвижимость", land: "Земельный участок с ипотекой на строительство дома",
@@ -36,7 +36,7 @@ const money = (n: number) => `${numberFormat.format(n)}\u00a0₽`;
 function MoneyInput({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const displayValue = focused ? value.replace(/[\s\u00a0\u202f]/g, "") : value;
+  const displayValue = focused ? formatInput(value) : value;
   const invalid = value !== "" && parseMoney(value) === null;
   return <div>
     <label htmlFor={id} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{label}</label>
@@ -50,7 +50,13 @@ function MoneyInput({ id, label, value, onChange }: { id: string; label: string;
           const raw = sanitizeDecimalInput(e.target.value);
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
+          const formatted = formatInput(raw);
+          const caret = sanitizeDecimalInput(e.currentTarget.value.slice(0, e.currentTarget.selectionStart ?? e.currentTarget.value.length)).length;
           onChange(raw);
+          requestAnimationFrame(() => {
+            const position = getFormattedCaretPosition(formatted, caret);
+            input.current?.setSelectionRange(position, position);
+          });
         }} className="h-14 w-full rounded-xl bg-transparent px-4 pr-[4.5rem] text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2]" />
       {value !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { onChange(""); input.current?.focus(); }} className="absolute right-10 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#7B8797]">₽</span>
     </div>

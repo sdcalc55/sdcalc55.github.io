@@ -28,3 +28,11 @@ test('Ввод срока принимает только цифры и огра
   assert.equal(sanitizeIntegerInput('1a8-0', 3), '180');
   assert.equal(sanitizeIntegerInput('12345', 3), '123');
 });
+
+test('Позиция курсора учитывает добавленные разделители тысяч', async () => {
+  const { getFormattedCaretPosition } = await import('../lib/input-sanitize.ts');
+  assert.equal(getFormattedCaretPosition('1 234', 4), 5);
+  assert.equal(getFormattedCaretPosition('1 234 567', 5), 7);
+  assert.equal(getFormattedCaretPosition('1 234 567,89', 10), 11);
+  assert.equal(getFormattedCaretPosition('12 345', 2), 2);
+});
