@@ -8,6 +8,7 @@ import { CalculatorResultActions } from "@/components/calculator-result-actions"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
+import { sanitizeDecimalInput, sanitizeIntegerInput } from "@/lib/input-sanitize";
 import { calculateLoan, calculateLoanFromPayment, type LoanResult } from "@/lib/loan";
 import { formatLoanTerm } from "@/lib/loan-term";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
@@ -228,7 +229,7 @@ export function LoanCalculator() {
       <div className="mb-6 flex items-center gap-5"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FCEBEA] text-[#E83C35]"><Calculator className="size-6" /></span><h3 className="text-xl font-semibold">Параметры кредита</h3></div>
       <div className="space-y-5">
         <div><label htmlFor={reverse ? "loan-payment" : "loan-principal"} className="mb-3 block text-sm font-semibold dark:text-[#D5DEE8]">{reverse ? "Комфортный платёж в месяц" : "Сумма кредита"}</label><div className="relative"><input name={reverse ? "sd-calc-loan-payment" : "sd-calc-loan-principal"} id={reverse ? "loan-payment" : "loan-principal"} ref={amountInput} onFocus={event => { setAmountFocused(true); scrollFocusedInputIntoView(event.currentTarget); }} onBlur={() => { setAmountFocused(false); edit({ value: formatInput(value) }); }} inputMode="decimal" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" onKeyDown={dismissKeyboard} autoComplete="off" value={amountFocused ? value.replace(/[\s\u00a0\u202f]/g, "") : value} onChange={event => {
-          const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+          const raw = sanitizeDecimalInput(event.target.value);
           const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
           if (digitsBeforeDecimal.length > 10) return;
           edit({ value: raw });
@@ -238,7 +239,7 @@ export function LoanCalculator() {
           <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
             <div className="relative">
               <input name="sd-calc-loan-term" id="loan-term" onFocus={event => scrollFocusedInputIntoView(event.currentTarget)} onClick={event => scrollFocusedInputIntoView(event.currentTarget)} inputMode="numeric" autoCorrect="off" autoCapitalize="off" spellCheck={false} enterKeyHint="next" autoComplete="off" onKeyDown={dismissKeyboard} value={term} onChange={event => {
-                const raw = event.target.value.replace(/[^\d]/g, "").slice(0, 3);
+                const raw = sanitizeIntegerInput(event.target.value, 3);
                 edit({ term: raw });
               }} placeholder="Введите срок" className="h-14 w-full min-w-0 rounded-xl border border-[#E4E8ED] bg-[#F7F8FA] px-4 pr-11 text-lg font-medium tabular-nums outline-none placeholder:text-sm placeholder:font-normal placeholder:text-[#8993A2] focus:border-[#E83C35] focus:ring-4 focus:ring-[#E83C35]/10" />
               {term !== "" && <button type="button" aria-label="Очистить поле" title="Очистить" onMouseDown={event => event.preventDefault()} onClick={() => { edit({ term: "" }); document.getElementById("loan-term")?.focus(); }} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-[#8993A2] hover:bg-black/5 hover:text-[#26364A] dark:hover:bg-white/10 dark:hover:text-white"><X className="size-4" /></button>}
