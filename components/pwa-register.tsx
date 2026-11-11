@@ -19,23 +19,26 @@ export default function PwaRegister() {
 
     // Страница сначала открывается из локального кэша.
     // При запуске проверяем опубликованную версию и загружаем её Service Worker.
+    // Distinguish first installation from an update. First control must not
+    // reload the page that the user has just opened.
+    const hadController = Boolean(navigator.serviceWorker.controller);
     let refreshing = false;
     const isSafeToReload = () => {
       let screen: string | null = null;
       try { screen = sessionStorage.getItem("sd-current-screen"); } catch {}
-      if (screen && !["home", "history", "settings"].includes(screen)) return false;
+      if (!screen || !["home", "history", "settings"].includes(screen)) return false;
       const active = document.activeElement;
       if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return false;
       return true;
     };
     const reloadForUpdate = () => {
-      if (refreshing || !isSafeToReload()) return;
+      if (!hadController || refreshing || !isSafeToReload()) return;
       refreshing = true;
       window.location.reload();
     };
     const handleControllerChange = () => {
-      // Never interrupt an active calculation. Apply the update on a safe screen
-      // or the next app launch.
+      // The new worker takes control only after its complete build is cached.
+      // Reload immediately on a safe screen; otherwise wait until Home or next launch.
       reloadForUpdate();
     };
 

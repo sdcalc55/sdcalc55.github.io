@@ -5,7 +5,9 @@ const CACHE_PREFIX = "sd-calculator-pwa-";
 
 async function fetchAndCache(cache, path) {
   const response = await fetch(path, { cache: "reload" });
-  if (!response.ok) throw new Error(`Failed to precache ${path}: HTTP ${response.status}`);
+  if (!response.ok || response.type === "opaque") {
+    throw new Error(`Failed to precache ${path}: HTTP ${response.status}`);
+  }
   await cache.put(path, response);
 }
 
@@ -19,20 +21,26 @@ self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
+      // Download the complete new build into its own cache. The current
+      // worker and cache remain untouched until every exported file succeeds.
       await precacheFiles(cache, CORE_FILES);
       const manifestResponse = await cache.match(PRECACHE_MANIFEST);
       if (!manifestResponse) throw new Error("Precache manifest was not cached");
       const manifest = await manifestResponse.json();
-      if (!manifest || !Array.isArray(manifest.critical) || manifest.critical.length === 0) {
-        throw new Error("Critical asset manifest is empty or invalid");
+      if (!manifest || !Array.isArray(manifest.files) || manifest.files.length === 0 ||
+          !Array.isArray(manifest.critical) || manifest.critical.length === 0) {
+        throw new Error("Precache manifest is empty or invalid");
       }
-      // Cache only the entry page's essential JS/CSS. Other assets are cached on demand.
-      await precacheFiles(cache, manifest.critical);
+      await precacheFiles(cache, manifest.files);
 
+      // Validate that the new app entry point and every critical asset exist.
+      for (const path of ["/", "/index.html", ...manifest.critical]) {
+        if (!await cache.match(path)) throw new Error(`Missing cached app asset: ${path}`);
+      }
       await self.skipWaiting();
     } catch (error) {
       await caches.delete(CACHE_NAME);
-      // Keep the previous worker active if even one exported file cannot be cached.
+      // Failed or offline update: retain the previously active version.
       throw error;
     }
   })());
@@ -50,13 +58,17 @@ self.addEventListener("fetch", (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
 
-    // Serve the installed app immediately and refresh HTML in the background.
+    // Cache-first navigation gives the installed app a fast, offline launch.
+    // The network refresh is non-blocking and only refreshes this version's
+    // page cache; installation of a newer build happens in a separate cache.
     if (request.mode === "navigate") {
       const cachedPage = await cache.match(request) ||
         await cache.match("/") ||
         await cache.match("/index.html");
       const refreshPage = fetch(request, { cache: "no-cache" }).then(async (response) => {
-        if (response.ok && response.type === "basic") await cache.put(request, response.clone());
+        if (response.ok && response.type === "basic") {
+          await cache.put(request, response.clone());
+        }
         return response;
       });
       if (cachedPage) {
@@ -70,12 +82,13 @@ self.addEventListener("fetch", (event) => {
       }
     }
 
-    // Cache exact URLs; newly requested assets are stored on demand.
     const cached = await cache.match(request);
     if (cached) return cached;
-    // A tab may still be running the previous app version. Keep its cached
-    // chunks available until that tab reloads safely.
-    const previousCaches = (await caches.keys()).filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME);
+
+    // Keep old hashed chunks available to already-open tabs until they reload.
+    const previousCaches = (await caches.keys()).filter(
+      (key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME
+    );
     for (const previousName of previousCaches) {
       const previousCache = await caches.open(previousName);
       const previousAsset = await previousCache.match(request);
@@ -91,5 +104,5 @@ self.addEventListener("fetch", (event) => {
     } catch {
       return Response.error();
     }
-  })());;
+  })());
 });
