@@ -67,6 +67,9 @@ function LegalDialog({ footer = false }: { footer?: boolean }) {
               <p>По вопросам, связанным с использованием Сервиса и обработкой данных, Пользователь вправе обратиться к автору: <AuthorContact />.</p>
             </LegalSection>
           </section>
+          <p className="mt-6 border-t border-[#E4E8ED] pt-3 text-[10px] leading-4 text-[#8993A2]">
+            Сборка: {process.env.NEXT_PUBLIC_BUILD_ID ?? "dev"} · Выгружено: {process.env.NEXT_PUBLIC_BUILD_DATETIME ?? "локальная версия"}
+          </p>
         </div>
         <div className="shrink-0 border-t border-[#E4E8ED] px-5 py-3 sm:px-7"><DialogClose asChild><button type="button" className="min-h-10 rounded-xl bg-[#26364A] px-5 text-sm font-medium text-white outline-offset-4 focus-visible:outline-2">Понятно</button></DialogClose></div>
       </DialogContent>
