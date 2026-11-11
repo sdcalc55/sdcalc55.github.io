@@ -30,5 +30,7 @@ test("mortgage money fields use shared decimal sanitization and retain focused/u
   assert.match(mortgage, /sanitizeDecimalInput\(event\.target\.value\)/);
   assert.match(mortgage, /onChange\(raw\);/);
   assert.match(mortgage, /onChange\(candidate\);/);
-  assert.match(mortgage, /money && focused \? value\.replace/);
+  assert.match(mortgage, /money && focused \? formatInput\(value\)/);
+  assert.match(mortgage, /getFormattedCaretPosition\(formatted, caret\)/);
+  assert.match(mortgage, /setSelectionRange\(position, position\)/);
 });
