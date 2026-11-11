@@ -24,8 +24,9 @@ test("partial down-payment result is not capped at one billion rubles", () => {
   assert.doesNotMatch(calculation, /total\s*>\s*maxMoney|total\.n\s*>/);
 });
 
-
-test("mortgage money fields retain thousands separators while percentage values retain decimals", () => {
+test("mortgage money fields use shared decimal sanitization and retain focused/unfocused formatting", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
+  assert.match(mortgage, /sanitizeDecimalInput\(event\.target\.value\)/);
   assert.match(mortgage, /const next = money \? formatInput\(raw\) : candidate;/);
+  assert.match(mortgage, /money && focused \? value\.replace/);
 });
