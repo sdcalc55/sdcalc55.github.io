@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { CalculatorResultActions } from "@/components/calculator-result-actions";
 import { formatInput } from "@/lib/calculator";
 import { scrollFocusedInputIntoView } from "@/lib/scroll-focused-input";
+import { sanitizeDecimalInput } from "@/lib/input-sanitize";
 import { calculateMortgage, type MortgageMode } from "@/lib/mortgage";
 import { getCalculationHistory, getHistoryMode, isValidCalculationRecord, removeCalculationByParams, saveCalculation, upsertCalculationByParams, type CalculationRecord } from "@/lib/history";
 
@@ -57,7 +58,7 @@ function MortgageInput({ id, label, value, money, suffix, placeholder, onChange 
     if (event.key === "-" || event.key === "−" || event.key === "Subtract") event.preventDefault();
     if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); focusNextCalculatorInput(event.currentTarget); }
   }} onChange={event => {
-    const raw = event.target.value.replace(/[^\d.,]/g, "").replace(/([.,].*)[.,]/g, "$1");
+    const raw = sanitizeDecimalInput(event.target.value);
     if (money) {
       const digitsBeforeDecimal = raw.split(/[.,]/)[0].replace(/^0+/, "");
       if (digitsBeforeDecimal.length > 10) return;
