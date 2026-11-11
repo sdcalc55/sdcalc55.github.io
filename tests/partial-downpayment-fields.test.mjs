@@ -6,7 +6,8 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
 test("partial down-payment money fields use the same ten-digit entry limit as other calculators", () => {
   const mortgage = read("../components/mortgage-calculators.tsx");
-  assert.match(mortgage, /if \(digitsBeforeDecimal\.length > 10\) return;/);\n  assert.match(mortgage, /if \(money\) \{/);
+  assert.match(mortgage, /if \(digitsBeforeDecimal\.length > 10\) return;/);
+  assert.match(mortgage, /if \(money\) \{/);
   assert.doesNotMatch(mortgage, /id\.startsWith\("mortgage-adjustment-"\) \? 9 : 10/);
 });
 
