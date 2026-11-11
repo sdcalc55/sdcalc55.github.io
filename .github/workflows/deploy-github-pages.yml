@@ -40,7 +40,7 @@ jobs:
         run: npm run lint
 
       - name: Build static site
-        run: npm run build
+        run: NEXT_PUBLIC_BUILD_ID="${GITHUB_SHA::7}" NEXT_PUBLIC_BUILD_DATETIME="$(date -u '+%d.%m.%Y %H:%M UTC')" npm run build
         env:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_BASE_PATH: ''
