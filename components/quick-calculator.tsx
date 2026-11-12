@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Delete, X } from "lucide-react";
-import { evaluateQuickExpression } from "@/lib/quick-calculator";
+import { evaluateQuickExpression, formatQuickExpression } from "@/lib/quick-calculator";
 
 const keys = ["AC", "±", "%", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "0", ",", "=", "⌫"];
 const operators = ["+", "−", "×", "÷"];
@@ -92,7 +92,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       </header>
       <div className="px-5 pb-3 pt-5">
         <div className="flex min-h-[132px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-3 text-right dark:bg-[#111820]">
-          <p className="max-w-full break-all text-sm text-[#748195]" aria-live="polite">{expression}</p>
+          <p className="max-w-full break-all text-sm text-[#748195]" aria-live="polite">{formatQuickExpression(expression)}</p>
           <p className="mt-1 max-w-full break-all text-[42px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[46px] text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
         </div>
       </div>

@@ -52,3 +52,14 @@ export function evaluateQuickExpression(source: string): number {
   if (position !== tokens.length || !Number.isFinite(result)) throw new Error("Некорректное выражение");
   return result;
 }
+
+/** Adds thousands separators to each number without changing operators or decimal input. */
+export function formatQuickExpression(source: string): string {
+  return source.replace(/(?:\\d+(?:[.,]\\d*)?|[.,]\\d+)/g, token => {
+    const separator = token.includes(",") ? "," : token.includes(".") ? "." : "";
+    const [wholePart, fraction] = separator ? token.split(separator) : [token, undefined];
+    const whole = wholePart || "0";
+    const grouped = whole.replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+    return fraction === undefined ? grouped : grouped + separator + fraction;
+  });
+}

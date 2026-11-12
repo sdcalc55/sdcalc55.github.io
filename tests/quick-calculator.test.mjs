@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { evaluateQuickExpression } from "../lib/quick-calculator.ts";
+import { evaluateQuickExpression, formatQuickExpression } from "../lib/quick-calculator.ts";
 
 test("обычные арифметические операции соблюдают приоритет", () => {
   assert.equal(evaluateQuickExpression("2+3*4"), 14);
@@ -22,4 +22,11 @@ test("ошибочные выражения и деление на ноль от
   assert.throws(() => evaluateQuickExpression("5/0"), /На ноль/);
   assert.throws(() => evaluateQuickExpression("2+abc"), /Некорректное/);
   assert.throws(() => evaluateQuickExpression("(2+3"), /скобка/);
+});
+
+test("форматирование выражения разделяет тысячи, не меняя вычисление", () => {
+  assert.equal(formatQuickExpression("100000×(1−25%)"), "100 000×(1−25%)");
+  assert.equal(formatQuickExpression("250000,50+12500"), "250 000,50+12 500");
+  assert.equal(formatQuickExpression("0,5×2000"), "0,5×2 000");
+  assert.equal(evaluateQuickExpression("100000×(1−25%)"), 75000);
 });
