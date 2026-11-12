@@ -15,7 +15,8 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
-  const [justEvaluated, setJustEvaluated] = useState(false);\n  const [showKeypad, setShowKeypad] = useState(false);
+  const [justEvaluated, setJustEvaluated] = useState(false);
+  const [showKeypad, setShowKeypad] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const expressionInputRef = useRef<HTMLTextAreaElement>(null);
   const pendingCaretRef = useRef<number | null>(null);
