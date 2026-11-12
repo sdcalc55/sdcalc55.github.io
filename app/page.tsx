@@ -10,6 +10,7 @@ import { CommissionCalculator } from "@/components/commission-calculator";
 import { MortgageCalculators } from "@/components/mortgage-calculators";
 import { AuthorCopyright, LegalFooter } from "@/components/legal-footer";
 import { LoanCalculator } from "@/components/loan-calculator";
+import { QuickCalculator } from "@/components/quick-calculator";
 import type { Operation } from "@/lib/calculator";
 import { discounts } from "@/lib/discounts";
 import { useTariffs } from "@/hooks/use-tariffs";
@@ -166,6 +167,7 @@ export default function Home() {
 
   const { tariffs, status: tariffStatus } = useTariffs();
   const [screen, setScreen] = useState<Screen>("home");
+  const [quickCalculatorOpen, setQuickCalculatorOpen] = useState(false);
   const [operation, setOperation] = useState<Operation>("sale");
   const [mortgageTab, setMortgageTab] = useState<"downpayment" | "loan">("downpayment");
   const [historyItems, setHistoryItems] = useState<CalculationRecord[]>([]);
@@ -303,11 +305,13 @@ export default function Home() {
         </a>
         <div className="ml-auto flex shrink-0 items-center gap-2 min-[375px]:gap-2.5 sm:gap-3">
           <div className="flex w-fit items-center gap-1 whitespace-nowrap rounded-full border border-[#F3C7C5] bg-[#FCEBEA] px-2 py-[5px] text-left text-[9px] font-medium leading-[14px] text-[#A94442] min-[375px]:text-[10px] sm:gap-1.5 sm:px-[15px] sm:py-[7.5px] sm:text-[11.25px] sm:leading-[18px]"><Sparkles aria-hidden="true" className="size-2.5 shrink-0 text-[#E83C35] sm:size-3" />Alpha Team</div>
+          <button type="button" title="Обычный калькулятор" aria-label="Обычный калькулятор" onClick={() => setQuickCalculatorOpen(true)} className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-[#E7EBF0] bg-white text-[#26364A] transition hover:bg-[#F5F7FA] focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:size-10"><Calculator aria-hidden="true" className="size-[17px] sm:size-5" strokeWidth={1.8} /></button>
           <button type="button" title="История" aria-label="История" onClick={() => navigate("history")} className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-[#E7EBF0] bg-white text-[#26364A] transition hover:bg-[#F5F7FA] focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:size-10"><History aria-hidden="true" className="size-[17px] sm:size-5" strokeWidth={1.8} /></button>
           <button type="button" title="Настройки" aria-label="Настройки" onClick={() => navigate("settings")} className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-[#E7EBF0] bg-white text-[#26364A] transition hover:bg-[#F5F7FA] focus-visible:outline-2 focus-visible:outline-[#E83C35] sm:size-10"><Settings aria-hidden="true" className="size-[17px] sm:size-5" strokeWidth={1.8} /></button>
         </div>
       </div>
     </header>
+    {quickCalculatorOpen && <QuickCalculator onClose={() => setQuickCalculatorOpen(false)} />}
     <main className={`mx-auto w-full max-w-[1200px] flex-1 px-5 sm:px-8 ${screen === "home" ? "pb-0 pt-8 sm:pt-10" : "pb-14 pt-3 sm:pt-6"}`}>
       {screen === "home" && <div className="mb-4 text-center sm:mb-6"><h1 className="text-[40px] font-bold tracking-[-0.045em] sm:text-[54px]">Калькулятор <span className="text-[#E83C35]">SD</span></h1><p className="mt-1 text-[13px] text-[#748195] sm:mt-2 sm:text-base">Выберите раздел для расчёта</p></div>}
       {screen !== "home" && <div className="mb-4 flex items-center justify-between gap-3"><button type="button" onClick={() => navigate("home")} className="inline-flex min-h-10 items-center gap-2 rounded-lg py-2 text-sm font-medium text-[#647184] hover:text-[#E83C35] focus-visible:outline-2 focus-visible:outline-offset-4"><ArrowLeft className="size-4" />На главный экран</button><h1 className="text-xl font-semibold tracking-tight sm:text-3xl">{titles[screen]}</h1></div>}
