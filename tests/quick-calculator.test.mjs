@@ -33,6 +33,17 @@ test("повторная десятичная запятая в одном чи�
   assert.throws(() => evaluateQuickExpression("1,2,3"), /Некорректное/);
   assert.throws(() => evaluateQuickExpression("10+2,,5"), /Некорректное/);
 });
+test("строгая проверка отклоняет посторонние символы и опасные строки", () => {
+  for (const value of ["1e3", "Infinity", "NaN", "12abc", "alert(1)", "2**3", "1..2", "1,2,3"]) {
+    assert.throws(() => evaluateQuickExpression(value), undefined, value);
+  }
+  assert.throws(() => evaluateQuickExpression("1".repeat(257)), /длинное/);
+});
+test("десятичные числа корректно работают с унарным минусом и скобками", () => {
+  assert.equal(evaluateQuickExpression("-1,5+2"), 0.5);
+  assert.equal(evaluateQuickExpression("(-0,5)×4"), -2);
+  assert.equal(evaluateQuickExpression("1+(-2,25)"), -1.25);
+});
 test("ошибочные выражения и деление на ноль отклоняются", () => {
   assert.throws(() => evaluateQuickExpression("5/0"), /На ноль/);
   assert.throws(() => evaluateQuickExpression("2+abc"), /Некорректное/);
