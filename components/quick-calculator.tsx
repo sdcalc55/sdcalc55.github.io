@@ -165,9 +165,29 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             spellCheck={false}
             value={formatQuickExpression(expression || "0")}
             onChange={event => {
-              const value = event.target.value;
-              const raw = value.replace(/[ \\u00a0\\u202f]/g, "");
-              const rawCaret = value.slice(0, event.target.selectionStart ?? value.length).replace(/[ \\u00a0\\u202f]/g, "").length;
+              const value = event.target.value.replace(/[ \\u00a0\\u202f]/g, "");
+              const caret = (event.target.selectionStart ?? value.length);
+              const acceptedBeforeCaret = value.slice(0, caret);
+              const normalize = (source: string) => {
+                let output = "";
+                let decimalUsed = false;
+                for (const char of source) {
+                  if (/^[0-9]$/.test(char)) {
+                    output += char;
+                  } else if (/[+−×÷()%()]/.test(char)) {
+                    output += char;
+                    decimalUsed = false;
+                  } else if (char === "," || char === ".") {
+                    if (!decimalUsed) {
+                      output += ",";
+                      decimalUsed = true;
+                    }
+                  }
+                }
+                return output;
+              };
+              const raw = normalize(value);
+              const rawCaret = normalize(acceptedBeforeCaret).length;
               setExpression(raw);
               pendingCaretRef.current = rawCaret;
               setResult("");
