@@ -33,6 +33,13 @@ test("повторная десятичная запятая в одном чи�
   assert.throws(() => evaluateQuickExpression("1,2,3"), /Некорректное/);
   assert.throws(() => evaluateQuickExpression("10+2,,5"), /Некорректное/);
 });
+test("операторы умножения и деления не могут начинать выражение", () => {
+  for (const value of ["÷9", "×9", "/9", "*9"]) {
+    assert.throws(() => evaluateQuickExpression(value), /Ожидается число|Некорректное выражение/, value);
+  }
+  assert.equal(evaluateQuickExpression("-9"), -9);
+  assert.equal(evaluateQuickExpression("+9"), 9);
+});
 test("строгая проверка отклоняет посторонние символы и опасные строки", () => {
   for (const value of ["1e3", "Infinity", "NaN", "12abc", "alert(1)", "2**3", "1..2", "1,2,3"]) {
     assert.throws(() => evaluateQuickExpression(value), undefined, value);
