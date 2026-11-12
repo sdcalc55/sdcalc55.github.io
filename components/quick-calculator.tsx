@@ -38,13 +38,13 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     }
     if (key === "±") {
       setExpression(current => {
-        if (current === "0") return current;
         const match = current.match(/(\d+(?:[.,]\d*)?|[.,]\d+)$/);
-        if (!match || match.index === undefined) return current.startsWith("-") ? current.slice(1) : "-" + current;
+        if (!match || match.index === undefined) return current;
         const start = match.index;
         const before = current.slice(0, start);
         const number = match[0];
-        return /[+−×÷(]$/.test(before) ? before + "-" + number : before + (before.endsWith("-") ? "+" : "−") + number;
+        const hasUnaryMinus = before.endsWith("−") && (before.length === 1 || /[+−×÷(]$/.test(before.slice(0, -1)));
+        return hasUnaryMinus ? before.slice(0, -1) + number : before + "−" + number;
       });
       setResult(""); setJustEvaluated(false); return;
     }
@@ -57,6 +57,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       }
       if (operators.includes(key)) {
         if (current === "0" && key !== "−") return current;
+        if (current === "0" && key === "−") return "−";
         if (/[+−×÷]$/.test(current)) return current.slice(0, -1) + key;
       }
       return current === "0" && /[0-9]/.test(key) ? key : current + key;
