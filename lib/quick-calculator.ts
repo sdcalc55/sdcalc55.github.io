@@ -1,7 +1,7 @@
 export function evaluateQuickExpression(source: string): number {
-  const input = source.replace(/[\\s\\u00a0\\u202f]/g, "").replace(/,/g, ".");
-  if (!input || !/^[0-9.+*/%()\\-]+$/.test(input)) throw new Error("Некорректное выражение");
-  const tokens = input.match(/(?:\\d+(?:\\.\\d*)?|\\.\\d+)|[()+\\-*/%]/g) ?? [];
+  const input = source.replace(/[\s\u00a0\u202f]/g, "").replace(/,/g, ".");
+  if (!input || !/^[0-9.+*/%()\-]+$/.test(input)) throw new Error("Некорректное выражение");
+  const tokens = input.match(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/%]/g) ?? [];
   if (tokens.join("") !== input) throw new Error("Некорректное выражение");
   let position = 0;
   const peek = () => tokens[position];
@@ -19,7 +19,7 @@ export function evaluateQuickExpression(source: string): number {
       return value;
     }
     const token = consume();
-    if (!token || !/^(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(token)) throw new Error("Ожидается число");
+    if (!token || !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token)) throw new Error("Ожидается число");
     const value = Number(token);
     if (!Number.isFinite(value)) throw new Error("Слишком большое число");
     return value;
