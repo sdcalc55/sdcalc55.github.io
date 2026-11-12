@@ -46,12 +46,12 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     const visible = input?.value ?? formatQuickExpression(expression || "0");
     const visibleStart = input?.selectionStart ?? visible.length;
     const visibleEnd = input?.selectionEnd ?? visibleStart;
-    const start = expression ? visible.slice(0, visibleStart).replace(/[ \\u00a0\\u202f]/g, "").length : 0;
-    const end = expression ? visible.slice(0, visibleEnd).replace(/[ \\u00a0\\u202f]/g, "").length : 0;
+    const start = expression ? visible.slice(0, visibleStart).replace(/[ \u00a0\u202f]/g, "").length : 0;
+    const end = expression ? visible.slice(0, visibleEnd).replace(/[ \u00a0\u202f]/g, "").length : 0;
     const replaceSelection = (value: string) => {
       let from = start;
       let to = end;
-      if (/^\\d$/.test(value) && from === to) {
+      if (/^\d$/.test(value) && from === to) {
         let tokenStart = from;
         let tokenEnd = from;
         while (tokenStart > 0 && !/[+−×÷()%]/.test(expression[tokenStart - 1])) tokenStart--;
@@ -165,29 +165,32 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             spellCheck={false}
             value={formatQuickExpression(expression || "0")}
             onChange={event => {
-              const value = event.target.value.replace(/[ \\u00a0\\u202f]/g, "");
+              const value = event.target.value.replace(/[ \u00a0\u202f]/g, "");
               const caret = (event.target.selectionStart ?? value.length);
               const acceptedBeforeCaret = value.slice(0, caret);
-              const normalize = (source: string) => {
+              const normalize = (source: string): string | null => {
                 let output = "";
                 let decimalUsed = false;
                 for (const char of source) {
                   if (/^[0-9]$/.test(char)) {
                     output += char;
-                  } else if (/[+−×÷()%()]/.test(char)) {
+                  } else if (/[+−×÷%()]/.test(char)) {
                     output += char;
                     decimalUsed = false;
                   } else if (char === "," || char === ".") {
-                    if (!decimalUsed) {
-                      output += ",";
-                      decimalUsed = true;
-                    }
+                    if (decimalUsed) return null;
+                    output += ",";
+                    decimalUsed = true;
+                  } else {
+                    return null;
                   }
                 }
                 return output;
               };
               const raw = normalize(value);
-              const rawCaret = normalize(acceptedBeforeCaret).length;
+              const normalizedBeforeCaret = normalize(acceptedBeforeCaret);
+              if (raw === null || normalizedBeforeCaret === null || raw.length > 256) return;
+              const rawCaret = normalizedBeforeCaret.length;
               setExpression(raw);
               pendingCaretRef.current = rawCaret;
               setResult("");
