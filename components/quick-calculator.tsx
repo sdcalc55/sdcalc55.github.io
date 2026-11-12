@@ -76,7 +76,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     if (key === "=") {
       try {
         const value = evaluateQuickExpression(expression || "0");
-        setResult(pretty(value)); setExpression(String(value).replace(".", ",")); setJustEvaluated(true);
+        const normalizedResult = String(value).replace(".", ",");\n        setResult(pretty(value));\n        setExpression(normalizedResult);\n        pendingCaretRef.current = normalizedResult.length;\n        setJustEvaluated(true);
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Ошибка"); }
       return;
     }
@@ -141,7 +141,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         return;
       }
     }
-    if (key === "%" && (!expression.slice(0, start).match(/[0-9)]$/) || start === 0)) return;
+    if (key === "%" && (start === 0 || !/[0-9),]$/.test(expression.slice(0, start)) || expression[start - 1] === "%")) return;
     replaceSelection(key);
   };
 
