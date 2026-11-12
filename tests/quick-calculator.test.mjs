@@ -18,6 +18,15 @@ test("поддерживаются десятичные числа, пробел
   assert.equal(evaluateQuickExpression("12,5*2"), 25);
   assert.equal(evaluateQuickExpression("200*10%"), 20);
 });
+test("завершающий оператор игнорируется без потери предыдущего результата", () => {
+  assert.equal(evaluateQuickExpression("56+66+"), 122);
+  assert.equal(evaluateQuickExpression("120×"), 120);
+  assert.equal(evaluateQuickExpression("25,5+"), 25.5);
+});
+test("повторная десятичная запятая в одном числе отклоняется", () => {
+  assert.throws(() => evaluateQuickExpression("1,2,3"), /Некорректное/);
+  assert.throws(() => evaluateQuickExpression("10+2,,5"), /Некорректное/);
+});
 test("ошибочные выражения и деление на ноль отклоняются", () => {
   assert.throws(() => evaluateQuickExpression("5/0"), /На ноль/);
   assert.throws(() => evaluateQuickExpression("2+abc"), /Некорректное/);
