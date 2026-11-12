@@ -39,7 +39,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     if (key === "±") {
       setExpression(current => {
         if (current === "0") return current;
-        const match = current.match(/(\\d+(?:[.,]\\d*)?|[.,]\\d+)$/);
+        const match = current.match(/(\d+(?:[.,]\d*)?|[.,]\d+)$/);
         if (!match || match.index === undefined) return current.startsWith("-") ? current.slice(1) : "-" + current;
         const start = match.index;
         const before = current.slice(0, start);
