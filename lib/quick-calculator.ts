@@ -1,4 +1,5 @@
 export function evaluateQuickExpression(source: string): number {
+  if (source.length > 256) throw new Error("Слишком длинное выражение");
   const input = source.replace(/[\s\u00a0\u202f]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-").replace(/×/g, "*").replace(/÷/g, "/").replace(/[+\-*/]+$/, "");
   if (!input || !/^[0-9.+*/%()\-]+$/.test(input)) throw new Error("Некорректное выражение");
   const tokens = input.match(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/%]/g) ?? [];
