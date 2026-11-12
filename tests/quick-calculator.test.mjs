@@ -23,6 +23,12 @@ test("завершающий оператор игнорируется без п
   assert.equal(evaluateQuickExpression("120×"), 120);
   assert.equal(evaluateQuickExpression("25,5+"), 25.5);
 });
+test("десятичная запятая корректна в начале, конце и в разных операндах", () => {
+  assert.equal(evaluateQuickExpression(",5+1,25"), 1.75);
+  assert.equal(evaluateQuickExpression("5,"), 5);
+  assert.equal(evaluateQuickExpression("1,2+3,4×2"), 8);
+  assert.equal(evaluateQuickExpression("1,000+2,000"), 3);
+});
 test("повторная десятичная запятая в одном числе отклоняется", () => {
   assert.throws(() => evaluateQuickExpression("1,2,3"), /Некорректное/);
   assert.throws(() => evaluateQuickExpression("10+2,,5"), /Некорректное/);
