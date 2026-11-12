@@ -32,6 +32,10 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Ошибка"); }
       return;
     }
+    if (key === "(" || key === ")") {
+      setExpression(current => (current === "0" || justEvaluated ? key : current + key));
+      setResult(""); setJustEvaluated(false); return;
+    }
     if (key === "±") {
       setExpression(current => {
         if (current === "0") return current;
@@ -70,6 +74,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       else if (event.key === "*") { event.preventDefault(); append("×"); }
       else if (event.key === "/") { event.preventDefault(); append("÷"); }
       else if (event.key === "%") { event.preventDefault(); append("%"); }
+      else if (event.key === "(" || event.key === ")") { event.preventDefault(); append(event.key); }
       else if (event.key === "Enter" || event.key === "=") { event.preventDefault(); append("="); }
       else if (event.key === "Backspace") { event.preventDefault(); append("⌫"); }
       else if (event.key === "Delete") { event.preventDefault(); append("AC"); }
@@ -86,10 +91,13 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         <button type="button" onClick={onClose} aria-label="Закрыть калькулятор" className="flex size-9 items-center justify-center rounded-xl text-[#748195] hover:bg-[#F1F3F6] dark:hover:bg-[#253241]"><X className="size-5" /></button>
       </header>
       <div className="px-5 pb-3 pt-5">
-        <div className="flex min-h-[105px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-3 text-right dark:bg-[#111820]">
+        <div className="flex min-h-[132px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-3 text-right dark:bg-[#111820]">
           <p className="max-w-full break-all text-sm text-[#748195]" aria-live="polite">{expression}</p>
-          <p className="mt-1 max-w-full break-all text-[32px] font-semibold leading-tight tracking-tight tabular-nums text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
+          <p className="mt-1 max-w-full break-all text-[42px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[46px] text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
         </div>
+      </div>
+      <div className="flex justify-end gap-2 px-5 pb-2">
+        {["(", ")"].map(key => <button key={key} type="button" onClick={() => append(key)} aria-label={key === "(" ? "Открывающая скобка" : "Закрывающая скобка"} className="flex min-h-10 min-w-14 items-center justify-center rounded-xl bg-[#EAF0F6] px-4 text-lg font-semibold text-[#26364A] transition hover:bg-[#DDE5EE] active:scale-[.97] dark:bg-[#253241] dark:text-[#E6ECF3]">{key}</button>)}
       </div>
       <div className="grid grid-cols-4 gap-2 px-5 pb-5">
         {keys.map(key => {
