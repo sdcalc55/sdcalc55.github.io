@@ -76,7 +76,11 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     if (key === "=") {
       try {
         const value = evaluateQuickExpression(expression || "0");
-        const normalizedResult = String(value).replace(".", ",");\n        setResult(pretty(value));\n        setExpression(normalizedResult);\n        pendingCaretRef.current = normalizedResult.length;\n        setJustEvaluated(true);
+        const normalizedResult = String(value).replace(".", ",");
+        setResult(pretty(value));
+        setExpression(normalizedResult);
+        pendingCaretRef.current = normalizedResult.length;
+        setJustEvaluated(true);
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Ошибка"); }
       return;
     }
