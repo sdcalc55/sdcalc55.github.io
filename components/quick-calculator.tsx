@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Delete, X } from "lucide-react";
+import { Delete, Keyboard, X } from "lucide-react";
 import { evaluateQuickExpression, formatQuickExpression } from "@/lib/quick-calculator";
 
 const keys = ["AC", "±", "%", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "0", ",", "=", "⌫"];
@@ -15,7 +15,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
-  const [justEvaluated, setJustEvaluated] = useState(false);
+  const [justEvaluated, setJustEvaluated] = useState(false);\n  const [showKeypad, setShowKeypad] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const expressionInputRef = useRef<HTMLTextAreaElement>(null);
   const pendingCaretRef = useRef<number | null>(null);
@@ -224,16 +224,30 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
           {error ? <p className="mt-2 max-w-full break-words text-sm font-medium leading-snug text-[#748195]">{error}</p> : <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{result || " "}</p>}
         </div>
       </div>
-      <div className="flex justify-end gap-2 px-5 pb-2">
-        {["(", ")"].map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "(" ? "Открывающая скобка" : "Закрывающая скобка"} className="flex min-h-10 min-w-14 items-center justify-center rounded-xl bg-[#EAF0F6] px-4 text-lg font-semibold text-[#26364A] transition hover:bg-[#DDE5EE] active:scale-[.97] dark:bg-[#253241] dark:text-[#E6ECF3]">{key}</button>)}
+      <div className="px-5 pb-3">
+        <button
+          type="button"
+          aria-expanded={showKeypad}
+          aria-controls="quick-calculator-keypad"
+          onClick={() => { setShowKeypad(value => !value); expressionInputRef.current?.focus(); }}
+          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#E1E6ED] text-sm font-medium text-[#748195] transition hover:bg-[#F4F6F8] dark:border-[#405064] dark:hover:bg-[#253241]"
+        >
+          <Keyboard className="size-4" />
+          {showKeypad ? "Скрыть экранные кнопки" : "Показать экранные кнопки"}
+        </button>
       </div>
-      <div className="grid grid-cols-4 gap-2 px-5 pb-5">
-        {keys.map(key => {
-          const utility = ["AC", "±", "%", "⌫"].includes(key);
-          const operator = operators.includes(key) || key === "÷" || key === "=";
-          return <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "⌫" ? "Удалить последнюю цифру" : key} className={`flex min-h-[58px] items-center justify-center rounded-2xl text-xl font-semibold tabular-nums transition active:scale-[.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : operator ? "bg-[#26364A] text-white hover:bg-[#34465D] dark:bg-[#34465D]" : utility ? "bg-[#FCEBEA] text-[#A94442] hover:bg-[#F8DDDB] dark:bg-[#352322] dark:text-[#F0A5A0]" : "bg-[#F1F3F6] text-[#26364A] hover:bg-[#E7EBF0] dark:bg-[#253241] dark:text-[#E6ECF3]"} ${key === "0" ? "col-span-1" : ""}`}>{key === "⌫" ? <Delete className="size-5" /> : key}</button>;
-        })}
-      </div>
+      {showKeypad && <>
+        <div className="flex justify-end gap-2 px-5 pb-2">
+          {["(", ")"].map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "(" ? "Открывающая скобка" : "Закрывающая скобка"} className="flex min-h-10 min-w-14 items-center justify-center rounded-xl bg-[#EAF0F6] px-4 text-lg font-semibold text-[#26364A] transition hover:bg-[#DDE5EE] active:scale-[.97] dark:bg-[#253241] dark:text-[#E6ECF3]">{key}</button>)}
+        </div>
+        <div id="quick-calculator-keypad" className="grid grid-cols-4 gap-2 px-5 pb-5">
+          {keys.map(key => {
+            const utility = ["AC", "±", "%", "⌫"].includes(key);
+            const operator = operators.includes(key) || key === "÷" || key === "=";
+            return <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "⌫" ? "Удалить последнюю цифру" : key} className={`flex min-h-[58px] items-center justify-center rounded-2xl text-xl font-semibold tabular-nums transition active:scale-[.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : operator ? "bg-[#26364A] text-white hover:bg-[#34465D] dark:bg-[#34465D]" : utility ? "bg-[#FCEBEA] text-[#A94442] hover:bg-[#F8DDDB] dark:bg-[#352322] dark:text-[#F0A5A0]" : "bg-[#F1F3F6] text-[#26364A] hover:bg-[#E7EBF0] dark:bg-[#253241] dark:text-[#E6ECF3]"} ${key === "0" ? "col-span-1" : ""}`}>{key === "⌫" ? <Delete className="size-5" /> : key}</button>;
+          })}
+        </div>
+      </>}
     </section>
   </div>;
 }
