@@ -219,7 +219,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
               setJustEvaluated(false);
             }}
             onMouseDown={event => event.stopPropagation()}
-            className="w-full min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-all bg-transparent text-right text-[32px] font-medium leading-tight tabular-nums text-[#748195] outline-none sm:text-[36px]"
+            className="max-h-[6em] w-full min-w-0 resize-none overflow-x-hidden overflow-y-auto whitespace-pre-wrap break-all bg-transparent text-right text-[32px] font-medium leading-tight tabular-nums text-[#748195] outline-none sm:text-[36px]"
           />
           {error ? <p className="mt-2 max-w-full break-words text-sm font-medium leading-snug text-[#748195]">{error}</p> : <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{result || " "}</p>}
         </div>
