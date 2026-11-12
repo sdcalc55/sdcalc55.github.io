@@ -92,9 +92,9 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         <button type="button" onClick={onClose} aria-label="Закрыть калькулятор" className="flex size-9 items-center justify-center rounded-xl text-[#748195] hover:bg-[#F1F3F6] dark:hover:bg-[#253241]"><X className="size-5" /></button>
       </header>
       <div className="px-5 pb-3 pt-5">
-        <div className="flex min-h-[132px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-3 text-right dark:bg-[#111820]">
-          <p className="max-w-full break-all text-sm text-[#748195]" aria-live="polite">{formatQuickExpression(expression)}</p>
-          <p className="mt-1 max-w-full break-all text-[42px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[46px] text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
+        <div className="flex min-h-[156px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-4 text-right dark:bg-[#111820]">
+          <p className="max-w-full break-all text-lg text-[#748195]" aria-live="polite">{formatQuickExpression(expression)}</p>
+          <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
         </div>
       </div>
       <div className="flex justify-end gap-2 px-5 pb-2">
@@ -107,7 +107,6 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
           return <button key={key} type="button" onClick={() => append(key)} aria-label={key === "⌫" ? "Удалить последнюю цифру" : key} className={`flex min-h-[58px] items-center justify-center rounded-2xl text-xl font-semibold tabular-nums transition active:scale-[.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : operator ? "bg-[#26364A] text-white hover:bg-[#34465D] dark:bg-[#34465D]" : utility ? "bg-[#FCEBEA] text-[#A94442] hover:bg-[#F8DDDB] dark:bg-[#352322] dark:text-[#F0A5A0]" : "bg-[#F1F3F6] text-[#26364A] hover:bg-[#E7EBF0] dark:bg-[#253241] dark:text-[#E6ECF3]"} ${key === "0" ? "col-span-1" : ""}`}>{key === "⌫" ? <Delete className="size-5" /> : key}</button>;
         })}
       </div>
-      <p className="px-5 pb-4 text-center text-[11px] text-[#8993A2]">Можно вводить выражения с клавиатуры</p>
     </section>
   </div>;
 }
