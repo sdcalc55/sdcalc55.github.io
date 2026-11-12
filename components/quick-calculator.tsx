@@ -120,11 +120,28 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       }
       return;
     }
-    if (operators.includes(key) && start === end && start > 0 && /[+−×÷]$/.test(expression.slice(0, start))) {
-      const next = expression.slice(0, start - 1) + key + expression.slice(end);
-      commitExpression(next, start);
-      return;
+    if (operators.includes(key)) {
+      const before = expression.slice(0, start);
+      const after = expression.slice(end);
+      const previous = before.slice(-1);
+      const nextChar = after[0];
+      // Binary operators need a left operand. Only unary minus may begin a term.
+      if (!before && key !== "−") return;
+      if (/[+×÷]/.test(key) && (previous === "(" || !previous)) return;
+      if (/[×÷]/.test(key) && /[+−×÷(]$/.test(before)) return;
+      if (key === "−" && previous === "−" && start === end) return;
+      if (start === end && /[+−×÷]$/.test(before)) {
+        const next = before.slice(0, -1) + key + after;
+        commitExpression(next, start);
+        return;
+      }
+      if (start === end && nextChar && /[+−×÷]/.test(nextChar)) {
+        const next = before + key + after.slice(1);
+        commitExpression(next, start + 1);
+        return;
+      }
     }
+    if (key === "%" && (!expression.slice(0, start).match(/[0-9)]$/) || start === 0)) return;
     replaceSelection(key);
   };
 
