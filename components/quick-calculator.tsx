@@ -46,8 +46,8 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     const visible = input?.value ?? formatQuickExpression(expression || "0");
     const visibleStart = input?.selectionStart ?? visible.length;
     const visibleEnd = input?.selectionEnd ?? visibleStart;
-    const start = visible.slice(0, visibleStart).replace(/[ \\u00a0\\u202f]/g, "").length;
-    const end = visible.slice(0, visibleEnd).replace(/[ \\u00a0\\u202f]/g, "").length;
+    const start = expression ? visible.slice(0, visibleStart).replace(/[ \\u00a0\\u202f]/g, "").length : 0;
+    const end = expression ? visible.slice(0, visibleEnd).replace(/[ \\u00a0\\u202f]/g, "").length : 0;
     const replaceSelection = (value: string) => {
       let from = start;
       let to = end;
