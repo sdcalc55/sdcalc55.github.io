@@ -17,7 +17,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState("");
   const [justEvaluated, setJustEvaluated] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const expressionInputRef = useRef<HTMLInputElement>(null);
+  const expressionInputRef = useRef<HTMLTextAreaElement>(null);
   const pendingCaretRef = useRef<number | null>(null);
 
   const commitExpression = (next: string, caret: number) => {
@@ -165,7 +165,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       else if (event.key === "Delete") { event.preventDefault(); append("AC"); }
     };
     window.addEventListener("keydown", handleKey);
-    dialogRef.current?.focus();
+    expressionInputRef.current?.focus();
     return () => window.removeEventListener("keydown", handleKey);
   });
 
@@ -178,7 +178,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       <div className="px-5 pb-3 pt-5">
         <div className="flex min-h-[156px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-4 text-right dark:bg-[#111820]">
           <textarea
-            ref={expressionInputRef as React.RefObject<HTMLTextAreaElement>}
+            ref={expressionInputRef}
             aria-label="Математическое выражение"
             rows={Math.min(4, Math.max(1, Math.ceil(formatQuickExpression(expression || "0").length / 14)))}
             inputMode="decimal"
