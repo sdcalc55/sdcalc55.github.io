@@ -1,5 +1,5 @@
 export function evaluateQuickExpression(source: string): number {
-  const input = source.replace(/[\s\u00a0\u202f]/g, "").replace(/,/g, ".");
+  const input = source.replace(/[\s\u00a0\u202f]/g, "").replace(/,/g, ".").replace(/[−–]/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
   if (!input || !/^[0-9.+*/%()\-]+$/.test(input)) throw new Error("Некорректное выражение");
   const tokens = input.match(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/%]/g) ?? [];
   if (tokens.join("") !== input) throw new Error("Некорректное выражение");
