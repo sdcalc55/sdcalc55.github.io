@@ -12,7 +12,7 @@ function pretty(value: number) {
 }
 
 export function QuickCalculator({ onClose }: { onClose: () => void }) {
-  const [expression, setExpression] = useState("0");
+  const [expression, setExpression] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [justEvaluated, setJustEvaluated] = useState(false);
@@ -41,9 +41,9 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
 
   const append = (key: string) => {
     setError("");
-    if (key === "AC") { setExpression("0"); setResult(""); setJustEvaluated(false); return; }
+    if (key === "AC") { setExpression(""); setResult(""); setJustEvaluated(false); return; }
     const input = expressionInputRef.current;
-    const visible = input?.value ?? formatQuickExpression(expression);
+    const visible = input?.value ?? formatQuickExpression(expression || "0");
     const visibleStart = input?.selectionStart ?? visible.length;
     const visibleEnd = input?.selectionEnd ?? visibleStart;
     const start = visible.slice(0, visibleStart).replace(/[ \\u00a0\\u202f]/g, "").length;
@@ -94,9 +94,18 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       }
     }
     if (key === ",") {
-      const currentNumber = expression.slice(0, start).split(/[+−×÷()%]/).pop() ?? "";
+      let tokenStart = start;
+      let tokenEnd = start;
+      while (tokenStart > 0 && !/[+−×÷()%]/.test(expression[tokenStart - 1])) tokenStart--;
+      while (tokenEnd < expression.length && !/[+−×÷()%]/.test(expression[tokenEnd])) tokenEnd++;
+      const currentNumber = expression.slice(tokenStart, tokenEnd);
       if (currentNumber.includes(",") || currentNumber.includes(".")) return;
-      replaceSelection(",");
+      if (!currentNumber) {
+        const next = expression.slice(0, start) + "0," + expression.slice(end);
+        commitExpression(next, start + 2);
+      } else {
+        replaceSelection(",");
+      }
       return;
     }
     if (operators.includes(key) && start === end && start > 0 && /[+−×÷]$/.test(expression.slice(0, start))) {
@@ -142,12 +151,12 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             inputMode="decimal"
             autoComplete="off"
             spellCheck={false}
-            value={formatQuickExpression(expression)}
+            value={formatQuickExpression(expression || "0")}
             onChange={event => {
               const value = event.target.value;
               const raw = value.replace(/[ \\u00a0\\u202f]/g, "");
               const rawCaret = value.slice(0, event.target.selectionStart ?? value.length).replace(/[ \\u00a0\\u202f]/g, "").length;
-              setExpression(raw || "0");
+              setExpression(raw);
               pendingCaretRef.current = rawCaret;
               setResult("");
               setError("");
