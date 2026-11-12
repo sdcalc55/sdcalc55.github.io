@@ -177,10 +177,10 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       </header>
       <div className="px-5 pb-3 pt-5">
         <div className="flex min-h-[156px] flex-col items-end justify-end overflow-hidden rounded-2xl bg-[#F4F6F8] px-4 py-4 text-right dark:bg-[#111820]">
-          <input
-            ref={expressionInputRef}
+          <textarea
+            ref={expressionInputRef as React.RefObject<HTMLTextAreaElement>}
             aria-label="Математическое выражение"
-            type="text"
+            rows={Math.min(4, Math.max(1, Math.ceil(formatQuickExpression(expression || "0").length / 14)))}
             inputMode="decimal"
             autoComplete="off"
             spellCheck={false}
@@ -219,7 +219,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
               setJustEvaluated(false);
             }}
             onMouseDown={event => event.stopPropagation()}
-            className={`w-full min-w-0 bg-transparent text-right font-medium tabular-nums text-[#748195] outline-none ${formatQuickExpression(expression || "0").length > 14 ? "text-[22px]" : "text-[32px] sm:text-[36px]"}`}
+            className="w-full min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-all bg-transparent text-right text-[32px] font-medium leading-tight tabular-nums text-[#748195] outline-none sm:text-[36px]"
           />
           {error ? <p className="mt-2 max-w-full break-words text-sm font-medium leading-snug text-[#748195]">{error}</p> : <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{result || " "}</p>}
         </div>
