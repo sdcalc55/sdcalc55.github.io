@@ -130,7 +130,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
   return <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[#17212D]/45 px-4 pb-6 pt-[max(5rem,env(safe-area-inset-top))] backdrop-blur-[2px]" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="quick-calculator-title" tabIndex={-1} className="w-full max-w-[360px] overflow-hidden rounded-3xl border border-[#E1E6ED] bg-white shadow-2xl outline-none dark:border-[#405064] dark:bg-[#1B2632]">
       <header className="flex items-center justify-between border-b border-[#E7EBF0] px-5 py-4 dark:border-[#354354]">
-        <h2 id="quick-calculator-title" className="text-sm font-semibold text-[#26364A] dark:text-[#E6ECF3]">Калькулятор</h2>
+        <h2 id="quick-calculator-title" className="text-base font-semibold text-[#26364A] dark:text-[#E6ECF3]">Калькулятор</h2>
         <button type="button" onClick={onClose} aria-label="Закрыть калькулятор" className="flex size-9 items-center justify-center rounded-xl text-[#748195] hover:bg-[#F1F3F6] dark:hover:bg-[#253241]"><X className="size-5" /></button>
       </header>
       <div className="px-5 pb-3 pt-5">
@@ -156,7 +156,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             onMouseDown={event => event.stopPropagation()}
             className="w-full min-w-0 bg-transparent text-right text-lg text-[#748195] outline-none"
           />
-          <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{error || result || " "}</p>
+          {error ? <p className="mt-2 max-w-full break-words text-sm font-medium leading-snug text-[#748195]">{error}</p> : <p className="mt-1 max-w-full break-all text-[48px] font-semibold leading-tight tracking-tight tabular-nums sm:text-[52px] text-[#26364A] dark:text-[#E6ECF3]">{result || " "}</p>}
         </div>
       </div>
       <div className="flex justify-end gap-2 px-5 pb-2">
