@@ -49,21 +49,33 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
     const start = visible.slice(0, visibleStart).replace(/[ \\u00a0\\u202f]/g, "").length;
     const end = visible.slice(0, visibleEnd).replace(/[ \\u00a0\\u202f]/g, "").length;
     const replaceSelection = (value: string) => {
-      const next = expression.slice(0, start) + value + expression.slice(end);
-      commitExpression(next || "0", start + value.length);
+      let from = start;
+      let to = end;
+      if (/^\\d$/.test(value) && from === to) {
+        let tokenStart = from;
+        let tokenEnd = from;
+        while (tokenStart > 0 && !/[+−×÷()%]/.test(expression[tokenStart - 1])) tokenStart--;
+        while (tokenEnd < expression.length && !/[+−×÷()%]/.test(expression[tokenEnd])) tokenEnd++;
+        if (expression.slice(tokenStart, tokenEnd) === "0" && from === tokenEnd) {
+          from = tokenStart;
+          to = tokenEnd;
+        }
+      }
+      const next = expression.slice(0, from) + value + expression.slice(to);
+      commitExpression(next, from + value.length);
     };
     if (key === "⌫") {
       if (start !== end) replaceSelection("");
       else if (start > 0) {
         const from = start - 1;
         const next = expression.slice(0, from) + expression.slice(start);
-        commitExpression(next || "0", from);
+        commitExpression(next, from);
       }
       return;
     }
     if (key === "=") {
       try {
-        const value = evaluateQuickExpression(expression);
+        const value = evaluateQuickExpression(expression || "0");
         setResult(pretty(value)); setExpression(String(value).replace(".", ",")); setJustEvaluated(true);
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Ошибка"); }
       return;
