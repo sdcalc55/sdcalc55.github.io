@@ -17,12 +17,14 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState("");
   const [justEvaluated, setJustEvaluated] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
+  const [completedExpression, setCompletedExpression] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const expressionInputRef = useRef<HTMLTextAreaElement>(null);
   const pendingCaretRef = useRef<number | null>(null);
 
   const commitExpression = (next: string, caret: number) => {
     setExpression(next);
+    setCompletedExpression(null);
     pendingCaretRef.current = caret;
     setResult("");
     setError("");
@@ -42,9 +44,9 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
 
   const append = (key: string) => {
     setError("");
-    if (key === "AC") { setExpression(""); setResult(""); setJustEvaluated(false); return; }
+    if (key === "AC") { setExpression(""); setCompletedExpression(null); setResult(""); setJustEvaluated(false); return; }
     const input = expressionInputRef.current;
-    const visible = input?.value ?? formatQuickExpression(expression || "0");
+    const visible = justEvaluated ? formatQuickExpression(expression || "0") : (input?.value ?? formatQuickExpression(expression || "0"));
     const visibleStart = input?.selectionStart ?? visible.length;
     const visibleEnd = input?.selectionEnd ?? visibleStart;
     const start = expression ? visible.slice(0, visibleStart).replace(/[ \u00a0\u202f]/g, "").length : 0;
@@ -79,6 +81,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         const value = evaluateQuickExpression(expression || "0");
         const normalizedResult = String(value).replace(".", ",");
         setResult(pretty(value));
+        setCompletedExpression(expression || "0");
         setExpression(normalizedResult);
         pendingCaretRef.current = normalizedResult.length;
         setJustEvaluated(true);
@@ -90,6 +93,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
       return;
     }
     if (key === "±") {
+      setCompletedExpression(null);
       setExpression(current => {
         const match = current.match(/(\d+(?:[.,]\d*)?|[.,]\d+)$/);
         if (!match || match.index === undefined) return current;
@@ -185,7 +189,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             inputMode="decimal"
             autoComplete="off"
             spellCheck={false}
-            value={formatQuickExpression(expression || "0")}
+            value={formatQuickExpression(completedExpression ?? expression || "0")}
             onChange={event => {
               const value = event.target.value.replace(/[ \u00a0\u202f]/g, "");
               const caret = (event.target.selectionStart ?? value.length);
@@ -214,6 +218,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
               if (raw === null || normalizedBeforeCaret === null || raw.length > 256) return;
               const rawCaret = normalizedBeforeCaret.length;
               setExpression(raw);
+              setCompletedExpression(null);
               pendingCaretRef.current = rawCaret;
               setResult("");
               setError("");
@@ -226,27 +231,29 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         </div>
       </div>
       <div className="px-5 pb-3">
-        <div className="grid grid-cols-4 gap-2 pb-2" aria-label="Математические операции">
-          {["+", "−", "×", "÷"].map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key} className="flex min-h-11 items-center justify-center rounded-xl bg-[#26364A] text-xl font-semibold text-white transition hover:bg-[#34465D] active:scale-[.97] dark:bg-[#34465D]">{key}</button>)}
-        </div>
-        <div className="grid grid-cols-4 gap-2 pb-3">
-          {["(", ")", "%", "="].map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key} className={`flex min-h-10 items-center justify-center rounded-xl text-lg font-semibold transition active:scale-[.97] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : "bg-[#EAF0F6] text-[#26364A] hover:bg-[#DDE5EE] dark:bg-[#253241] dark:text-[#E6ECF3]"}`}>{key}</button>)}
-        </div>
-        <button
-          type="button"
-          aria-expanded={showKeypad}
-          aria-controls="quick-calculator-keypad"
-          onClick={() => { setShowKeypad(value => !value); expressionInputRef.current?.focus(); }}
-          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#E1E6ED] text-sm font-medium text-[#748195] transition hover:bg-[#F4F6F8] dark:border-[#405064] dark:hover:bg-[#253241]"
-        >
-          <Keyboard className="size-4" />
-          {showKeypad ? "Скрыть цифровые кнопки" : "Показать цифровые кнопки"}
-        </button>
+        {showKeypad ? (
+          <button type="button" aria-expanded="true" aria-controls="quick-calculator-keypad" onClick={() => { setShowKeypad(false); expressionInputRef.current?.focus(); }} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#E1E6ED] text-sm font-medium text-[#748195] transition hover:bg-[#F4F6F8] dark:border-[#405064] dark:hover:bg-[#253241]">
+            <Keyboard className="size-4" /> Скрыть цифровые кнопки
+          </button>
+        ) : (
+          <>
+            <div className="grid grid-cols-4 gap-2 pb-2" aria-label="Математические операции">
+              {operators.map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key} className="flex min-h-11 items-center justify-center rounded-xl bg-[#26364A] text-xl font-semibold text-white transition hover:bg-[#34465D] active:scale-[.97] dark:bg-[#34465D]">{key}</button>)}
+            </div>
+            <div className="grid grid-cols-4 gap-2 pb-3">
+              {["(", ")", "%", "="].map(key => <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key} className={`flex min-h-10 items-center justify-center rounded-xl text-lg font-semibold transition active:scale-[.97] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : "bg-[#EAF0F6] text-[#26364A] hover:bg-[#DDE5EE] dark:bg-[#253241] dark:text-[#E6ECF3]"}`}>{key}</button>)}
+            </div>
+            <button type="button" aria-expanded="false" aria-controls="quick-calculator-keypad" onClick={() => { setShowKeypad(true); expressionInputRef.current?.focus(); }} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#E1E6ED] text-sm font-medium text-[#748195] transition hover:bg-[#F4F6F8] dark:border-[#405064] dark:hover:bg-[#253241]">
+              <Keyboard className="size-4" /> Показать цифровые кнопки
+            </button>
+          </>
+        )}
       </div>
       {showKeypad && <div id="quick-calculator-keypad" className="grid grid-cols-4 gap-2 px-5 pb-5">
-        {keys.filter(key => !operators.includes(key) && key !== "÷" && key !== "=" && key !== "%").map(key => {
-          const utility = ["AC", "±", "⌫"].includes(key);
-          return <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "⌫" ? "Удалить последнюю цифру" : key} className={`flex min-h-[58px] items-center justify-center rounded-2xl text-xl font-semibold tabular-nums transition active:scale-[.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] ${utility ? "bg-[#FCEBEA] text-[#A94442] hover:bg-[#F8DDDB] dark:bg-[#352322] dark:text-[#F0A5A0]" : "bg-[#F1F3F6] text-[#26364A] hover:bg-[#E7EBF0] dark:bg-[#253241] dark:text-[#E6ECF3]"}`}>{key === "⌫" ? <Delete className="size-5" /> : key}</button>;
+        {keys.map(key => {
+          const utility = ["AC", "±", "%", "⌫"].includes(key);
+          const operator = operators.includes(key) || key === "=";
+          return <button key={key} type="button" onMouseDown={event => event.preventDefault()} onClick={() => append(key)} aria-label={key === "⌫" ? "Удалить последнюю цифру" : key} className={`flex min-h-[58px] items-center justify-center rounded-2xl text-xl font-semibold tabular-nums transition active:scale-[.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E83C35] ${key === "=" ? "bg-[#E83C35] text-white hover:bg-[#D9322C]" : operator ? "bg-[#26364A] text-white hover:bg-[#34465D] dark:bg-[#34465D]" : utility ? "bg-[#FCEBEA] text-[#A94442] hover:bg-[#F8DDDB] dark:bg-[#352322] dark:text-[#F0A5A0]" : "bg-[#F1F3F6] text-[#26364A] hover:bg-[#E7EBF0] dark:bg-[#253241] dark:text-[#E6ECF3]"}`}>{key === "⌫" ? <Delete className="size-5" /> : key}</button>;
         })}
       </div>}
     </section>
