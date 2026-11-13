@@ -83,7 +83,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
         setResult(pretty(value));
         setCompletedExpression(expression || "0");
         setExpression(normalizedResult);
-        pendingCaretRef.current = normalizedResult.length;
+        pendingCaretRef.current = null;
         setJustEvaluated(true);
       } catch (caught) { setError(caught instanceof Error ? caught.message : "Ошибка"); }
       return;
@@ -189,7 +189,7 @@ export function QuickCalculator({ onClose }: { onClose: () => void }) {
             inputMode="decimal"
             autoComplete="off"
             spellCheck={false}
-            value={formatQuickExpression(completedExpression ?? expression || "0")}
+            value={formatQuickExpression(completedExpression ?? (expression || "0"))}
             onChange={event => {
               const value = event.target.value.replace(/[ \u00a0\u202f]/g, "");
               const caret = (event.target.selectionStart ?? value.length);
