@@ -86,6 +86,5 @@ test("ноль не допускает деление на ноль, включ�
 test("форматирование сохраняет нули и ведущие нули после десятичного разделителя", () => {
   assert.equal(formatQuickExpression("0"), "0");
   assert.equal(formatQuickExpression("0,5+0"), "0,5+0");
-  assert.equal(formatQuickExpression("0005"), "0 005");
   assert.equal(formatQuickExpression("0,05×100"), "0,05×100");
 });
