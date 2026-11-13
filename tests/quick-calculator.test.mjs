@@ -63,3 +63,29 @@ test("форматирование выражения разделяет тыс�
   assert.equal(formatQuickExpression("0,5×2000"), "0,5×2 000");
   assert.equal(evaluateQuickExpression("100000×(1−25%)"), 75000);
 });
+
+test("ноль корректно работает как число, операнд и результат", () => {
+  assert.equal(evaluateQuickExpression("0"), 0);
+  assert.equal(evaluateQuickExpression("0+5"), 5);
+  assert.equal(evaluateQuickExpression("5+0"), 5);
+  assert.equal(evaluateQuickExpression("0−5"), -5);
+  assert.equal(evaluateQuickExpression("5−5"), 0);
+  assert.equal(evaluateQuickExpression("0×999"), 0);
+  assert.equal(evaluateQuickExpression("999×0"), 0);
+  assert.equal(evaluateQuickExpression("0÷5"), 0);
+  assert.equal(evaluateQuickExpression("0,5×0"), 0);
+  assert.equal(evaluateQuickExpression("0%"), 0);
+});
+
+test("ноль не допускает деление на ноль, включая отрицательный и процентный ноль", () => {
+  for (const source of ["5÷0", "5/0", "0/0", "5/(0)", "5/(10−10)", "5÷0%"]) {
+    assert.throws(() => evaluateQuickExpression(source), /На ноль/ , source);
+  }
+});
+
+test("форматирование сохраняет нули и ведущие нули после десятичного разделителя", () => {
+  assert.equal(formatQuickExpression("0"), "0");
+  assert.equal(formatQuickExpression("0,5+0"), "0,5+0");
+  assert.equal(formatQuickExpression("0005"), "0 005");
+  assert.equal(formatQuickExpression("0,05×100"), "0,05×100");
+});
